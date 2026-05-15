@@ -23,43 +23,51 @@ export function TunnelManager({
     const [expandedCmd, setExpandedCmd] = useState<string | null>(null)
 
     return (
-        <div className="rounded-xl border border-border/50 bg-card/50 p-4 backdrop-blur">
-            <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-sm font-medium text-muted-foreground">SSH Tunnels</h3>
-                <Button variant="ghost" size="xs" onClick={onAdd}>
+        <div className="pk-panel rounded-xl p-4">
+            <div className="mb-4 flex items-center justify-between">
+                <div>
+                    <h3 className="text-sm font-semibold text-[#edf3f7]">SSH Tunnels</h3>
+                    <p className="pk-mono text-[10px] font-bold uppercase tracking-wider pk-muted">Forward local traffic through SSH</p>
+                </div>
+                <Button variant="outline" size="xs" onClick={onAdd} className="border-white/10 bg-white/[0.035] text-[#edf3f7] hover:bg-white/[0.07]">
                     <Plus className="size-3" />
                     Add
                 </Button>
             </div>
 
             {tunnels.length === 0 ? (
-                <p className="text-xs italic text-muted-foreground/60">
+                <p className="rounded-lg border border-dashed border-white/10 px-3 py-6 text-center text-xs italic pk-muted">
                     No tunnels configured. Click Add to create an SSH tunnel.
                 </p>
             ) : (
-                <div className="space-y-2">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {tunnels.map((t) => (
                         <div
                             key={t.id}
-                            className="rounded-lg border border-border/30 bg-muted/10 p-3"
+                            className="pk-card min-w-0 overflow-hidden rounded-xl p-3"
                         >
                             {/* Header: label + status */}
                             <div className="mb-1.5 flex items-center gap-2">
                                 <span
-                                    className={`inline-block size-2 rounded-full ${
+                                    className={`inline-block size-2 shrink-0 rounded-full ${
                                         t.is_running ? 'bg-green-400' : 'bg-red-400'
                                     }`}
                                 />
-                                <span className="flex-1 truncate text-sm font-medium">
+                                <span className="min-w-0 flex-1 truncate text-sm font-semibold text-[#edf3f7]" title={t.config.label}>
                                     {t.config.label}
+                                </span>
+                                <span className={`shrink-0 rounded-full px-2 py-0.5 pk-mono text-[10px] font-bold uppercase ${
+                                    t.is_running ? 'bg-emerald-200/10 text-emerald-200' : 'bg-red-200/10 text-red-200'
+                                }`}>
+                                    {t.is_running ? 'running' : 'stopped'}
                                 </span>
                             </div>
 
                             {/* Connection info */}
-                            <div className="mb-2 font-mono text-xs text-muted-foreground">
-                                <span className="text-orange-400">{t.config.local_port}</span>
+                            <div className="mb-2 break-all pk-mono text-xs leading-relaxed pk-subtle">
+                                <span className="text-cyan-200">{t.config.local_port}</span>
                                 {' → '}
-                                {t.config.remote_host}:<span className="text-green-400">{t.config.remote_port}</span>
+                                {t.config.remote_host}:<span className="text-emerald-200">{t.config.remote_port}</span>
                                 {' via '}
                                 {t.config.ssh_user}@{t.config.ssh_host}
                                 {t.config.ssh_port !== 22 && `:${t.config.ssh_port}`}
@@ -67,7 +75,7 @@ export function TunnelManager({
 
                             {/* Error */}
                             {t.error && (
-                                <div className="mb-2 flex items-start gap-1.5 rounded bg-red-500/10 px-2 py-1 text-xs text-red-400">
+                                <div className="mb-2 flex items-start gap-1.5 rounded-lg border border-red-200/15 bg-red-200/10 px-2 py-1 text-xs text-red-200">
                                     <AlertCircle className="mt-0.5 size-3 shrink-0" />
                                     <span className="break-all">{t.error}</span>
                                 </div>
@@ -78,7 +86,7 @@ export function TunnelManager({
                                 <div className="mb-2">
                                     <button
                                         type="button"
-                                        className="flex w-full items-center gap-1.5 text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+                                        className="flex w-full items-center gap-1.5 text-xs pk-muted transition-colors hover:text-[#edf3f7]"
                                         onClick={() => setExpandedCmd(expandedCmd === t.id ? null : t.id)}
                                     >
                                         <Terminal className="size-3" />
@@ -86,7 +94,7 @@ export function TunnelManager({
                                         <ChevronDown className={`size-3 ml-auto transition-transform ${expandedCmd === t.id ? 'rotate-180' : ''}`} />
                                     </button>
                                     {expandedCmd === t.id && (
-                                        <div className="mt-1 rounded bg-muted/30 px-2.5 py-1.5 font-mono text-[11px] text-muted-foreground break-all select-all">
+                                        <div className="mt-1 select-all break-all rounded-lg border border-white/10 bg-black/20 px-2.5 py-1.5 pk-mono text-[11px] pk-subtle">
                                             {t.command}
                                         </div>
                                     )}
@@ -120,7 +128,7 @@ export function TunnelManager({
                                     variant="ghost"
                                     size="icon-xs"
                                     onClick={() => onEdit(t.id)}
-                                    className="text-muted-foreground hover:text-foreground"
+                                    className="pk-muted hover:bg-white/[0.055] hover:text-[#edf3f7]"
                                     title="Edit"
                                 >
                                     <Pencil className="size-3" />
@@ -129,13 +137,13 @@ export function TunnelManager({
                                     variant="ghost"
                                     size="icon-xs"
                                     onClick={() => onDelete(t.id)}
-                                    className="text-muted-foreground hover:text-red-400"
+                                    className="pk-muted hover:bg-red-400/10 hover:text-red-200"
                                     title="Delete"
                                 >
                                     <Trash2 className="size-3" />
                                 </Button>
                                 {t.is_running && t.pid && (
-                                    <span className="ml-auto text-xs text-muted-foreground/50">
+                                    <span className="ml-auto pk-mono text-xs pk-muted">
                                         PID {t.pid}
                                     </span>
                                 )}

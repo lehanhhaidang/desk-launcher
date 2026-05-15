@@ -31,20 +31,26 @@ body {
 
 .launcher-panel {
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)),
-    rgba(18, 19, 27, 0.74);
+    linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.018)),
+    rgba(18, 19, 27, 0.92);
   border-color: rgba(158, 170, 190, 0.16);
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
-  backdrop-filter: blur(18px);
+}
+
+.launcher-form-section {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.048), rgba(255, 255, 255, 0.016)),
+    rgba(17, 18, 27, 0.94);
+  border-color: rgba(158, 170, 190, 0.16);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.22);
 }
 
 .launcher-card {
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
-    rgba(36, 39, 55, 0.64);
+    rgba(36, 39, 55, 0.9);
   border-color: rgba(158, 170, 190, 0.16);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(16px);
 }
 
 .launcher-card:hover {
@@ -60,6 +66,85 @@ body {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+.launcher-modal {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(124, 238, 230, 0.08), transparent 30%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02)),
+    rgba(18, 19, 27, 0.94);
+  border-color: rgba(158, 170, 190, 0.2);
+  box-shadow: 0 34px 110px rgba(0, 0, 0, 0.62);
+  animation: launcher-dialog-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.launcher-modal-backdrop {
+  background:
+    radial-gradient(circle at 76% 22%, rgba(124, 238, 230, 0.06), transparent 28rem),
+    rgba(1, 2, 6, 0.9);
+  animation: launcher-backdrop-in 160ms ease-out;
+}
+
+@keyframes launcher-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes launcher-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.975);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.launcher-input {
+  height: 2.5rem;
+  width: 100%;
+  border-radius: 0.625rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0 0.75rem;
+  color: #edf3f7;
+  outline: none;
+  box-shadow: none;
+}
+
+.launcher-input::placeholder,
+.launcher-textarea::placeholder {
+  color: rgba(174, 184, 199, 0.68);
+}
+
+.launcher-input:focus,
+.launcher-textarea:focus {
+  border-color: rgba(183, 156, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(183, 156, 255, 0.16);
+}
+
+.launcher-textarea {
+  width: 100%;
+  resize: vertical;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.75rem;
+  color: #edf3f7;
+  outline: none;
+  line-height: 1.55;
+  font-size: 0.875rem;
+  max-height: 16rem;
+}
+
+.launcher-primary-button {
+  background: linear-gradient(135deg, #7ceee6 0%, #9be7ff 42%, #b79cff 100%);
+  color: #071413;
 }
 
 *::-webkit-scrollbar {

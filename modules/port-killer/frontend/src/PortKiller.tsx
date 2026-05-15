@@ -25,6 +25,7 @@ import { WarningDialog } from './components/WarningDialog'
 import { TunnelManager } from './components/TunnelManager'
 import { TunnelDialog } from './components/TunnelDialog'
 import { checkProcessSafety, checkBulkKillSafety } from './utils/port-safety'
+import { Activity, Cable, RadioTower, ShieldAlert, TerminalSquare } from 'lucide-react'
 
 const STORAGE_KEY = 'port-killer-configs'
 const PROFILES_KEY = 'port-killer-profiles'
@@ -230,8 +231,9 @@ export default function PortKiller() {
                     details: (
                         <div className="space-y-1">
                             {safetyResult.blockedPids.map((b) => (
-                                <div key={b.pid} className="text-red-400">
-                                    <span className="font-mono">PID {b.pid}</span> — {b.name}
+                                <div key={b.pid} className="flex items-baseline gap-2 break-words text-red-400">
+                                    <span className="shrink-0 font-mono text-xs">PID {b.pid}</span>
+                                    <span className="min-w-0 flex-1">— {b.name}</span>
                                 </div>
                             ))}
                         </div>
@@ -252,14 +254,16 @@ export default function PortKiller() {
                         <div className="space-y-2">
                             <div className="text-xs font-medium text-red-400">⛔ Blocked (system):</div>
                             {safetyResult.blockedPids.map((b) => (
-                                <div key={b.pid} className="ml-2 text-red-400/80">
-                                    <span className="font-mono">PID {b.pid}</span> — {b.name}
+                                <div key={b.pid} className="ml-2 flex items-baseline gap-2 break-words text-red-400/80">
+                                    <span className="shrink-0 font-mono text-xs">PID {b.pid}</span>
+                                    <span className="min-w-0 flex-1">— {b.name}</span>
                                 </div>
                             ))}
                             <div className="mt-1 text-xs font-medium text-green-400">✓ Will kill:</div>
                             {safetyResult.safePids.map((pid) => (
-                                <div key={pid} className="ml-2 text-green-400/80">
-                                    <span className="font-mono">PID {pid}</span> — {processNames.get(pid) || 'Unknown'}
+                                <div key={pid} className="ml-2 flex items-baseline gap-2 break-words text-green-400/80">
+                                    <span className="shrink-0 font-mono text-xs">PID {pid}</span>
+                                    <span className="min-w-0 flex-1">— {processNames.get(pid) || 'Unknown'}</span>
                                 </div>
                             ))}
                         </div>
@@ -399,39 +403,67 @@ export default function PortKiller() {
         ? tunnels.find((t) => t.id === editingTunnelId)?.config ?? null
         : null
 
+    const listeningCount = ports.filter((p) => p.status === 'LISTEN').length
+    const runningTunnelCount = tunnels.filter((t) => t.is_running).length
+    const labeledCount = ports.filter((p) => p.label || p.group).length
+
 
 
     return (
-        <div className="mx-auto max-w-6xl space-y-4">
+        <div className="pk-shell">
+        <div className="pk-page space-y-3">
+            <header className="pk-panel rounded-xl p-4">
+                <div className="pk-hero-layout">
+                    <div className="min-w-0">
+                        <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-cyan-200/15 bg-cyan-200/10 px-2.5 py-1 pk-mono text-[10px] font-bold uppercase tracking-wider text-cyan-100">
+                            <ShieldAlert className="size-3.5" />
+                            Local process control
+                        </div>
+                        <h1 className="text-xl font-semibold tracking-tight text-[#edf3f7]">Port Killer</h1>
+                        <p className="mt-1 max-w-lg text-xs leading-5 pk-subtle">
+                            Inspect listening ports, label services, terminate stuck processes, and manage SSH tunnels.
+                        </p>
+                    </div>
+
+                    <div className="pk-metrics">
+                        <MetricCard label="Ports" value={ports.length} icon={<Cable className="size-3.5" />} tone="cyan" />
+                        <MetricCard label="Listening" value={listeningCount} icon={<Activity className="size-3.5" />} tone="emerald" />
+                        <MetricCard label="Tagged" value={labeledCount} icon={<TerminalSquare className="size-3.5" />} tone="violet" />
+                        <MetricCard label="Tunnels" value={`${runningTunnelCount}/${tunnels.length}`} icon={<RadioTower className="size-3.5" />} tone="magenta" />
+                    </div>
+                </div>
+            </header>
             {/* Tab bar */}
-            <div className="flex items-center gap-1 rounded-lg border border-border/50 bg-card/50 p-1 backdrop-blur">
+            <div className="pk-panel inline-flex items-center gap-1 rounded-xl p-1">
                 <button
                     onClick={() => setActiveTab('ports')}
-                    className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all ${
+                    className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
                         activeTab === 'ports'
-                            ? 'bg-muted/50 text-foreground shadow-sm border border-border/50'
-                            : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
+                            ? 'border border-cyan-200/20 bg-cyan-200/10 text-cyan-100 shadow-sm'
+                            : 'pk-subtle hover:bg-white/[0.045] hover:text-[#edf3f7]'
                     }`}
                 >
-                    🔌 Ports
+                    <Cable className="size-4" />
+                    Ports
                     {ports.length > 0 && (
-                        <span className="ml-2 rounded-full bg-black/20 px-2 py-0.5 text-xs">
+                        <span className="rounded-full bg-black/25 px-2 py-0.5 pk-mono text-xs">
                             {ports.length}
                         </span>
                     )}
                 </button>
                 <button
                     onClick={() => setActiveTab('tunnels')}
-                    className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all ${
+                    className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
                         activeTab === 'tunnels'
-                            ? 'bg-muted/50 text-foreground shadow-sm border border-border/50'
-                            : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
+                            ? 'border border-fuchsia-200/20 bg-fuchsia-200/10 text-fuchsia-100 shadow-sm'
+                            : 'pk-subtle hover:bg-white/[0.045] hover:text-[#edf3f7]'
                     }`}
                 >
-                    🔗 SSH Tunnels
+                    <RadioTower className="size-4" />
+                    SSH Tunnels
                     {tunnels.length > 0 && (
-                        <span className="ml-2 rounded-full bg-black/20 px-2 py-0.5 text-xs">
-                            {tunnels.filter((t) => t.is_running).length}/{tunnels.length}
+                        <span className="rounded-full bg-black/25 px-2 py-0.5 pk-mono text-xs">
+                            {runningTunnelCount}/{tunnels.length}
                         </span>
                     )}
                 </button>
@@ -439,19 +471,19 @@ export default function PortKiller() {
 
             {/* Kill results banner (shared) */}
             {killResults && (
-                <div className="rounded-lg border border-border/50 bg-card/50 p-3 text-sm backdrop-blur">
+                <div className="pk-panel space-y-1 rounded-xl p-3 text-sm">
                     {killResults.map((r, i) => (
-                        <div key={i} className="flex items-center gap-2">
-                            <span className={r.success ? 'text-green-400' : 'text-red-400'}>
+                        <div key={i} className="flex items-start gap-2">
+                            <span className={`shrink-0 font-mono text-xs ${r.success ? 'text-green-400' : 'text-red-400'}`}>
                                 {r.success ? 'OK' : 'FAIL'}
                             </span>
-                            {r.pid > 0 && <span className="font-mono">PID {r.pid}</span>}
-                            {r.error && <span className="text-muted-foreground">— {r.error}</span>}
+                            {r.pid > 0 && <span className="shrink-0 font-mono text-xs">PID {r.pid}</span>}
+                            {r.error && <span className="min-w-0 flex-1 break-words pk-subtle">— {r.error}</span>}
                         </div>
                     ))}
                     <button
                         onClick={() => setKillResults(null)}
-                        className="mt-1 text-xs text-muted-foreground hover:text-foreground"
+                        className="mt-1 text-xs pk-subtle hover:text-[#edf3f7]"
                     >
                         Dismiss
                     </button>
@@ -474,7 +506,7 @@ export default function PortKiller() {
                         onToggleAutoRefresh={() => setAutoRefresh((v) => !v)}
                     />
 
-                    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_240px]">
+                    <div className="grid grid-cols-1 gap-3 xl:grid-cols-[1fr_240px]">
                         <PortTable
                             ports={ports}
                             selectedPids={selectedPids}
@@ -549,6 +581,38 @@ export default function PortKiller() {
                     onCancel={() => setWarningDialog(null)}
                 />
             )}
+        </div>
+        </div>
+    )
+}
+
+function MetricCard({
+    label,
+    value,
+    icon,
+    tone,
+}: {
+    label: string
+    value: number | string
+    icon: React.ReactNode
+    tone: 'cyan' | 'emerald' | 'violet' | 'magenta'
+}) {
+    const tones = {
+        cyan: 'border-cyan-200/15 bg-cyan-200/10 text-cyan-100',
+        emerald: 'border-emerald-200/15 bg-emerald-200/10 text-emerald-100',
+        violet: 'border-violet-200/15 bg-violet-200/10 text-violet-100',
+        magenta: 'border-fuchsia-200/15 bg-fuchsia-200/10 text-fuchsia-100',
+    }
+
+    return (
+        <div className="pk-metric-card">
+            <div className={`flex size-7 shrink-0 items-center justify-center rounded-md border ${tones[tone]}`}>
+                {icon}
+            </div>
+            <div className="min-w-0 flex-1">
+                <div className="truncate pk-mono text-base font-bold leading-none text-[#edf3f7]" title={String(value)}>{value}</div>
+                <div className="mt-1 truncate pk-mono text-[9px] font-bold uppercase tracking-wider pk-muted">{label}</div>
+            </div>
         </div>
     )
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Button } from '@desk-launcher/ui'
 import { Input } from '@desk-launcher/ui'
-import { Search, RefreshCw, Skull, X } from 'lucide-react'
+import { Search, RefreshCw, Skull, X, ListFilter } from 'lucide-react'
 import type { PortEntry } from '../types/port.types'
 
 interface PortTableProps {
@@ -59,59 +59,86 @@ export function PortTable({
     return (
         <div className="space-y-3">
             {/* Search filter */}
-            <div className="relative">
-                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                    placeholder="Filter by name, port, label, or group..."
-                    value={filter}
-                    onChange={(e) => setFilter(e.target.value)}
-                    className="pl-9"
-                />
-                {filter && (
-                    <button
-                        onClick={() => setFilter('')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    >
-                        <X className="size-4" />
-                    </button>
-                )}
+            <div className="pk-panel rounded-xl p-3">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                        <div className="flex size-8 items-center justify-center rounded-lg border border-cyan-200/15 bg-cyan-200/10 text-cyan-100">
+                            <ListFilter className="size-4" />
+                        </div>
+                        <div>
+                            <div className="text-sm font-semibold text-[#edf3f7]">Listening ports</div>
+                            <div className="pk-mono text-[10px] font-bold uppercase tracking-wider pk-muted">Filter, label, group, terminate</div>
+                        </div>
+                    </div>
+                    <span className="rounded-full border border-white/10 bg-white/[0.035] px-2.5 py-1 pk-mono text-xs pk-subtle">
+                        {filteredPorts.length}/{ports.length}
+                    </span>
+                </div>
+                <div className="relative">
+                    <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 pk-muted" />
+                    <Input
+                        placeholder="Filter by process, port, address, label, or group..."
+                        value={filter}
+                        onChange={(e) => setFilter(e.target.value)}
+                        className="pk-input pl-9 pr-9"
+                    />
+                    {filter && (
+                        <button
+                            onClick={() => setFilter('')}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 pk-muted hover:text-[#edf3f7]"
+                        >
+                            <X className="size-4" />
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Table */}
-            <div className="overflow-hidden rounded-xl border border-border/50 bg-card/50 backdrop-blur">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+            <div className="pk-panel overflow-hidden rounded-xl">
+                <div className="pk-scrollbar overflow-x-auto">
+                    <table className="w-full min-w-[720px] table-fixed text-sm">
+                        <colgroup>
+                            <col className="w-10" />
+                            <col className="w-[64px]" />
+                            <col className="w-[64px]" />
+                            <col />
+                            <col className="w-[120px]" />
+                            <col className="w-[128px]" />
+                            <col className="w-[88px]" />
+                            <col className="w-[100px]" />
+                            <col className="w-12" />
+                        </colgroup>
                         <thead>
-                            <tr className="border-b border-border/50 bg-muted/30">
-                                <th className="w-10 p-3">
+                            <tr className="border-b border-white/10 bg-white/[0.035]">
+                                <th className="px-2 py-2.5 text-center align-middle">
                                     <input
                                         type="checkbox"
                                         checked={allSelected}
                                         onChange={onToggleSelectAll}
-                                        className="rounded border-border"
+                                        className="size-3.5 rounded border-white/20 bg-white/[0.04] align-middle"
                                     />
                                 </th>
-                                <th className="p-3 text-left font-medium text-muted-foreground">Port</th>
-                                <th className="p-3 text-left font-medium text-muted-foreground">PID</th>
-                                <th className="p-3 text-left font-medium text-muted-foreground">Process</th>
-                                <th className="p-3 text-left font-medium text-muted-foreground">Label</th>
-                                <th className="p-3 text-left font-medium text-muted-foreground">Address</th>
-                                <th className="p-3 text-left font-medium text-muted-foreground">Status</th>
-                                <th className="p-3 text-left font-medium text-muted-foreground">Group</th>
-                                <th className="w-12 p-3"></th>
+                                <th className="px-3 py-2.5 text-left align-middle pk-mono text-[10px] font-bold uppercase tracking-wider pk-muted">Port</th>
+                                <th className="px-3 py-2.5 text-left align-middle pk-mono text-[10px] font-bold uppercase tracking-wider pk-muted">PID</th>
+                                <th className="px-3 py-2.5 text-left align-middle pk-mono text-[10px] font-bold uppercase tracking-wider pk-muted">Process</th>
+                                <th className="px-3 py-2.5 text-left align-middle pk-mono text-[10px] font-bold uppercase tracking-wider pk-muted">Label</th>
+                                <th className="px-3 py-2.5 text-left align-middle pk-mono text-[10px] font-bold uppercase tracking-wider pk-muted">Address</th>
+                                <th className="px-3 py-2.5 text-left align-middle pk-mono text-[10px] font-bold uppercase tracking-wider pk-muted">Status</th>
+                                <th className="px-3 py-2.5 text-left align-middle pk-mono text-[10px] font-bold uppercase tracking-wider pk-muted">Group</th>
+                                <th className="px-2 py-2.5"></th>
                             </tr>
                         </thead>
                         <tbody>
                             {isLoading && ports.length === 0 ? (
                                 <tr>
-                                    <td colSpan={9} className="p-8 text-center text-muted-foreground">
+                                    <td colSpan={9} className="p-8 text-center pk-subtle">
                                         <RefreshCw className="mx-auto mb-2 size-5 animate-spin" />
                                         Loading ports...
                                     </td>
                                 </tr>
                             ) : filteredPorts.length === 0 ? (
                                 <tr>
-                                    <td colSpan={9} className="p-8 text-center text-muted-foreground">
+                                    <td colSpan={9} className="p-8 text-center pk-subtle">
                                         {filter ? 'No ports match your filter' : 'No listening ports found'}
                                     </td>
                                 </tr>
@@ -119,24 +146,24 @@ export function PortTable({
                                 filteredPorts.map((port) => (
                                     <tr
                                         key={`${port.pid}-${port.local_port}`}
-                                        className={`border-b border-border/30 transition-colors hover:bg-muted/20 ${
-                                            selectedPids.has(port.pid) ? 'bg-red-500/5' : ''
+                                        className={`border-b border-white/[0.055] transition-colors hover:bg-white/[0.035] ${
+                                            selectedPids.has(port.pid) ? 'bg-red-500/10' : ''
                                         }`}
                                     >
-                                        <td className="p-3">
+                                        <td className="px-2 py-2 text-center align-middle">
                                             <input
                                                 type="checkbox"
                                                 checked={selectedPids.has(port.pid)}
                                                 onChange={() => onToggleSelect(port.pid)}
-                                                className="rounded border-border"
+                                                className="size-3.5 rounded border-white/20 bg-white/[0.04] align-middle"
                                             />
                                         </td>
-                                        <td className="p-3 font-mono font-semibold text-orange-400">
+                                        <td className="truncate px-3 py-2 align-middle pk-mono font-semibold text-cyan-200">
                                             {port.local_port}
                                         </td>
-                                        <td className="p-3 font-mono text-muted-foreground">{port.pid}</td>
-                                        <td className="p-3 font-medium">{port.name}</td>
-                                        <td className="p-3">
+                                        <td className="truncate px-3 py-2 align-middle pk-mono pk-subtle">{port.pid}</td>
+                                        <td className="truncate px-3 py-2 align-middle font-medium text-[#edf3f7]" title={port.name}>{port.name}</td>
+                                        <td className="px-3 py-2 align-middle">
                                             <EditableCell
                                                 value={port.label || ''}
                                                 placeholder="Add label..."
@@ -148,21 +175,22 @@ export function PortTable({
                                                 onCancel={() => setEditingCell(null)}
                                             />
                                         </td>
-                                        <td className="p-3 font-mono text-xs text-muted-foreground">
+                                        <td className="truncate px-3 py-2 align-middle pk-mono text-xs pk-subtle" title={port.local_address}>
                                             {port.local_address}
                                         </td>
-                                        <td className="p-3">
+                                        <td className="px-3 py-2 align-middle">
                                             <span
-                                                className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                                                className={`inline-flex max-w-full truncate rounded-full px-2 py-0.5 text-xs font-medium ${
                                                     port.status === 'LISTEN'
-                                                        ? 'bg-green-500/10 text-green-400'
-                                                        : 'bg-blue-500/10 text-blue-400'
+                                                        ? 'border border-emerald-200/15 bg-emerald-200/10 text-emerald-200'
+                                                        : 'border border-blue-200/15 bg-blue-200/10 text-blue-200'
                                                 }`}
+                                                title={port.status}
                                             >
                                                 {port.status}
                                             </span>
                                         </td>
-                                        <td className="p-3">
+                                        <td className="px-3 py-2 align-middle">
                                             <EditableCell
                                                 value={port.group || ''}
                                                 placeholder="Add group..."
@@ -174,12 +202,12 @@ export function PortTable({
                                                 onCancel={() => setEditingCell(null)}
                                             />
                                         </td>
-                                        <td className="p-3">
+                                        <td className="px-2 py-2 text-center align-middle">
                                             <Button
                                                 variant="ghost"
                                                 size="icon-xs"
                                                 onClick={() => onKillSingle(port.pid)}
-                                                className="text-muted-foreground hover:text-red-400"
+                                                className="pk-muted hover:bg-red-400/10 hover:text-red-200"
                                                 title={`Kill PID ${port.pid}`}
                                             >
                                                 <Skull className="size-3.5" />
@@ -193,13 +221,13 @@ export function PortTable({
                 </div>
             </div>
 
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <div className="flex items-center justify-between text-xs pk-subtle">
                 <span>
                     {filteredPorts.length} port{filteredPorts.length !== 1 ? 's' : ''}
                     {filter && ` (filtered from ${ports.length})`}
                 </span>
                 {selectedPids.size > 0 && (
-                    <span className="text-red-400">
+                    <span className="pk-danger-text">
                         <Skull className="mr-1 inline size-3" />
                         {selectedPids.size} selected for kill
                     </span>
@@ -239,7 +267,7 @@ function EditableCell({
                     if (e.key === 'Escape') onCancel()
                 }}
                 autoFocus
-                className="h-7 text-xs"
+                className="pk-input h-7 text-xs"
             />
         )
     }
@@ -247,10 +275,10 @@ function EditableCell({
     return (
         <button
             onClick={onStartEdit}
-            className="max-w-[150px] truncate text-left text-xs text-muted-foreground hover:text-foreground"
+            className="block w-full truncate text-left text-xs pk-subtle hover:text-[#edf3f7]"
             title={value || placeholder}
         >
-            {value || <span className="italic opacity-50">{placeholder}</span>}
+            {value || <span className="italic pk-muted">{placeholder}</span>}
         </button>
     )
 }

@@ -30,7 +30,7 @@ function getVideoLabel(f: VideoFormat): string {
   if (f.note) parts.push(f.note)
   const size = formatFileSize(f.filesize || f.filesize_approx)
   if (size) parts.push(`(${size})`)
-  return parts.join(' · ') || f.format_id
+  return parts.join(' - ') || f.format_id
 }
 
 function getAudioLabel(f: VideoFormat): string {
@@ -40,7 +40,7 @@ function getAudioLabel(f: VideoFormat): string {
   if (f.ext) parts.push(f.ext)
   const size = formatFileSize(f.filesize || f.filesize_approx)
   if (size) parts.push(`(${size})`)
-  return parts.join(' · ') || f.format_id
+  return parts.join(' - ') || f.format_id
 }
 
 export function QualitySelector({
@@ -51,28 +51,28 @@ export function QualitySelector({
   onChange,
 }: QualitySelectorProps) {
   const formats = outputType === 'mp4' ? videoFormats : audioFormats
-  const label = outputType === 'mp4' ? 'Video Quality' : 'Audio Quality'
+  const label = outputType === 'mp4' ? 'Video quality' : 'Audio quality'
   const getLabel = outputType === 'mp4' ? getVideoLabel : getAudioLabel
 
   if (formats.length === 0) {
     return (
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-muted-foreground">{label}</label>
-        <p className="text-sm text-muted-foreground/70">No formats available</p>
+      <div className="vd-panel rounded-xl p-3">
+        <label className="mb-2 block text-xs font-semibold vd-subtle">{label}</label>
+        <p className="text-sm vd-muted">No formats available</p>
       </div>
     )
   }
 
   return (
-    <div className="space-y-2">
-      <label className="text-sm font-medium text-muted-foreground">{label}</label>
+    <div className="vd-panel rounded-xl p-3">
+      <label className="mb-2 block text-xs font-semibold vd-subtle">{label}</label>
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="h-12 border-border/50 bg-background/50 backdrop-blur-sm">
+        <SelectTrigger className="vd-input h-10 text-xs">
           <SelectValue placeholder={`Select ${label.toLowerCase()}`} />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="border-sky-200/10 bg-[#101827] text-[#eef6ff]">
           {formats.map((f) => (
-            <SelectItem key={f.format_id} value={f.format_id}>
+            <SelectItem key={f.format_id} value={f.format_id} className="text-xs">
               {getLabel(f)}
             </SelectItem>
           ))}

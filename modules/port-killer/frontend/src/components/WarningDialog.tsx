@@ -31,33 +31,33 @@ export function WarningDialog({
     const borderColor = isDanger ? 'border-red-500/30' : 'border-yellow-500/30'
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div className="mx-4 w-full max-w-md animate-in fade-in zoom-in-95 duration-200">
-                <div className={`rounded-xl border ${borderColor} bg-card p-6 shadow-2xl`}>
-                    <div className="mb-4 flex items-center gap-3">
-                        <div className={`flex size-10 items-center justify-center rounded-full ${iconBg}`}>
+        <div className="pk-dialog-backdrop">
+            <div className="pk-dialog max-w-sm animate-in fade-in zoom-in-95 duration-200">
+                <div className={`pk-panel rounded-xl border ${borderColor} p-5 shadow-2xl`}>
+                    <div className="mb-4 flex items-start gap-3">
+                        <div className={`flex size-10 shrink-0 items-center justify-center rounded-full ${iconBg}`}>
                             <Icon className={`size-5 ${iconColor}`} />
                         </div>
-                        <div className="flex-1">
-                            <h3 className="font-semibold">{title}</h3>
-                            <p className="text-sm text-muted-foreground">{message}</p>
+                        <div className="min-w-0 flex-1">
+                            <h3 className="font-semibold leading-tight">{title}</h3>
+                            <p className="mt-1 text-sm leading-snug pk-subtle">{message}</p>
                         </div>
                         <button
                             onClick={onCancel}
-                            className="text-muted-foreground hover:text-foreground"
+                            className="shrink-0 pk-muted hover:text-[#edf3f7]"
                         >
                             <X className="size-4" />
                         </button>
                     </div>
 
                     {details && (
-                        <div className="mb-5 max-h-48 overflow-y-auto rounded-lg bg-muted/30 p-3 text-sm">
+                        <div className="mb-5 max-h-48 overflow-y-auto rounded-lg border border-blue-200/10 bg-black/20 p-3 text-sm">
                             {details}
                         </div>
                     )}
 
                     <div className="flex justify-end gap-2">
-                        <Button variant="outline" size="sm" onClick={onCancel}>
+                        <Button variant="outline" size="sm" onClick={onCancel} className="pk-button-ghost">
                             {showConfirm ? cancelLabel : 'OK'}
                         </Button>
                         {showConfirm && onConfirm && (
@@ -65,6 +65,7 @@ export function WarningDialog({
                                 variant={isDanger ? 'destructive' : 'default'}
                                 size="sm"
                                 onClick={onConfirm}
+                                className={isDanger ? 'bg-red-500/90 text-white hover:bg-red-400' : 'pk-button-primary'}
                             >
                                 {confirmLabel}
                             </Button>

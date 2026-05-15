@@ -91,7 +91,7 @@ export function ModuleCard({ module, opening, isOpen, onOpen }: Props) {
       onDoubleClick={onOpen}
     >
       <div className={`pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b ${accent.wash}`} />
-      <div className={`pointer-events-none absolute -right-10 -top-12 size-28 rounded-full blur-3xl transition-opacity duration-200 ${accent.glow} opacity-0 group-hover:opacity-100`} />
+      <div className={`pointer-events-none absolute -right-8 -top-10 size-24 rounded-full transition-opacity duration-200 ${accent.glow} opacity-0 group-hover:opacity-35`} />
 
       <div className="mb-4 flex items-start justify-between">
         <div
