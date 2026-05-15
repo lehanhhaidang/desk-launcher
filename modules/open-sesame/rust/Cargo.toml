@@ -10,7 +10,7 @@ links = "tauri-plugin-open-sesame"
 name = "tauri_plugin_open_sesame"
 
 [build-dependencies]
-tauri-plugin = "2"
+tauri-plugin = { version = "2", features = ["build"] }
 
 [dependencies]
 tauri = { workspace = true }

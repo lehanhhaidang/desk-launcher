@@ -38,6 +38,7 @@ export default defineConfig({
       '@os': path.resolve(__dirname, '../../modules/open-sesame/frontend/src'),
       '@cmt': path.resolve(__dirname, '../../modules/comtor/frontend/src'),
       '@vid': path.resolve(__dirname, '../../modules/video-downloader/frontend/src'),
+      '@mdc': path.resolve(__dirname, '../../modules/md-converter/frontend/src'),
     },
   },
   build: {
@@ -50,6 +51,7 @@ export default defineConfig({
         'open-sesame': resolve(__dirname, 'modules-pages/open-sesame/index.html'),
         comtor: resolve(__dirname, 'modules-pages/comtor/index.html'),
         'video-downloader': resolve(__dirname, 'modules-pages/video-downloader/index.html'),
+        'md-converter': resolve(__dirname, 'modules-pages/md-converter/index.html'),
       },
     },
   },

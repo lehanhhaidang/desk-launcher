@@ -7,6 +7,7 @@ members = [
   "modules/open-sesame/rust",
   "modules/comtor/rust",
   "modules/video-downloader/rust",
+  "modules/md-converter/rust",
   # Add new modules' rust crates here as they come online.
 ]
 

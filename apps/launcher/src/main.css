@@ -16,9 +16,50 @@ html.dark {
 
 body {
   background:
-    radial-gradient(circle at 18% -10%, oklch(0.42 0.12 245 / 0.18), transparent 28rem),
-    radial-gradient(circle at 88% 4%, oklch(0.52 0.16 155 / 0.1), transparent 24rem),
-    var(--background);
+    radial-gradient(circle at 16% 10%, rgba(183, 156, 255, 0.13), transparent 34%),
+    radial-gradient(circle at 84% 0%, rgba(124, 238, 230, 0.1), transparent 32%),
+    linear-gradient(135deg, #101015 0%, #111722 44%, #12111c 100%);
+}
+
+.launcher-bg {
+  background:
+    radial-gradient(circle at 12% 12%, rgba(183, 156, 255, 0.14), transparent 30%),
+    radial-gradient(circle at 88% 8%, rgba(124, 238, 230, 0.1), transparent 28%),
+    radial-gradient(circle at 58% 110%, rgba(255, 188, 134, 0.06), transparent 32%),
+    linear-gradient(135deg, #101015 0%, #111722 48%, #12111c 100%);
+}
+
+.launcher-panel {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)),
+    rgba(18, 19, 27, 0.74);
+  border-color: rgba(158, 170, 190, 0.16);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(18px);
+}
+
+.launcher-card {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+    rgba(36, 39, 55, 0.64);
+  border-color: rgba(158, 170, 190, 0.16);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(16px);
+}
+
+.launcher-card:hover {
+  border-color: rgba(183, 156, 255, 0.34);
+  box-shadow:
+    0 0 34px rgba(124, 238, 230, 0.07),
+    0 0 44px rgba(183, 156, 255, 0.07),
+    0 16px 38px rgba(0, 0, 0, 0.24);
+}
+
+.launcher-lux-text {
+  background: linear-gradient(135deg, #7ceee6 0%, #d7c8ff 72%, #b79cff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 *::-webkit-scrollbar {

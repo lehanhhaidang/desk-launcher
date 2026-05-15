@@ -1,0 +1,11 @@
+# Default permission set for the md-converter plugin — grants every command.
+"$schema" = "schemas/schema.json"
+
+[default]
+description = "Allows every Markdown Converter plugin command."
+permissions = [
+    "allow-convert-file",
+    "allow-convert-text",
+    "allow-convert-batch",
+    "allow-supported-extensions",
+]

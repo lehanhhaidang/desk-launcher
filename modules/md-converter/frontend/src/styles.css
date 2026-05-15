@@ -1,0 +1,83 @@
+/* Shared shadcn theme. */
+@import "../../../../packages/ui/src/theme.css";
+@import "highlight.js/styles/github-dark.css";
+
+@source ".";
+@source "../../../../packages/ui/src";
+
+:root {
+  color-scheme: dark;
+  font-family: "Quicksand", ui-sans-serif, system-ui, sans-serif;
+  color: #edf3f7;
+  background: #101015;
+
+  --background: #101015;
+  --surface: rgba(18, 19, 27, 0.82);
+  --surface-lowest: rgba(10, 11, 16, 0.82);
+  --surface-container: rgba(28, 31, 44, 0.68);
+  --surface-high: rgba(36, 39, 55, 0.7);
+  --primary: #7ceee6;
+  --purple: #b79cff;
+  --purple-soft: rgba(183, 156, 255, 0.16);
+  --outline-variant: rgba(158, 170, 190, 0.16);
+  --on-surface: #edf3f7;
+  --on-surface-variant: #aeb8c7;
+  --error: #ffb4ab;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+}
+
+.mdc-bg {
+  background:
+    radial-gradient(circle at 16% 10%, rgba(183, 156, 255, 0.14), transparent 34%),
+    radial-gradient(circle at 84% 0%, rgba(124, 238, 230, 0.11), transparent 32%),
+    linear-gradient(135deg, #101015 0%, #111722 44%, #12111c 100%);
+}
+
+.mdc-panel {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)),
+    rgba(18, 19, 27, 0.76);
+  border-color: rgba(158, 170, 190, 0.16);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(18px);
+}
+
+.mdc-lux-text {
+  background: linear-gradient(135deg, #7ceee6 0%, #d7c8ff 72%, #b79cff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.mdc-primary-button {
+  background: linear-gradient(135deg, #7ceee6 0%, #9be7ff 42%, #b79cff 100%);
+  color: #071413;
+}
+
+.mdc-panel,
+.mdc-panel * {
+  color-scheme: dark;
+}
+
+.mdc-panel {
+  color: var(--on-surface);
+}
+
+.mdc-editor {
+  color: var(--on-surface);
+  caret-color: var(--primary);
+}
+
+.mdc-editor::placeholder {
+  color: rgba(174, 184, 199, 0.68);
+}

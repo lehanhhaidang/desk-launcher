@@ -58,6 +58,15 @@ pub const MODULES: &[ModuleWindowSpec] = &[
         min_width: Some(800.0),
         min_height: Some(500.0),
     },
+    ModuleWindowSpec {
+        id: "md-converter",
+        title: "📝 Markdown Converter",
+        initial_url: "modules-pages/md-converter/index.html",
+        width: 1200.0,
+        height: 800.0,
+        min_width: Some(900.0),
+        min_height: Some(600.0),
+    },
 ];
 
 pub fn find(id: &str) -> Option<&'static ModuleWindowSpec> {

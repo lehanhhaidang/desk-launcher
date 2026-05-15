@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "open-sesame-window",
-  "description": "Permissions for the Open Sesame module window. Needs fs access to local doc-sets and the ~/.open-sesame/mirrors/ git working copies, opener for GitHub device-flow OAuth URLs, and dialogs for file pickers.",
+  "description": "Permissions for the Open Sesame module window. Needs fs access to local doc-sets and the ~/.open-sesame/mirrors/ git working copies, opener for GitHub device-flow OAuth URLs, shell.open for the auth screen's verification_uri browser hand-off, and dialogs for file pickers.",
   "windows": ["open-sesame"],
   "permissions": [
     "core:default",
@@ -9,6 +9,7 @@
     "opener:default",
     "log:default",
     "fs:default",
+    "shell:allow-open",
     "open-sesame:default",
     {
       "identifier": "fs:allow-read-file",

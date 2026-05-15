@@ -5,7 +5,7 @@
 // in sync is part of adding a module.
 
 export type ModuleCategory = 'productivity' | 'media' | 'dev' | 'utility'
-export type ModuleIcon = 'plug' | 'book-open' | 'languages' | 'download'
+export type ModuleIcon = 'plug' | 'book-open' | 'languages' | 'download' | 'file-text'
 
 export interface ModuleWindowConfig {
   title: string
@@ -100,6 +100,24 @@ export const MODULES: readonly ModuleDescriptor[] = [
       minWidth: 800,
       minHeight: 500,
       initialUrl: 'modules-pages/video-downloader/index.html',
+    },
+  },
+  {
+    id: 'md-converter',
+    displayName: 'Markdown Converter',
+    shortName: 'MD',
+    description: 'Convert Office, PDF, HTML, EPUB and more to Markdown — Rust port of Microsoft MarkItDown.',
+    icon: 'file-text',
+    category: 'utility',
+    accentClass: 'from-amber-500/20 to-orange-400/10 text-amber-300 border-amber-400/20',
+    health: 'beta',
+    windowConfig: {
+      title: 'Markdown Converter',
+      width: 1200,
+      height: 800,
+      minWidth: 900,
+      minHeight: 600,
+      initialUrl: 'modules-pages/md-converter/index.html',
     },
   },
 ] as const

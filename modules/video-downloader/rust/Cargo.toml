@@ -10,7 +10,7 @@ links = "tauri-plugin-video-downloader"
 name = "tauri_plugin_video_downloader"
 
 [build-dependencies]
-tauri-plugin = "2"
+tauri-plugin = { version = "2", features = ["build"] }
 
 [dependencies]
 tauri = { workspace = true }

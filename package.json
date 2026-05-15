@@ -7,8 +7,9 @@
     "apps/*"
   ],
   "scripts": {
-    "dev": "npm --workspace @desk-launcher/launcher run tauri dev",
-    "build": "npm --workspace @desk-launcher/launcher run tauri build",
+    "sidecars": "node scripts/ensure-sidecars.mjs",
+    "dev": "npm run sidecars && npm --workspace @desk-launcher/launcher run tauri dev",
+    "build": "npm run sidecars && npm --workspace @desk-launcher/launcher run tauri build",
     "frontend:dev": "npm --workspace @desk-launcher/launcher run dev",
     "frontend:build": "npm --workspace @desk-launcher/launcher run build",
     "tauri": "npm --workspace @desk-launcher/launcher run tauri"

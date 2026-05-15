@@ -1,0 +1,30 @@
+[package]
+name = "tauri-plugin-md-converter"
+version = "0.1.0"
+edition.workspace = true
+description = "Markdown Converter module — pure-Rust port of Microsoft MarkItDown core converters (DOCX, XLSX, PPTX, PDF, HTML, CSV/JSON/XML, EPUB, IPYNB, ZIP, plain text)."
+authors.workspace = true
+links = "tauri-plugin-md-converter"
+
+[lib]
+name = "tauri_plugin_md_converter"
+
+[build-dependencies]
+# tauri-plugin 2.6 moved the build-script helper behind the `build` feature.
+tauri-plugin = { version = "2", features = ["build"] }
+
+[dependencies]
+tauri = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+log = { workspace = true }
+thiserror = { workspace = true }
+
+# File-format crates
+calamine = "0.26"          # XLSX / XLS reader
+zip = { version = "2.2", default-features = false, features = ["deflate"] }
+quick-xml = "0.36"          # DOCX/PPTX/EPUB inner XML
+htmd = "0.1"                # HTML → Markdown
+pdf-extract = "0.7"         # PDF text extraction
+csv = "1.3"
+encoding_rs = "0.8"         # decode non-UTF8 text files

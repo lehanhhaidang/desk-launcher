@@ -2,6 +2,22 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* Quicksand — round, friendly, full Vietnamese support. Loaded centrally
+   here so every module window picks it up via the shared theme. */
+@import "@fontsource/quicksand/latin-300.css";
+@import "@fontsource/quicksand/latin-400.css";
+@import "@fontsource/quicksand/latin-500.css";
+@import "@fontsource/quicksand/latin-600.css";
+@import "@fontsource/quicksand/latin-700.css";
+@import "@fontsource/quicksand/latin-ext-400.css";
+@import "@fontsource/quicksand/latin-ext-500.css";
+@import "@fontsource/quicksand/latin-ext-600.css";
+@import "@fontsource/quicksand/vietnamese-300.css";
+@import "@fontsource/quicksand/vietnamese-400.css";
+@import "@fontsource/quicksand/vietnamese-500.css";
+@import "@fontsource/quicksand/vietnamese-600.css";
+@import "@fontsource/quicksand/vietnamese-700.css";
+
 /* Used by the launcher dashboard (apps/launcher/src/main.css imports
    this theme). Tell Tailwind to scan launcher source + shim files. */
 @source "../../../apps/launcher/src";
@@ -126,8 +142,45 @@
     }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Quicksand', ui-sans-serif, system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     }
+
+  /* Default cursor for any interactive element. Browsers ship `pointer`
+     for <a> but NOT <button>, <select>, checkbox/radio etc., which makes
+     UIs feel inconsistent. Normalize globally; module-specific styles
+     can still override. */
+  a,
+  button,
+  summary,
+  select,
+  label[for],
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="submit"],
+  input[type="button"],
+  input[type="reset"],
+  input[type="file"],
+  [role="button"],
+  [role="link"],
+  [role="tab"],
+  [role="menuitem"],
+  [role="menuitemcheckbox"],
+  [role="menuitemradio"],
+  [role="option"],
+  [role="checkbox"],
+  [role="radio"],
+  [role="switch"] {
+    cursor: pointer;
+  }
+
+  /* Disabled state wins over pointer — applies to native :disabled,
+     aria-disabled, and shadcn/radix's data-disabled attribute. */
+  :disabled,
+  [aria-disabled="true"],
+  [data-disabled],
+  [data-disabled="true"] {
+    cursor: not-allowed;
+  }
 }
