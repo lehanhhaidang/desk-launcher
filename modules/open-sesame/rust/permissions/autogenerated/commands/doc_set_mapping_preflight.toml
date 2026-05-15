@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-doc-set-mapping-preflight"
+description = "Enables the doc_set_mapping_preflight command without any pre-configured scope."
+commands.allow = ["doc_set_mapping_preflight"]
+
+[[permission]]
+identifier = "deny-doc-set-mapping-preflight"
+description = "Denies the doc_set_mapping_preflight command without any pre-configured scope."
+commands.deny = ["doc_set_mapping_preflight"]

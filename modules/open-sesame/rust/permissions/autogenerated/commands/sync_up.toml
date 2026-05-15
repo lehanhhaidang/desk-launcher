@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-sync-up"
+description = "Enables the sync_up command without any pre-configured scope."
+commands.allow = ["sync_up"]
+
+[[permission]]
+identifier = "deny-sync-up"
+description = "Denies the sync_up command without any pre-configured scope."
+commands.deny = ["sync_up"]

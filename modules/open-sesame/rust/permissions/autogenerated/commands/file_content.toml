@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-file-content"
+description = "Enables the file_content command without any pre-configured scope."
+commands.allow = ["file_content"]
+
+[[permission]]
+identifier = "deny-file-content"
+description = "Denies the file_content command without any pre-configured scope."
+commands.deny = ["file_content"]

@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-list-recent-meetings"
+description = "Enables the list_recent_meetings command without any pre-configured scope."
+commands.allow = ["list_recent_meetings"]
+
+[[permission]]
+identifier = "deny-list-recent-meetings"
+description = "Denies the list_recent_meetings command without any pre-configured scope."
+commands.deny = ["list_recent_meetings"]

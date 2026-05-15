@@ -1,0 +1,309 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "highlight.js/styles/github-dark.css";
+
+/* Vite's project root is apps/launcher/. Module source files live OUTSIDE
+   that root, so Tailwind v4's auto-source scanner skips them and the
+   utility classes used only inside open-sesame components are never
+   generated → broken visuals.
+   These @source directives tell Tailwind to also scan this module's
+   tree plus the shared UI package. */
+@source ".";
+@source "../../../../packages/ui/src";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  color-scheme: dark;
+  font-family: "Quicksand", ui-sans-serif, system-ui, sans-serif;
+  color: #edf3f7;
+  background: #101015;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --background: #101015;
+  --surface: rgba(18, 19, 27, 0.82);
+  --surface-lowest: rgba(10, 11, 16, 0.82);
+  --surface-low: rgba(21, 23, 33, 0.74);
+  --surface-container: rgba(28, 31, 44, 0.68);
+  --surface-high: rgba(36, 39, 55, 0.7);
+  --surface-highest: rgba(45, 49, 68, 0.72);
+  --surface-bright: rgba(60, 65, 88, 0.8);
+  --primary: #7ceee6;
+  --primary-container: #5dd9d0;
+  --on-primary: #003734;
+  --purple: #b79cff;
+  --purple-soft: rgba(183, 156, 255, 0.16);
+  --pink-soft: rgba(239, 137, 214, 0.12);
+  --tertiary: #ffbc86;
+  --error: #ffb4ab;
+  --error-container: #93000a;
+  --outline: rgba(178, 190, 206, 0.58);
+  --outline-variant: rgba(158, 170, 190, 0.16);
+  --on-surface: #edf3f7;
+  --on-surface-variant: #aeb8c7;
+  --secondary: #cdd3ea;
+  --shadow-soft: 0 18px 50px rgba(0, 0, 0, 0.28);
+  --shadow-glow: 0 0 34px rgba(124, 238, 230, 0.08), 0 0 44px rgba(183, 156, 255, 0.08);
+  --foreground: #edf3f7;
+  --card: rgba(36, 39, 55, 0.7);
+  --card-foreground: #edf3f7;
+  --popover: rgba(21, 23, 33, 0.92);
+  --popover-foreground: #edf3f7;
+  --primary-foreground: #071413;
+  --secondary-foreground: #101015;
+  --muted: rgba(28, 31, 44, 0.68);
+  --muted-foreground: #aeb8c7;
+  --accent: rgba(183, 156, 255, 0.16);
+  --accent-foreground: #edf3f7;
+  --destructive: #ffb4ab;
+  --border: rgba(158, 170, 190, 0.16);
+  --input: rgba(255, 255, 255, 0.08);
+  --ring: rgba(183, 156, 255, 0.55);
+  --chart-1: #7ceee6;
+  --chart-2: #b79cff;
+  --chart-3: #ffbc86;
+  --chart-4: #9be7ff;
+  --chart-5: #ef89d6;
+  --radius: 0.625rem;
+  --sidebar: rgba(10, 11, 16, 0.82);
+  --sidebar-foreground: #edf3f7;
+  --sidebar-primary: #7ceee6;
+  --sidebar-primary-foreground: #071413;
+  --sidebar-accent: rgba(183, 156, 255, 0.16);
+  --sidebar-accent-foreground: #edf3f7;
+  --sidebar-border: rgba(158, 170, 190, 0.16);
+  --sidebar-ring: rgba(183, 156, 255, 0.55);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 16% 10%, rgba(183, 156, 255, 0.14), transparent 34%),
+    radial-gradient(circle at 84% 0%, rgba(124, 238, 230, 0.11), transparent 32%),
+    linear-gradient(135deg, #101015 0%, #111722 44%, #12111c 100%);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app-bg {
+  background:
+    radial-gradient(circle at 18% 12%, rgba(183, 156, 255, 0.12), transparent 30%),
+    radial-gradient(circle at 92% 16%, rgba(124, 238, 230, 0.09), transparent 28%),
+    linear-gradient(135deg, #101015 0%, #111722 50%, #12111c 100%);
+}
+
+.soft-panel {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018)),
+    var(--surface-container);
+  border-color: var(--outline-variant);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(18px);
+}
+
+.soft-card {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02)),
+    var(--surface-high);
+  border-color: var(--outline-variant);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(14px);
+}
+
+.soft-card:hover {
+  border-color: rgba(183, 156, 255, 0.34);
+  box-shadow: var(--shadow-glow), 0 14px 34px rgba(0, 0, 0, 0.22);
+  transform: translateY(-1px);
+}
+
+.lux-gradient {
+  background: linear-gradient(135deg, var(--primary) 0%, #9be7ff 42%, var(--purple) 100%);
+}
+
+.lux-text {
+  background: linear-gradient(135deg, var(--primary) 0%, #d7c8ff 72%, var(--purple) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.purple-haze {
+  position: relative;
+  overflow: hidden;
+}
+
+.purple-haze::before {
+  content: "";
+  position: absolute;
+  inset: -80px -60px auto auto;
+  width: 240px;
+  height: 240px;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(183, 156, 255, 0.14), transparent 64%);
+}
+
+@keyframes open-sesame-modal-in {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.96);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes open-sesame-modal-out {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+    filter: blur(6px);
+  }
+}
+
+@keyframes open-sesame-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes open-sesame-breathe {
+  0%, 100% {
+    opacity: 0.58;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-spring[data-state="open"] {
+  animation: open-sesame-modal-in 280ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-spring[data-state="closed"] {
+  animation: open-sesame-modal-out 180ms ease-in;
+}
+
+.loading-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.loading-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  animation: open-sesame-shimmer 1.5s infinite;
+}
+
+.loading-breathe {
+  animation: open-sesame-breathe 1.8s ease-in-out infinite;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--primary) 35%, transparent);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface-low);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--outline-variant);
+  border: 2px solid var(--surface-low);
+  border-radius: 8px;
+}
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: "Quicksand", ui-sans-serif, system-ui, sans-serif;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}

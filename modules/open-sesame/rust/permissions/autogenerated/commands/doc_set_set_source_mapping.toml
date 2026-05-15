@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-doc-set-set-source-mapping"
+description = "Enables the doc_set_set_source_mapping command without any pre-configured scope."
+commands.allow = ["doc_set_set_source_mapping"]
+
+[[permission]]
+identifier = "deny-doc-set-set-source-mapping"
+description = "Denies the doc_set_set_source_mapping command without any pre-configured scope."
+commands.deny = ["doc_set_set_source_mapping"]

@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-export-xlsx"
+description = "Enables the export_xlsx command without any pre-configured scope."
+commands.allow = ["export_xlsx"]
+
+[[permission]]
+identifier = "deny-export-xlsx"
+description = "Denies the export_xlsx command without any pre-configured scope."
+commands.deny = ["export_xlsx"]

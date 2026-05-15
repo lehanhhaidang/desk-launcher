@@ -1,0 +1,40 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "open-sesame-window",
+  "description": "Permissions for the Open Sesame module window. Needs fs access to local doc-sets and the ~/.open-sesame/mirrors/ git working copies, opener for GitHub device-flow OAuth URLs, and dialogs for file pickers.",
+  "windows": ["open-sesame"],
+  "permissions": [
+    "core:default",
+    "dialog:default",
+    "opener:default",
+    "log:default",
+    "fs:default",
+    "open-sesame:default",
+    {
+      "identifier": "fs:allow-read-file",
+      "allow": [
+        { "path": "$HOME/.open-sesame/**" },
+        { "path": "$HOME/**" }
+      ]
+    },
+    {
+      "identifier": "fs:allow-write-file",
+      "allow": [
+        { "path": "$HOME/.open-sesame/**" }
+      ]
+    },
+    {
+      "identifier": "opener:allow-open-path",
+      "allow": [
+        { "path": "$HOME/.open-sesame/**" }
+      ]
+    },
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        { "url": "https://github.com/*" },
+        { "url": "https://api.github.com/*" }
+      ]
+    }
+  ]
+}

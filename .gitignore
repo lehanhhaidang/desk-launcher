@@ -1,0 +1,41 @@
+# Node
+node_modules/
+.pnpm-store/
+*.log
+.DS_Store
+.env
+.env.local
+.npm/
+
+# Vite
+dist/
+.vite/
+
+# TypeScript project-references build outputs (tsconfig.node.json)
+**/node-dist/
+**/*.tsbuildinfo
+
+# Rust / Tauri
+target/
+**/gen/schemas/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Bundled external CLI binaries (yt-dlp.exe, ffmpeg.exe, ...)
+# Too big for git — README has the download commands.
+apps/launcher/src-tauri/binaries/
+
+# Tauri build artifacts
+apps/launcher/src-tauri/gen/
+
+# Plan files (private workspace)
+.claude/

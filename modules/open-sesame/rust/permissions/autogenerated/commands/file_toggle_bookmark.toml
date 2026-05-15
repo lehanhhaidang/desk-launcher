@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-file-toggle-bookmark"
+description = "Enables the file_toggle_bookmark command without any pre-configured scope."
+commands.allow = ["file_toggle_bookmark"]
+
+[[permission]]
+identifier = "deny-file-toggle-bookmark"
+description = "Denies the file_toggle_bookmark command without any pre-configured scope."
+commands.deny = ["file_toggle_bookmark"]

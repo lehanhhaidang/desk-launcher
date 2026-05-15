@@ -1,0 +1,25 @@
+[package]
+name = "tauri-plugin-video-downloader"
+version = "0.1.0"
+edition.workspace = true
+description = "Video Downloader module — spawns bundled yt-dlp.exe (+ ffmpeg.exe) as Tauri sidecars to fetch metadata and download videos/audio."
+authors.workspace = true
+links = "tauri-plugin-video-downloader"
+
+[lib]
+name = "tauri_plugin_video_downloader"
+
+[build-dependencies]
+tauri-plugin = "2"
+
+[dependencies]
+tauri = { workspace = true }
+tauri-plugin-shell = "2"
+serde = { workspace = true }
+serde_json = { workspace = true }
+log = { workspace = true }
+thiserror = { workspace = true }
+uuid = { version = "1", features = ["v4"] }
+tokio = { version = "1", features = ["sync", "process", "io-util", "rt-multi-thread", "macros"] }
+
+launcher-paths = { path = "../../../crates/launcher-paths" }

@@ -1,0 +1,822 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PermissionFile",
+  "description": "Permission file that can define a default permission, a set of permissions or a list of inlined permissions.",
+  "type": "object",
+  "properties": {
+    "default": {
+      "description": "The default permission set for the plugin",
+      "anyOf": [
+        {
+          "$ref": "#/definitions/DefaultPermission"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "set": {
+      "description": "A list of permissions sets defined",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/PermissionSet"
+      }
+    },
+    "permission": {
+      "description": "A list of inlined permissions",
+      "default": [],
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Permission"
+      }
+    }
+  },
+  "definitions": {
+    "DefaultPermission": {
+      "description": "The default permission set of the plugin.\n\nWorks similarly to a permission with the \"default\" identifier.",
+      "type": "object",
+      "required": [
+        "permissions"
+      ],
+      "properties": {
+        "version": {
+          "description": "The version of the permission.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 1.0
+        },
+        "description": {
+          "description": "Human-readable description of what the permission does. Tauri convention is to use `<h4>` headings in markdown content for Tauri documentation generation purposes.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "permissions": {
+          "description": "All permissions this set contains.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "PermissionSet": {
+      "description": "A set of direct permissions grouped together under a new name.",
+      "type": "object",
+      "required": [
+        "description",
+        "identifier",
+        "permissions"
+      ],
+      "properties": {
+        "identifier": {
+          "description": "A unique identifier for the permission.",
+          "type": "string"
+        },
+        "description": {
+          "description": "Human-readable description of what the permission does.",
+          "type": "string"
+        },
+        "permissions": {
+          "description": "All permissions this set contains.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PermissionKind"
+          }
+        }
+      }
+    },
+    "Permission": {
+      "description": "Descriptions of explicit privileges of commands.\n\nIt can enable commands to be accessible in the frontend of the application.\n\nIf the scope is defined it can be used to fine grain control the access of individual or multiple commands.",
+      "type": "object",
+      "required": [
+        "identifier"
+      ],
+      "properties": {
+        "version": {
+          "description": "The version of the permission.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 1.0
+        },
+        "identifier": {
+          "description": "A unique identifier for the permission.",
+          "type": "string"
+        },
+        "description": {
+          "description": "Human-readable description of what the permission does. Tauri internal convention is to use `<h4>` headings in markdown content for Tauri documentation generation purposes.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "commands": {
+          "description": "Allowed or denied commands when using this permission.",
+          "default": {
+            "allow": [],
+            "deny": []
+          },
+          "allOf": [
+            {
+              "$ref": "#/definitions/Commands"
+            }
+          ]
+        },
+        "scope": {
+          "description": "Allowed or denied scoped when using this permission.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Scopes"
+            }
+          ]
+        },
+        "platforms": {
+          "description": "Target platforms this permission applies. By default all platforms are affected by this permission.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/Target"
+          }
+        }
+      }
+    },
+    "Commands": {
+      "description": "Allowed and denied commands inside a permission.\n\nIf two commands clash inside of `allow` and `deny`, it should be denied by default.",
+      "type": "object",
+      "properties": {
+        "allow": {
+          "description": "Allowed command.",
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "deny": {
+          "description": "Denied command, which takes priority.",
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Scopes": {
+      "description": "An argument for fine grained behavior control of Tauri commands.\n\nIt can be of any serde serializable type and is used to allow or prevent certain actions inside a Tauri command. The configured scope is passed to the command and will be enforced by the command implementation.\n\n## Example\n\n```json { \"allow\": [{ \"path\": \"$HOME/**\" }], \"deny\": [{ \"path\": \"$HOME/secret.txt\" }] } ```",
+      "type": "object",
+      "properties": {
+        "allow": {
+          "description": "Data that defines what is allowed by the scope.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/Value"
+          }
+        },
+        "deny": {
+          "description": "Data that defines what is denied by the scope. This should be prioritized by validation logic.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/Value"
+          }
+        }
+      }
+    },
+    "Value": {
+      "description": "All supported ACL values.",
+      "anyOf": [
+        {
+          "description": "Represents a null JSON value.",
+          "type": "null"
+        },
+        {
+          "description": "Represents a [`bool`].",
+          "type": "boolean"
+        },
+        {
+          "description": "Represents a valid ACL [`Number`].",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Number"
+            }
+          ]
+        },
+        {
+          "description": "Represents a [`String`].",
+          "type": "string"
+        },
+        {
+          "description": "Represents a list of other [`Value`]s.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Value"
+          }
+        },
+        {
+          "description": "Represents a map of [`String`] keys to [`Value`]s.",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/Value"
+          }
+        }
+      ]
+    },
+    "Number": {
+      "description": "A valid ACL number.",
+      "anyOf": [
+        {
+          "description": "Represents an [`i64`].",
+          "type": "integer",
+          "format": "int64"
+        },
+        {
+          "description": "Represents a [`f64`].",
+          "type": "number",
+          "format": "double"
+        }
+      ]
+    },
+    "Target": {
+      "description": "Platform target.",
+      "oneOf": [
+        {
+          "description": "MacOS.",
+          "type": "string",
+          "enum": [
+            "macOS"
+          ]
+        },
+        {
+          "description": "Windows.",
+          "type": "string",
+          "enum": [
+            "windows"
+          ]
+        },
+        {
+          "description": "Linux.",
+          "type": "string",
+          "enum": [
+            "linux"
+          ]
+        },
+        {
+          "description": "Android.",
+          "type": "string",
+          "enum": [
+            "android"
+          ]
+        },
+        {
+          "description": "iOS.",
+          "type": "string",
+          "enum": [
+            "iOS"
+          ]
+        }
+      ]
+    },
+    "PermissionKind": {
+      "type": "string",
+      "oneOf": [
+        {
+          "description": "Enables the auth_github_poll command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-auth-github-poll",
+          "markdownDescription": "Enables the auth_github_poll command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the auth_github_poll command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-auth-github-poll",
+          "markdownDescription": "Denies the auth_github_poll command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the auth_github_start command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-auth-github-start",
+          "markdownDescription": "Enables the auth_github_start command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the auth_github_start command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-auth-github-start",
+          "markdownDescription": "Denies the auth_github_start command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the auth_list_accounts command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-auth-list-accounts",
+          "markdownDescription": "Enables the auth_list_accounts command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the auth_list_accounts command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-auth-list-accounts",
+          "markdownDescription": "Denies the auth_list_accounts command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the auth_logout command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-auth-logout",
+          "markdownDescription": "Enables the auth_logout command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the auth_logout command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-auth-logout",
+          "markdownDescription": "Denies the auth_logout command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the config_export command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-config-export",
+          "markdownDescription": "Enables the config_export command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the config_export command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-config-export",
+          "markdownDescription": "Denies the config_export command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the config_import command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-config-import",
+          "markdownDescription": "Enables the config_import command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the config_import command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-config-import",
+          "markdownDescription": "Denies the config_import command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the doc_set_add_mirror_source command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-doc-set-add-mirror-source",
+          "markdownDescription": "Enables the doc_set_add_mirror_source command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the doc_set_add_mirror_source command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-doc-set-add-mirror-source",
+          "markdownDescription": "Denies the doc_set_add_mirror_source command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the doc_set_add_source command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-doc-set-add-source",
+          "markdownDescription": "Enables the doc_set_add_source command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the doc_set_add_source command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-doc-set-add-source",
+          "markdownDescription": "Denies the doc_set_add_source command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the doc_set_create command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-doc-set-create",
+          "markdownDescription": "Enables the doc_set_create command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the doc_set_create command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-doc-set-create",
+          "markdownDescription": "Denies the doc_set_create command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the doc_set_delete command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-doc-set-delete",
+          "markdownDescription": "Enables the doc_set_delete command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the doc_set_delete command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-doc-set-delete",
+          "markdownDescription": "Denies the doc_set_delete command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the doc_set_detect_strategy command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-doc-set-detect-strategy",
+          "markdownDescription": "Enables the doc_set_detect_strategy command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the doc_set_detect_strategy command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-doc-set-detect-strategy",
+          "markdownDescription": "Denies the doc_set_detect_strategy command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the doc_set_import_from_github command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-doc-set-import-from-github",
+          "markdownDescription": "Enables the doc_set_import_from_github command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the doc_set_import_from_github command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-doc-set-import-from-github",
+          "markdownDescription": "Denies the doc_set_import_from_github command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the doc_set_keep_both_local_changes command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-doc-set-keep-both-local-changes",
+          "markdownDescription": "Enables the doc_set_keep_both_local_changes command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the doc_set_keep_both_local_changes command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-doc-set-keep-both-local-changes",
+          "markdownDescription": "Denies the doc_set_keep_both_local_changes command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the doc_set_list command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-doc-set-list",
+          "markdownDescription": "Enables the doc_set_list command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the doc_set_list command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-doc-set-list",
+          "markdownDescription": "Denies the doc_set_list command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the doc_set_list_all command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-doc-set-list-all",
+          "markdownDescription": "Enables the doc_set_list_all command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the doc_set_list_all command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-doc-set-list-all",
+          "markdownDescription": "Denies the doc_set_list_all command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the doc_set_mapping_preflight command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-doc-set-mapping-preflight",
+          "markdownDescription": "Enables the doc_set_mapping_preflight command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the doc_set_mapping_preflight command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-doc-set-mapping-preflight",
+          "markdownDescription": "Denies the doc_set_mapping_preflight command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the doc_set_move command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-doc-set-move",
+          "markdownDescription": "Enables the doc_set_move command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the doc_set_move command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-doc-set-move",
+          "markdownDescription": "Denies the doc_set_move command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the doc_set_refresh_mirror command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-doc-set-refresh-mirror",
+          "markdownDescription": "Enables the doc_set_refresh_mirror command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the doc_set_refresh_mirror command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-doc-set-refresh-mirror",
+          "markdownDescription": "Denies the doc_set_refresh_mirror command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the doc_set_remove_new_mirror_path command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-doc-set-remove-new-mirror-path",
+          "markdownDescription": "Enables the doc_set_remove_new_mirror_path command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the doc_set_remove_new_mirror_path command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-doc-set-remove-new-mirror-path",
+          "markdownDescription": "Denies the doc_set_remove_new_mirror_path command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the doc_set_restore_local_from_mirror command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-doc-set-restore-local-from-mirror",
+          "markdownDescription": "Enables the doc_set_restore_local_from_mirror command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the doc_set_restore_local_from_mirror command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-doc-set-restore-local-from-mirror",
+          "markdownDescription": "Denies the doc_set_restore_local_from_mirror command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the doc_set_set_auto_sync command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-doc-set-set-auto-sync",
+          "markdownDescription": "Enables the doc_set_set_auto_sync command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the doc_set_set_auto_sync command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-doc-set-set-auto-sync",
+          "markdownDescription": "Denies the doc_set_set_auto_sync command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the doc_set_set_source_mapping command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-doc-set-set-source-mapping",
+          "markdownDescription": "Enables the doc_set_set_source_mapping command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the doc_set_set_source_mapping command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-doc-set-set-source-mapping",
+          "markdownDescription": "Denies the doc_set_set_source_mapping command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the doc_set_setup_github_remote command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-doc-set-setup-github-remote",
+          "markdownDescription": "Enables the doc_set_setup_github_remote command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the doc_set_setup_github_remote command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-doc-set-setup-github-remote",
+          "markdownDescription": "Denies the doc_set_setup_github_remote command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the doc_set_sources command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-doc-set-sources",
+          "markdownDescription": "Enables the doc_set_sources command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the doc_set_sources command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-doc-set-sources",
+          "markdownDescription": "Denies the doc_set_sources command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the doc_set_watch_start command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-doc-set-watch-start",
+          "markdownDescription": "Enables the doc_set_watch_start command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the doc_set_watch_start command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-doc-set-watch-start",
+          "markdownDescription": "Denies the doc_set_watch_start command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the doc_set_watch_stop command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-doc-set-watch-stop",
+          "markdownDescription": "Enables the doc_set_watch_stop command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the doc_set_watch_stop command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-doc-set-watch-stop",
+          "markdownDescription": "Denies the doc_set_watch_stop command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the file_content command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-file-content",
+          "markdownDescription": "Enables the file_content command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the file_content command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-file-content",
+          "markdownDescription": "Denies the file_content command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the file_list_bookmarks command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-file-list-bookmarks",
+          "markdownDescription": "Enables the file_list_bookmarks command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the file_list_bookmarks command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-file-list-bookmarks",
+          "markdownDescription": "Denies the file_list_bookmarks command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the file_search command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-file-search",
+          "markdownDescription": "Enables the file_search command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the file_search command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-file-search",
+          "markdownDescription": "Denies the file_search command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the file_toggle_bookmark command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-file-toggle-bookmark",
+          "markdownDescription": "Enables the file_toggle_bookmark command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the file_toggle_bookmark command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-file-toggle-bookmark",
+          "markdownDescription": "Denies the file_toggle_bookmark command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the file_tree command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-file-tree",
+          "markdownDescription": "Enables the file_tree command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the file_tree command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-file-tree",
+          "markdownDescription": "Denies the file_tree command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the read_text_file command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-read-text-file",
+          "markdownDescription": "Enables the read_text_file command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the read_text_file command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-read-text-file",
+          "markdownDescription": "Denies the read_text_file command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the sync_down command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-sync-down",
+          "markdownDescription": "Enables the sync_down command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the sync_down command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-sync-down",
+          "markdownDescription": "Denies the sync_down command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the sync_force_pull command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-sync-force-pull",
+          "markdownDescription": "Enables the sync_force_pull command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the sync_force_pull command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-sync-force-pull",
+          "markdownDescription": "Denies the sync_force_pull command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the sync_force_push command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-sync-force-push",
+          "markdownDescription": "Enables the sync_force_push command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the sync_force_push command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-sync-force-push",
+          "markdownDescription": "Denies the sync_force_push command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the sync_logs command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-sync-logs",
+          "markdownDescription": "Enables the sync_logs command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the sync_logs command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-sync-logs",
+          "markdownDescription": "Denies the sync_logs command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the sync_status command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-sync-status",
+          "markdownDescription": "Enables the sync_status command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the sync_status command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-sync-status",
+          "markdownDescription": "Denies the sync_status command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the sync_up command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-sync-up",
+          "markdownDescription": "Enables the sync_up command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the sync_up command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-sync-up",
+          "markdownDescription": "Denies the sync_up command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the workspace_create command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-workspace-create",
+          "markdownDescription": "Enables the workspace_create command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the workspace_create command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-workspace-create",
+          "markdownDescription": "Denies the workspace_create command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the workspace_delete command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-workspace-delete",
+          "markdownDescription": "Enables the workspace_delete command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the workspace_delete command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-workspace-delete",
+          "markdownDescription": "Denies the workspace_delete command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the workspace_list command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-workspace-list",
+          "markdownDescription": "Enables the workspace_list command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the workspace_list command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-workspace-list",
+          "markdownDescription": "Denies the workspace_list command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the workspace_update command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-workspace-update",
+          "markdownDescription": "Enables the workspace_update command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the workspace_update command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-workspace-update",
+          "markdownDescription": "Denies the workspace_update command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the write_text_file command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-write-text-file",
+          "markdownDescription": "Enables the write_text_file command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the write_text_file command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-write-text-file",
+          "markdownDescription": "Denies the write_text_file command without any pre-configured scope."
+        },
+        {
+          "description": "Allows every Open Sesame plugin command.\n#### This default permission set includes:\n\n- `allow-auth-github-start`\n- `allow-auth-github-poll`\n- `allow-auth-list-accounts`\n- `allow-auth-logout`\n- `allow-workspace-list`\n- `allow-workspace-create`\n- `allow-workspace-update`\n- `allow-workspace-delete`\n- `allow-doc-set-detect-strategy`\n- `allow-doc-set-create`\n- `allow-doc-set-list`\n- `allow-doc-set-list-all`\n- `allow-doc-set-delete`\n- `allow-doc-set-move`\n- `allow-doc-set-set-auto-sync`\n- `allow-doc-set-setup-github-remote`\n- `allow-doc-set-import-from-github`\n- `allow-doc-set-sources`\n- `allow-doc-set-mapping-preflight`\n- `allow-doc-set-set-source-mapping`\n- `allow-doc-set-add-source`\n- `allow-doc-set-add-mirror-source`\n- `allow-doc-set-remove-new-mirror-path`\n- `allow-doc-set-refresh-mirror`\n- `allow-doc-set-restore-local-from-mirror`\n- `allow-doc-set-keep-both-local-changes`\n- `allow-doc-set-watch-start`\n- `allow-doc-set-watch-stop`\n- `allow-config-export`\n- `allow-config-import`\n- `allow-sync-up`\n- `allow-sync-down`\n- `allow-sync-force-push`\n- `allow-sync-force-pull`\n- `allow-sync-status`\n- `allow-sync-logs`\n- `allow-file-tree`\n- `allow-file-content`\n- `allow-file-search`\n- `allow-file-toggle-bookmark`\n- `allow-file-list-bookmarks`\n- `allow-write-text-file`\n- `allow-read-text-file`",
+          "type": "string",
+          "const": "default",
+          "markdownDescription": "Allows every Open Sesame plugin command.\n#### This default permission set includes:\n\n- `allow-auth-github-start`\n- `allow-auth-github-poll`\n- `allow-auth-list-accounts`\n- `allow-auth-logout`\n- `allow-workspace-list`\n- `allow-workspace-create`\n- `allow-workspace-update`\n- `allow-workspace-delete`\n- `allow-doc-set-detect-strategy`\n- `allow-doc-set-create`\n- `allow-doc-set-list`\n- `allow-doc-set-list-all`\n- `allow-doc-set-delete`\n- `allow-doc-set-move`\n- `allow-doc-set-set-auto-sync`\n- `allow-doc-set-setup-github-remote`\n- `allow-doc-set-import-from-github`\n- `allow-doc-set-sources`\n- `allow-doc-set-mapping-preflight`\n- `allow-doc-set-set-source-mapping`\n- `allow-doc-set-add-source`\n- `allow-doc-set-add-mirror-source`\n- `allow-doc-set-remove-new-mirror-path`\n- `allow-doc-set-refresh-mirror`\n- `allow-doc-set-restore-local-from-mirror`\n- `allow-doc-set-keep-both-local-changes`\n- `allow-doc-set-watch-start`\n- `allow-doc-set-watch-stop`\n- `allow-config-export`\n- `allow-config-import`\n- `allow-sync-up`\n- `allow-sync-down`\n- `allow-sync-force-push`\n- `allow-sync-force-pull`\n- `allow-sync-status`\n- `allow-sync-logs`\n- `allow-file-tree`\n- `allow-file-content`\n- `allow-file-search`\n- `allow-file-toggle-bookmark`\n- `allow-file-list-bookmarks`\n- `allow-write-text-file`\n- `allow-read-text-file`"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-update-tunnel"
+description = "Enables the update_tunnel command without any pre-configured scope."
+commands.allow = ["update_tunnel"]
+
+[[permission]]
+identifier = "deny-update-tunnel"
+description = "Denies the update_tunnel command without any pre-configured scope."
+commands.deny = ["update_tunnel"]

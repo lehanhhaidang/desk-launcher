@@ -1,0 +1,9 @@
+/* Shared shadcn theme — same source as the launcher's main.css. */
+@import "../../../../packages/ui/src/theme.css";
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}

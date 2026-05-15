@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-doc-set-watch-start"
+description = "Enables the doc_set_watch_start command without any pre-configured scope."
+commands.allow = ["doc_set_watch_start"]
+
+[[permission]]
+identifier = "deny-doc-set-watch-start"
+description = "Denies the doc_set_watch_start command without any pre-configured scope."
+commands.deny = ["doc_set_watch_start"]

@@ -1,0 +1,16 @@
+# Default permission set for the port-killer plugin — grants every command.
+"$schema" = "schemas/schema.json"
+
+[default]
+description = "Allows every Port Killer plugin command."
+permissions = [
+    "allow-list-ports",
+    "allow-kill-ports",
+    "allow-list-tunnels",
+    "allow-create-tunnel",
+    "allow-update-tunnel",
+    "allow-delete-tunnel",
+    "allow-start-tunnel",
+    "allow-stop-tunnel",
+    "allow-list-ssh-keys",
+]

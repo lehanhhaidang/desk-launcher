@@ -1,0 +1,10 @@
+[package]
+name = "launcher-paths"
+version = "0.1.0"
+edition.workspace = true
+description = "Per-module data directory helper for Desk Launcher modules"
+authors.workspace = true
+
+[dependencies]
+dirs = "5"
+thiserror = { workspace = true }

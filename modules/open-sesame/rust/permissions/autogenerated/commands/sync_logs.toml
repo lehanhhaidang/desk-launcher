@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-sync-logs"
+description = "Enables the sync_logs command without any pre-configured scope."
+commands.allow = ["sync_logs"]
+
+[[permission]]
+identifier = "deny-sync-logs"
+description = "Denies the sync_logs command without any pre-configured scope."
+commands.deny = ["sync_logs"]

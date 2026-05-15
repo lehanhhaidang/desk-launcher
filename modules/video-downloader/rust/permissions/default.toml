@@ -1,0 +1,12 @@
+# Default permission set for the video-downloader plugin.
+"$schema" = "schemas/schema.json"
+
+[default]
+description = "Allows every Video Downloader plugin command."
+permissions = [
+    "allow-video-info",
+    "allow-video-download-start",
+    "allow-video-download-cancel",
+    "allow-video-download-read",
+    "allow-video-download-cleanup",
+]

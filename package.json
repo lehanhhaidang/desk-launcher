@@ -1,0 +1,16 @@
+{
+  "name": "desk-launcher",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Unified desktop tool launcher hosting modular sub-apps",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm --workspace @desk-launcher/launcher run tauri dev",
+    "build": "npm --workspace @desk-launcher/launcher run tauri build",
+    "frontend:dev": "npm --workspace @desk-launcher/launcher run dev",
+    "frontend:build": "npm --workspace @desk-launcher/launcher run build",
+    "tauri": "npm --workspace @desk-launcher/launcher run tauri"
+  }
+}

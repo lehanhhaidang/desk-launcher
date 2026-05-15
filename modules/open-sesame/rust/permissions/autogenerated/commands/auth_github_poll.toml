@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-auth-github-poll"
+description = "Enables the auth_github_poll command without any pre-configured scope."
+commands.allow = ["auth_github_poll"]
+
+[[permission]]
+identifier = "deny-auth-github-poll"
+description = "Denies the auth_github_poll command without any pre-configured scope."
+commands.deny = ["auth_github_poll"]

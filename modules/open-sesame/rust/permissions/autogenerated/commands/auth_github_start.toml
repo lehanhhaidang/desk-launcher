@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-auth-github-start"
+description = "Enables the auth_github_start command without any pre-configured scope."
+commands.allow = ["auth_github_start"]
+
+[[permission]]
+identifier = "deny-auth-github-start"
+description = "Denies the auth_github_start command without any pre-configured scope."
+commands.deny = ["auth_github_start"]

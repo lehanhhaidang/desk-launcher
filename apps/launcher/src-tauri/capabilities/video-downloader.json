@@ -1,0 +1,26 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "video-downloader-window",
+  "description": "Permissions for the Video Downloader module window. Needs to spawn yt-dlp.exe + ffmpeg.exe sidecars (via the plugin's commands, not raw shell), dialog for Save As, and fs write for the chosen save path.",
+  "windows": ["video-downloader"],
+  "permissions": [
+    "core:default",
+    "dialog:default",
+    "dialog:allow-save",
+    "log:default",
+    "fs:default",
+    {
+      "identifier": "fs:allow-write-file",
+      "allow": [{ "path": "$HOME/**" }, { "path": "$DOWNLOAD/**" }]
+    },
+    "shell:default",
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        { "name": "binaries/yt-dlp", "sidecar": true, "args": true },
+        { "name": "binaries/ffmpeg", "sidecar": true, "args": true }
+      ]
+    },
+    "video-downloader:default"
+  ]
+}

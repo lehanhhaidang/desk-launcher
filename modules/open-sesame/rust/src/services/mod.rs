@@ -1,0 +1,13 @@
+pub mod auth_service;
+pub mod doc_set_service;
+pub mod doc_set_manifest_service;
+pub mod file_meta_service;
+pub mod file_tree_service;
+pub mod github_sync_setup_service;
+pub mod github_import_service;
+pub mod mirror_service;
+pub mod repo_service;
+pub mod search_service;
+pub mod strategy_detector;
+pub mod sync_service;
+pub mod workspace_service;

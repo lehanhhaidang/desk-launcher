@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@modules/*": ["../../modules/*"],
+      "@desk-launcher/ui": ["../../packages/ui/src"],
+      "@desk-launcher/ui/*": ["../../packages/ui/src/*"],
+      "@desk-launcher/tauri-bridge": ["../../packages/tauri-bridge/src"],
+      "@desk-launcher/tauri-bridge/*": ["../../packages/tauri-bridge/src/*"],
+      "@os/*": ["../../modules/open-sesame/frontend/src/*"],
+      "@cmt/*": ["../../modules/comtor/frontend/src/*"],
+      "@vid/*": ["../../modules/video-downloader/frontend/src/*"]
+    }
+  },
+  "include": [
+    "src",
+    "modules-pages",
+    "../../modules/port-killer/frontend/src",
+    "../../modules/open-sesame/frontend/src",
+    "../../modules/comtor/frontend/src",
+    "../../modules/video-downloader/frontend/src",
+    "../../packages/*/src"
+  ],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

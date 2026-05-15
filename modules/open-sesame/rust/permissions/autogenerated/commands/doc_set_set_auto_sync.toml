@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-doc-set-set-auto-sync"
+description = "Enables the doc_set_set_auto_sync command without any pre-configured scope."
+commands.allow = ["doc_set_set_auto_sync"]
+
+[[permission]]
+identifier = "deny-doc-set-set-auto-sync"
+description = "Denies the doc_set_set_auto_sync command without any pre-configured scope."
+commands.deny = ["doc_set_set_auto_sync"]

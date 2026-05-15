@@ -1,0 +1,12 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "port-killer-window",
+  "description": "Permissions for the Port Killer module window. All port list/kill/tunnel commands live in the port-killer Rust plugin.",
+  "windows": ["port-killer"],
+  "permissions": [
+    "core:default",
+    "dialog:default",
+    "log:default",
+    "port-killer:default"
+  ]
+}

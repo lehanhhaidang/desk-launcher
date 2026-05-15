@@ -1,0 +1,13 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "comtor-window",
+  "description": "Permissions for the Virtual Comtor module window. Needs dialog for xlsx export, keyring access via the comtor plugin's commands (no extra permission needed), and HTTPS/WSS to Soniox + OpenAI (enforced via CSP in tauri.conf.json, not capabilities).",
+  "windows": ["comtor"],
+  "permissions": [
+    "core:default",
+    "dialog:default",
+    "dialog:allow-save",
+    "log:default",
+    "comtor:default"
+  ]
+}

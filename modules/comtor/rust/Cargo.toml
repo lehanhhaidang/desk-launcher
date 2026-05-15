@@ -1,0 +1,31 @@
+[package]
+# Following Tauri's `tauri-plugin-*` convention: build.rs strips the prefix
+# so capabilities can reference this plugin as `comtor:<perm>`, matching the
+# runtime plugin name registered via `Builder::new("comtor")`.
+name = "tauri-plugin-comtor"
+version = "0.1.0"
+edition.workspace = true
+description = "Virtual Comtor module — JP/VN realtime meeting translator. Plugin-ized from the original virtual_comtor_desktop Tauri app."
+authors.workspace = true
+links = "tauri-plugin-comtor"
+
+[lib]
+name = "tauri_plugin_comtor"
+
+[build-dependencies]
+tauri-plugin = "2"
+
+[dependencies]
+tauri = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+log = { workspace = true }
+
+rusqlite = { version = "0.32", features = ["bundled"] }
+keyring = { version = "3", features = ["windows-native"] }
+uuid = { version = "1", features = ["v4"] }
+dirs = "5"
+tauri-plugin-dialog = "2"
+
+launcher-paths = { path = "../../../crates/launcher-paths" }
