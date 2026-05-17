@@ -14,8 +14,7 @@ use tauri::plugin::{Builder, TauriPlugin};
 use tauri::Wry;
 
 use netstat2::{
-    AddressFamilyFlags, ProtocolFlags, ProtocolSocketInfo, SocketInfo, TcpState,
-    get_sockets_info,
+    get_sockets_info, AddressFamilyFlags, ProtocolFlags, ProtocolSocketInfo, SocketInfo, TcpState,
 };
 use sysinfo::{Pid, ProcessRefreshKind, RefreshKind, System};
 
@@ -48,8 +47,7 @@ pub struct KillRequest {
 fn list_ports() -> Result<Vec<PortEntry>, String> {
     let flags = AddressFamilyFlags::IPV4 | AddressFamilyFlags::IPV6;
     let protos = ProtocolFlags::TCP | ProtocolFlags::UDP;
-    let sockets =
-        get_sockets_info(flags, protos).map_err(|e| format!("netstat: {e}"))?;
+    let sockets = get_sockets_info(flags, protos).map_err(|e| format!("netstat: {e}"))?;
 
     let mut sys = System::new_with_specifics(
         RefreshKind::new().with_processes(ProcessRefreshKind::everything()),
@@ -69,39 +67,45 @@ fn list_ports() -> Result<Vec<PortEntry>, String> {
             Some(p) => *p,
             None => continue,
         };
-        let (family_str, local_addr, local_port, remote, status) =
-            match protocol_socket_info {
-                ProtocolSocketInfo::Tcp(t) => {
-                    if !matches!(t.state, TcpState::Listen | TcpState::Established) {
-                        continue;
-                    }
-                    let family = if t.local_addr.is_ipv4() { "IPv4" } else { "IPv6" };
-                    let remote =
-                        format!("{}:{}", t.remote_addr, t.remote_port);
-                    let status = match t.state {
-                        TcpState::Listen => "LISTEN",
-                        TcpState::Established => "ESTABLISHED",
-                        _ => "OTHER",
-                    };
-                    (
-                        family,
-                        t.local_addr.to_string(),
-                        t.local_port,
-                        remote,
-                        status,
-                    )
+        let (family_str, local_addr, local_port, remote, status) = match protocol_socket_info {
+            ProtocolSocketInfo::Tcp(t) => {
+                if !matches!(t.state, TcpState::Listen | TcpState::Established) {
+                    continue;
                 }
-                ProtocolSocketInfo::Udp(u) => {
-                    let family = if u.local_addr.is_ipv4() { "IPv4" } else { "IPv6" };
-                    (
-                        family,
-                        u.local_addr.to_string(),
-                        u.local_port,
-                        String::new(),
-                        "LISTEN",
-                    )
-                }
-            };
+                let family = if t.local_addr.is_ipv4() {
+                    "IPv4"
+                } else {
+                    "IPv6"
+                };
+                let remote = format!("{}:{}", t.remote_addr, t.remote_port);
+                let status = match t.state {
+                    TcpState::Listen => "LISTEN",
+                    TcpState::Established => "ESTABLISHED",
+                    _ => "OTHER",
+                };
+                (
+                    family,
+                    t.local_addr.to_string(),
+                    t.local_port,
+                    remote,
+                    status,
+                )
+            }
+            ProtocolSocketInfo::Udp(u) => {
+                let family = if u.local_addr.is_ipv4() {
+                    "IPv4"
+                } else {
+                    "IPv6"
+                };
+                (
+                    family,
+                    u.local_addr.to_string(),
+                    u.local_port,
+                    String::new(),
+                    "LISTEN",
+                )
+            }
+        };
 
         if !seen.insert((pid, local_port)) {
             continue;
@@ -140,12 +144,12 @@ fn kill_ports(request: KillRequest) -> Vec<KillResult> {
         .map(|pid| match sys.process(Pid::from_u32(pid)) {
             Some(p) => {
                 if p.kill() {
-                    log::info!(
-                        "killed pid {} ({})",
+                    log::info!("killed pid {} ({})", pid, p.name().to_string_lossy());
+                    KillResult {
                         pid,
-                        p.name().to_string_lossy()
-                    );
-                    KillResult { pid, success: true, error: None }
+                        success: true,
+                        error: None,
+                    }
                 } else {
                     KillResult {
                         pid,

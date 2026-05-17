@@ -31,15 +31,12 @@ pub async fn open_module(app: AppHandle, id: String) -> Result<(), WindowError> 
 
     let spec = module_registry::find(&id).ok_or_else(|| WindowError::UnknownModule(id.clone()))?;
 
-    let mut builder = WebviewWindowBuilder::new(
-        &app,
-        spec.id,
-        WebviewUrl::App(spec.initial_url.into()),
-    )
-    .title(spec.title)
-    .inner_size(spec.width, spec.height)
-    .resizable(true)
-    .center();
+    let mut builder =
+        WebviewWindowBuilder::new(&app, spec.id, WebviewUrl::App(spec.initial_url.into()))
+            .title(spec.title)
+            .inner_size(spec.width, spec.height)
+            .resizable(true)
+            .center();
 
     if let (Some(min_w), Some(min_h)) = (spec.min_width, spec.min_height) {
         builder = builder.min_inner_size(min_w, min_h);

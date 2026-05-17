@@ -93,7 +93,10 @@ const MEETING_COLS: &str = "id, project_id, title, status, mode, duration_ms, en
 
 #[tauri::command]
 pub fn list_meetings(state: State<DbState>, project_id: String) -> AppResult<Vec<Meeting>> {
-    let conn = state.0.lock().map_err(|e| AppError::Internal(e.to_string()))?;
+    let conn = state
+        .0
+        .lock()
+        .map_err(|e| AppError::Internal(e.to_string()))?;
     let sql = format!(
         "SELECT {MEETING_COLS} FROM meetings WHERE project_id = ?1 ORDER BY created_at DESC"
     );
@@ -108,11 +111,12 @@ pub fn list_meetings(state: State<DbState>, project_id: String) -> AppResult<Vec
 
 #[tauri::command]
 pub fn list_recent_meetings(state: State<DbState>, limit: Option<i64>) -> AppResult<Vec<Meeting>> {
-    let conn = state.0.lock().map_err(|e| AppError::Internal(e.to_string()))?;
+    let conn = state
+        .0
+        .lock()
+        .map_err(|e| AppError::Internal(e.to_string()))?;
     let lim = limit.unwrap_or(20);
-    let sql = format!(
-        "SELECT {MEETING_COLS} FROM meetings ORDER BY created_at DESC LIMIT ?1"
-    );
+    let sql = format!("SELECT {MEETING_COLS} FROM meetings ORDER BY created_at DESC LIMIT ?1");
     let mut stmt = conn.prepare(&sql)?;
     let rows = stmt.query_map([lim], row_to_meeting)?;
     let mut out = Vec::new();
@@ -124,7 +128,10 @@ pub fn list_recent_meetings(state: State<DbState>, limit: Option<i64>) -> AppRes
 
 #[tauri::command]
 pub fn get_meeting(state: State<DbState>, id: String) -> AppResult<MeetingDetail> {
-    let conn = state.0.lock().map_err(|e| AppError::Internal(e.to_string()))?;
+    let conn = state
+        .0
+        .lock()
+        .map_err(|e| AppError::Internal(e.to_string()))?;
     let sql = format!("SELECT {MEETING_COLS} FROM meetings WHERE id = ?1");
     let mut stmt = conn.prepare(&sql)?;
     let mut rows = stmt.query([&id])?;
@@ -169,7 +176,10 @@ pub fn create_meeting(state: State<DbState>, input: NewMeeting) -> AppResult<Str
     let mode = input.mode.unwrap_or_else(|| "standard".into());
     let id = Uuid::new_v4().to_string();
     let ts = now_ms();
-    let conn = state.0.lock().map_err(|e| AppError::Internal(e.to_string()))?;
+    let conn = state
+        .0
+        .lock()
+        .map_err(|e| AppError::Internal(e.to_string()))?;
     conn.execute(
         "INSERT INTO meetings (id, project_id, title, status, mode, started_at, created_at, updated_at)
          VALUES (?1, ?2, ?3, 'in_progress', ?4, ?5, ?5, ?5)",
@@ -180,41 +190,74 @@ pub fn create_meeting(state: State<DbState>, input: NewMeeting) -> AppResult<Str
 
 #[tauri::command]
 pub fn update_meeting(state: State<DbState>, id: String, patch: MeetingPatch) -> AppResult<()> {
-    let conn = state.0.lock().map_err(|e| AppError::Internal(e.to_string()))?;
+    let conn = state
+        .0
+        .lock()
+        .map_err(|e| AppError::Internal(e.to_string()))?;
     let ts = now_ms();
     if let Some(v) = patch.title {
-        conn.execute("UPDATE meetings SET title=?1, updated_at=?2 WHERE id=?3", params![v, ts, id])?;
+        conn.execute(
+            "UPDATE meetings SET title=?1, updated_at=?2 WHERE id=?3",
+            params![v, ts, id],
+        )?;
     }
     if let Some(v) = patch.status {
-        conn.execute("UPDATE meetings SET status=?1, updated_at=?2 WHERE id=?3", params![v, ts, id])?;
+        conn.execute(
+            "UPDATE meetings SET status=?1, updated_at=?2 WHERE id=?3",
+            params![v, ts, id],
+        )?;
     }
     if let Some(v) = patch.mode {
-        conn.execute("UPDATE meetings SET mode=?1, updated_at=?2 WHERE id=?3", params![v, ts, id])?;
+        conn.execute(
+            "UPDATE meetings SET mode=?1, updated_at=?2 WHERE id=?3",
+            params![v, ts, id],
+        )?;
     }
     if let Some(v) = patch.duration_ms {
-        conn.execute("UPDATE meetings SET duration_ms=?1, updated_at=?2 WHERE id=?3", params![v, ts, id])?;
+        conn.execute(
+            "UPDATE meetings SET duration_ms=?1, updated_at=?2 WHERE id=?3",
+            params![v, ts, id],
+        )?;
     }
     if let Some(v) = patch.started_at {
-        conn.execute("UPDATE meetings SET started_at=?1, updated_at=?2 WHERE id=?3", params![v, ts, id])?;
+        conn.execute(
+            "UPDATE meetings SET started_at=?1, updated_at=?2 WHERE id=?3",
+            params![v, ts, id],
+        )?;
     }
     if let Some(v) = patch.ended_at {
-        conn.execute("UPDATE meetings SET ended_at=?1, updated_at=?2 WHERE id=?3", params![v, ts, id])?;
+        conn.execute(
+            "UPDATE meetings SET ended_at=?1, updated_at=?2 WHERE id=?3",
+            params![v, ts, id],
+        )?;
     }
     if let Some(v) = patch.audio_path {
-        conn.execute("UPDATE meetings SET audio_path=?1, updated_at=?2 WHERE id=?3", params![v, ts, id])?;
+        conn.execute(
+            "UPDATE meetings SET audio_path=?1, updated_at=?2 WHERE id=?3",
+            params![v, ts, id],
+        )?;
     }
     if let Some(v) = patch.summary {
-        conn.execute("UPDATE meetings SET summary=?1, updated_at=?2 WHERE id=?3", params![v, ts, id])?;
+        conn.execute(
+            "UPDATE meetings SET summary=?1, updated_at=?2 WHERE id=?3",
+            params![v, ts, id],
+        )?;
     }
     if let Some(v) = patch.speaker_mapping {
-        conn.execute("UPDATE meetings SET speaker_mapping=?1, updated_at=?2 WHERE id=?3", params![v, ts, id])?;
+        conn.execute(
+            "UPDATE meetings SET speaker_mapping=?1, updated_at=?2 WHERE id=?3",
+            params![v, ts, id],
+        )?;
     }
     Ok(())
 }
 
 #[tauri::command]
 pub fn delete_meeting(state: State<DbState>, id: String) -> AppResult<()> {
-    let conn = state.0.lock().map_err(|e| AppError::Internal(e.to_string()))?;
+    let conn = state
+        .0
+        .lock()
+        .map_err(|e| AppError::Internal(e.to_string()))?;
     conn.execute("DELETE FROM meetings WHERE id=?1", [&id])?;
     Ok(())
 }
@@ -225,11 +268,20 @@ pub fn save_transcript(
     meeting_id: String,
     entries: Vec<TranscriptEntry>,
 ) -> AppResult<i64> {
-    let mut conn = state.0.lock().map_err(|e| AppError::Internal(e.to_string()))?;
+    let mut conn = state
+        .0
+        .lock()
+        .map_err(|e| AppError::Internal(e.to_string()))?;
     let tx = conn.transaction()?;
-    tx.execute("DELETE FROM transcript_entries WHERE meeting_id = ?1", [&meeting_id])?;
+    tx.execute(
+        "DELETE FROM transcript_entries WHERE meeting_id = ?1",
+        [&meeting_id],
+    )?;
     for (i, entry) in entries.iter().enumerate() {
-        let id = entry.id.clone().unwrap_or_else(|| Uuid::new_v4().to_string());
+        let id = entry
+            .id
+            .clone()
+            .unwrap_or_else(|| Uuid::new_v4().to_string());
         tx.execute(
             "INSERT INTO transcript_entries (id, meeting_id, ord, speaker_id, speaker_label, speaker_number, language, original_text, translated_text, start_ms, end_ms, confidence, is_reply)
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)",

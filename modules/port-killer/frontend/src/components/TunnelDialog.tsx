@@ -1,7 +1,15 @@
 import { useState, useEffect } from 'react'
-import { Button } from '@desk-launcher/ui'
-import { Input } from '@desk-launcher/ui'
-import { X, Save, FolderOpen, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react'
+import { Button, Input } from '@pk/components/ui'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@pk/components/ui/dialog'
+import { Label } from '@pk/components/ui/label'
+import { Save, FolderOpen, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react'
 import type { TunnelConfig, TunnelCreateRequest, TunnelStatus } from '../types/port.types'
 
 interface TunnelDialogProps {
@@ -48,7 +56,6 @@ export function TunnelDialog({ tunnel, onSave, onClose }: TunnelDialogProps) {
 
     const set = (field: keyof TunnelCreateRequest, value: string | number) => {
         setForm((prev) => ({ ...prev, [field]: value }))
-        // Reset error when user changes form
         if (status === 'error') {
             setStatus('idle')
             setErrorMessage('')
@@ -62,10 +69,8 @@ export function TunnelDialog({ tunnel, onSave, onClose }: TunnelDialogProps) {
 
         try {
             const result = await onSave(form)
-
             if (result.is_running) {
                 setStatus('success')
-                // Close after brief success feedback
                 setTimeout(() => onClose(), 800)
             } else {
                 setStatus('error')
@@ -81,34 +86,17 @@ export function TunnelDialog({ tunnel, onSave, onClose }: TunnelDialogProps) {
     const isBusy = status === 'connecting'
 
     return (
-        <div className="pk-dialog-backdrop">
-            <div className="pk-dialog max-w-xl animate-in fade-in zoom-in-95 duration-200">
-                <form
-                    onSubmit={handleSubmit}
-                    className="pk-panel flex max-h-[calc(100vh-36px)] flex-col rounded-xl p-5 shadow-2xl"
-                >
-                    <div className="mb-4 flex shrink-0 items-start justify-between gap-3 border-b border-blue-200/10 pb-4">
-                        <div className="min-w-0 flex-1">
-                            <h3 className="text-lg font-semibold leading-tight text-[#edf3f7]">
-                                {isEdit ? 'Edit Tunnel' : 'New SSH Tunnel'}
-                            </h3>
-                            <p className="mt-1 text-xs pk-subtle">Configure local forwarding through an SSH host.</p>
-                        </div>
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            disabled={isBusy}
-                            className="shrink-0 pk-muted hover:text-[#edf3f7] disabled:opacity-50"
-                        >
-                            <X className="size-4" />
-                        </button>
-                    </div>
+        <Dialog open onOpenChange={(open) => { if (!open && !isBusy) onClose() }}>
+            <DialogContent className="max-w-2xl">
+                <form onSubmit={handleSubmit} className="flex max-h-[calc(100vh-100px)] flex-col">
+                    <DialogHeader className="border-b pb-4">
+                        <DialogTitle>{isEdit ? 'Edit Tunnel' : 'New SSH Tunnel'}</DialogTitle>
+                        <DialogDescription>Configure local forwarding through an SSH host.</DialogDescription>
+                    </DialogHeader>
 
-                    <div className="pk-dialog-body space-y-4">
-                        {/* Label */}
+                    <div className="mt-4 max-h-[calc(100vh-280px)] space-y-4 overflow-y-auto pr-1">
                         <Field label="Label">
                             <Input
-                                className="pk-input"
                                 value={form.label}
                                 onChange={(e) => set('label', e.target.value)}
                                 placeholder="e.g. Staging DB, Prod Redis"
@@ -117,11 +105,9 @@ export function TunnelDialog({ tunnel, onSave, onClose }: TunnelDialogProps) {
                             />
                         </Field>
 
-                        {/* SSH connection */}
-                        <div className="pk-form-grid-3">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                             <Field label="SSH User">
                                 <Input
-                                    className="pk-input"
                                     value={form.ssh_user}
                                     onChange={(e) => set('ssh_user', e.target.value)}
                                     placeholder="root"
@@ -131,7 +117,6 @@ export function TunnelDialog({ tunnel, onSave, onClose }: TunnelDialogProps) {
                             </Field>
                             <Field label="Server Host">
                                 <Input
-                                    className="pk-input"
                                     value={form.ssh_host}
                                     onChange={(e) => set('ssh_host', e.target.value)}
                                     placeholder="192.168.1.100"
@@ -141,7 +126,6 @@ export function TunnelDialog({ tunnel, onSave, onClose }: TunnelDialogProps) {
                             </Field>
                             <Field label="SSH Port">
                                 <Input
-                                    className="pk-input"
                                     type="number"
                                     value={form.ssh_port}
                                     onChange={(e) => set('ssh_port', parseInt(e.target.value) || 22)}
@@ -152,11 +136,9 @@ export function TunnelDialog({ tunnel, onSave, onClose }: TunnelDialogProps) {
                             </Field>
                         </div>
 
-                        {/* Port forwarding */}
-                        <div className="pk-form-grid-3">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                             <Field label="Remote Host">
                                 <Input
-                                    className="pk-input"
                                     value={form.remote_host}
                                     onChange={(e) => set('remote_host', e.target.value)}
                                     placeholder="localhost"
@@ -165,7 +147,6 @@ export function TunnelDialog({ tunnel, onSave, onClose }: TunnelDialogProps) {
                             </Field>
                             <Field label="Remote Port">
                                 <Input
-                                    className="pk-input"
                                     type="number"
                                     value={form.remote_port || ''}
                                     onChange={(e) => set('remote_port', parseInt(e.target.value) || 0)}
@@ -178,7 +159,6 @@ export function TunnelDialog({ tunnel, onSave, onClose }: TunnelDialogProps) {
                             </Field>
                             <Field label="Local Port">
                                 <Input
-                                    className="pk-input"
                                     type="number"
                                     value={form.local_port || ''}
                                     onChange={(e) => set('local_port', parseInt(e.target.value) || 0)}
@@ -191,23 +171,21 @@ export function TunnelDialog({ tunnel, onSave, onClose }: TunnelDialogProps) {
                             </Field>
                         </div>
 
-                        {/* Forwarding preview */}
                         {form.local_port > 0 && form.remote_port > 0 && (
-                            <div className="break-all rounded-lg border border-blue-200/10 bg-black/20 px-3 py-2 pk-mono text-xs leading-relaxed pk-subtle">
-                                127.0.0.1:<span className="text-cyan-200">{form.local_port}</span>
+                            <div className="overflow-hidden rounded-lg border bg-background/50 px-3 py-2 pk-mono text-xs leading-relaxed text-muted-foreground">
+                                127.0.0.1:<span className="text-cyan-400">{form.local_port}</span>
                                 {' → '}
-                                {form.remote_host || 'localhost'}:<span className="text-emerald-200">{form.remote_port}</span>
+                                {form.remote_host || 'localhost'}:<span className="text-emerald-400">{form.remote_port}</span>
                                 {' via '}
                                 {form.ssh_user || 'user'}@{form.ssh_host || 'host'}
                                 {form.ssh_port !== 22 && `:${form.ssh_port}`}
                             </div>
                         )}
 
-                        {/* Identity file */}
                         <Field label="Identity File (optional)">
                             <div className="flex gap-2">
                                 <Input
-                                    className="pk-input flex-1"
+                                    className="flex-1"
                                     value={form.identity_file || ''}
                                     onChange={(e) => set('identity_file', e.target.value)}
                                     placeholder="~/.ssh/id_rsa"
@@ -218,7 +196,6 @@ export function TunnelDialog({ tunnel, onSave, onClose }: TunnelDialogProps) {
                                     variant="outline"
                                     size="default"
                                     disabled={isBusy}
-                                    className="pk-button-ghost"
                                     onClick={async () => {
                                         const { fetchSshKeys } = await import('../api/port-api')
                                         try {
@@ -239,15 +216,15 @@ export function TunnelDialog({ tunnel, onSave, onClose }: TunnelDialogProps) {
                                 </Button>
                             </div>
                             {showKeyPicker && sshKeys.length > 0 && (
-                                <div className="mt-2 space-y-1 rounded-lg border border-blue-200/10 bg-black/20 p-2">
+                                <div className="mt-2 space-y-1 rounded-lg border bg-background/50 p-2">
                                     {sshKeys.map((k) => (
                                         <button
                                             key={k.path}
                                             type="button"
-                                            className={`flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors hover:bg-blue-200/10 ${
+                                            className={`flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors hover:bg-accent ${
                                                 form.identity_file === k.path
-                                                    ? 'bg-cyan-200/10 text-cyan-100'
-                                                    : 'pk-subtle'
+                                                    ? 'bg-cyan-400/10 text-cyan-300'
+                                                    : 'text-muted-foreground'
                                             }`}
                                             onClick={() => {
                                                 set('identity_file', k.path)
@@ -263,11 +240,10 @@ export function TunnelDialog({ tunnel, onSave, onClose }: TunnelDialogProps) {
                             )}
                         </Field>
 
-                        {/* Password */}
                         <Field label="Password (optional)">
                             <div className="relative">
                                 <Input
-                                    className="pk-input pr-10"
+                                    className="pr-10"
                                     type={showPassword ? 'text' : 'password'}
                                     value={form.password || ''}
                                     onChange={(e) => set('password', e.target.value)}
@@ -276,7 +252,7 @@ export function TunnelDialog({ tunnel, onSave, onClose }: TunnelDialogProps) {
                                 />
                                 <button
                                     type="button"
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 pk-muted hover:text-[#edf3f7]"
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                                     onClick={() => setShowPassword((v) => !v)}
                                     tabIndex={-1}
                                 >
@@ -285,10 +261,8 @@ export function TunnelDialog({ tunnel, onSave, onClose }: TunnelDialogProps) {
                             </div>
                         </Field>
 
-                        {/* Extra args */}
                         <Field label="Extra SSH Arguments (optional)">
                             <Input
-                                className="pk-input"
                                 value={form.extra_args || ''}
                                 onChange={(e) => set('extra_args', e.target.value)}
                                 placeholder="-o ProxyJump=bastion"
@@ -297,13 +271,12 @@ export function TunnelDialog({ tunnel, onSave, onClose }: TunnelDialogProps) {
                         </Field>
                     </div>
 
-                    {/* Status feedback */}
                     {status === 'error' && (
                         <div className="mt-4 flex items-start gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400">
                             <AlertCircle className="mt-0.5 size-4 shrink-0" />
                             <div className="min-w-0 flex-1">
                                 <p className="font-medium">Connection failed</p>
-                                <p className="break-words text-xs opacity-80">{errorMessage}</p>
+                                <p className="text-xs opacity-80">{errorMessage}</p>
                             </div>
                         </div>
                     )}
@@ -315,11 +288,11 @@ export function TunnelDialog({ tunnel, onSave, onClose }: TunnelDialogProps) {
                         </div>
                     )}
 
-                    <div className="mt-5 flex shrink-0 justify-end gap-2 border-t border-blue-200/10 pt-4">
-                        <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={isBusy} className="pk-button-ghost">
+                    <DialogFooter className="mt-5 border-t pt-4">
+                        <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={isBusy}>
                             Cancel
                         </Button>
-                        <Button type="submit" size="sm" disabled={!isValid || isBusy} className="pk-button-primary disabled:bg-blue-200/10 disabled:text-[#788495]">
+                        <Button type="submit" size="sm" disabled={!isValid || isBusy}>
                             {isBusy ? (
                                 <>
                                     <Loader2 className="size-4 animate-spin" />
@@ -337,10 +310,10 @@ export function TunnelDialog({ tunnel, onSave, onClose }: TunnelDialogProps) {
                                 </>
                             )}
                         </Button>
-                    </div>
+                    </DialogFooter>
                 </form>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     )
 }
 
@@ -355,9 +328,9 @@ function Field({
 }) {
     return (
         <div className={className}>
-            <label className="mb-1 block text-xs font-semibold pk-subtle">
+            <Label className="mb-1.5 text-xs font-semibold text-muted-foreground">
                 {label}
-            </label>
+            </Label>
             {children}
         </div>
     )

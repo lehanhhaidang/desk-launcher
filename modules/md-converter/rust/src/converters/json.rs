@@ -25,8 +25,7 @@ pub fn convert_json_str(content: &str) -> Result<String, ConvertError> {
         return Ok(table);
     }
 
-    let pretty = serde_json::to_string_pretty(&value)
-        .unwrap_or_else(|_| content.to_string());
+    let pretty = serde_json::to_string_pretty(&value).unwrap_or_else(|_| content.to_string());
     Ok(format!("```json\n{}\n```\n", pretty))
 }
 

@@ -68,7 +68,10 @@ pub async fn sync_up(
     let db = db.lock().await;
     match &result {
         Ok(sync_result) => {
-            if let Some(hash) = sync_result.commit_hash.as_deref().filter(|hash| !hash.is_empty())
+            if let Some(hash) = sync_result
+                .commit_hash
+                .as_deref()
+                .filter(|hash| !hash.is_empty())
             {
                 doc_set_repo::update_sync_state(&db, doc_set_id, hash, chrono::Utc::now())?;
             } else {
@@ -153,7 +156,10 @@ pub async fn sync_down(
     let db = db.lock().await;
     match &result {
         Ok(sync_result) => {
-            if let Some(hash) = sync_result.commit_hash.as_deref().filter(|hash| !hash.is_empty())
+            if let Some(hash) = sync_result
+                .commit_hash
+                .as_deref()
+                .filter(|hash| !hash.is_empty())
             {
                 doc_set_repo::update_sync_state(&db, doc_set_id, hash, chrono::Utc::now())?;
             } else {
@@ -257,7 +263,10 @@ async fn finish_sync(
     let db = db.lock().await;
     match result {
         Ok(sync_result) => {
-            if let Some(hash) = sync_result.commit_hash.as_deref().filter(|hash| !hash.is_empty())
+            if let Some(hash) = sync_result
+                .commit_hash
+                .as_deref()
+                .filter(|hash| !hash.is_empty())
             {
                 doc_set_repo::update_sync_state(&db, doc_set_id, hash, chrono::Utc::now())?;
             } else {
@@ -365,10 +374,7 @@ async fn execute_force_push(
     })
 }
 
-async fn execute_sync_down(
-    doc_set: &DocSet,
-    provider: &dyn SyncProvider,
-) -> AppResult<SyncResult> {
+async fn execute_sync_down(doc_set: &DocSet, provider: &dyn SyncProvider) -> AppResult<SyncResult> {
     let staging_path = resolve_staging_path(doc_set)?;
     let staging = Path::new(&staging_path);
 
@@ -385,7 +391,10 @@ async fn execute_sync_down(
         message: if pull_result.conflicted_files.is_empty() {
             format!("Pulled {} update(s)", files_count)
         } else {
-            format!("Pulled with {} conflict(s)", pull_result.conflicted_files.len())
+            format!(
+                "Pulled with {} conflict(s)",
+                pull_result.conflicted_files.len()
+            )
         },
         issue: None,
     })
@@ -457,7 +466,10 @@ fn classify_sync_error(err: &AppError) -> SyncIssue {
         return SyncIssue {
             kind: "diverged".into(),
             message,
-            details: Some("Local and remote histories need user action before normal sync can continue.".into()),
+            details: Some(
+                "Local and remote histories need user action before normal sync can continue."
+                    .into(),
+            ),
             recoverable: true,
             actions: vec![
                 "retry".into(),
@@ -487,13 +499,16 @@ fn classify_sync_error(err: &AppError) -> SyncIssue {
         return SyncIssue {
             kind: "repo_missing".into(),
             message,
-            details: Some("The configured GitHub repository could not be found or accessed.".into()),
+            details: Some(
+                "The configured GitHub repository could not be found or accessed.".into(),
+            ),
             recoverable: true,
             actions: vec!["setup_github".into()],
         };
     }
 
-    if matches!(err, AppError::Network(_)) || lower.contains("network") || lower.contains("timeout") {
+    if matches!(err, AppError::Network(_)) || lower.contains("network") || lower.contains("timeout")
+    {
         return SyncIssue {
             kind: "network_error".into(),
             message,

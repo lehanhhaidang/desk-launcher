@@ -51,7 +51,7 @@ pub const MODULES: &[ModuleWindowSpec] = &[
     },
     ModuleWindowSpec {
         id: "video-downloader",
-        title: "📥 Video Downloader",
+        title: "Media Toolbox",
         initial_url: "modules-pages/video-downloader/index.html",
         width: 1100.0,
         height: 760.0,

@@ -39,6 +39,7 @@ export default defineConfig({
       '@cmt': path.resolve(__dirname, '../../modules/comtor/frontend/src'),
       '@vid': path.resolve(__dirname, '../../modules/video-downloader/frontend/src'),
       '@mdc': path.resolve(__dirname, '../../modules/md-converter/frontend/src'),
+      '@pk': path.resolve(__dirname, '../../modules/port-killer/frontend/src'),
     },
   },
   build: {

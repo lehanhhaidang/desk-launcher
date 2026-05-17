@@ -248,7 +248,11 @@ fn parse_document(xml: &str, rels: &HashMap<String, String>) -> Result<String, C
                     // Image placeholder — best-effort alt/name.
                     let name = attr(&e, b"name").unwrap_or_default();
                     let descr = attr(&e, b"descr").unwrap_or_default();
-                    let alt = if !descr.is_empty() { descr } else { name.clone() };
+                    let alt = if !descr.is_empty() {
+                        descr
+                    } else {
+                        name.clone()
+                    };
                     let alt = alt.replace(['\n', '\r'], " ");
                     let img = format!("![{}]({})", alt, sanitize_filename(&name));
                     append_text(
@@ -438,7 +442,9 @@ fn attr(e: &quick_xml::events::BytesStart, key: &[u8]) -> Option<String> {
 }
 
 fn escape_url(s: &str) -> String {
-    s.replace(' ', "%20").replace(')', "%29").replace('(', "%28")
+    s.replace(' ', "%20")
+        .replace(')', "%29")
+        .replace('(', "%28")
 }
 
 fn sanitize_filename(name: &str) -> String {

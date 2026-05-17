@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-media-video-probe"
+description = "Enables the media_video_probe command without any pre-configured scope."
+commands.allow = ["media_video_probe"]
+
+[[permission]]
+identifier = "deny-media-video-probe"
+description = "Denies the media_video_probe command without any pre-configured scope."
+commands.deny = ["media_video_probe"]

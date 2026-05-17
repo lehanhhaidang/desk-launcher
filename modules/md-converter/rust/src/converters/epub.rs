@@ -77,7 +77,9 @@ fn locate_opf<R: std::io::Read + std::io::Seek>(
         }
         buf.clear();
     }
-    Err(ConvertError::Parse("epub: no rootfile in container.xml".into()))
+    Err(ConvertError::Parse(
+        "epub: no rootfile in container.xml".into(),
+    ))
 }
 
 fn parse_opf(xml: &str) -> Result<(Vec<(String, String)>, Vec<String>), ConvertError> {

@@ -13,7 +13,7 @@ Unified desktop tool launcher - một app Tauri 2 trên Windows, dashboard chứ
 | **Virtual Comtor** | Phiên dịch real-time Nhật <-> Việt cho meeting (Soniox + OpenAI), transcript + summary + xlsx export. | `rusqlite` + `keyring` (Windows Credential Manager) |
 | **Video Downloader** | Tải video/audio (YouTube, TikTok, Bilibili, ...) qua bundled `yt-dlp.exe` + `ffmpeg.exe`. | Tauri sidecar |
 
-Mỗi module có SQLite DB / settings riêng dưới `%APPDATA%\com.lehanhhaidang.desklauncher\modules\<id>\`.
+Mỗi module có SQLite DB / settings riêng dưới `%APPDATA%\io.desklauncher\modules\<id>\`.
 
 ## Cấu trúc thư mục
 

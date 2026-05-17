@@ -9,8 +9,8 @@ use super::tabular::rows_to_markdown;
 use super::ConvertError;
 
 pub fn convert_xlsx(path: &Path) -> Result<String, ConvertError> {
-    let mut workbook = open_workbook_auto(path)
-        .map_err(|e| ConvertError::Parse(format!("open xlsx: {e}")))?;
+    let mut workbook =
+        open_workbook_auto(path).map_err(|e| ConvertError::Parse(format!("open xlsx: {e}")))?;
 
     let mut out = String::new();
     let sheet_names: Vec<String> = workbook.sheet_names().to_owned();

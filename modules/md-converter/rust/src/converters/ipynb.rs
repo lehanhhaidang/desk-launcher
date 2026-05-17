@@ -26,10 +26,7 @@ pub fn convert_ipynb(path: &Path) -> Result<String, ConvertError> {
     let mut title: Option<String> = None;
 
     let empty: Vec<Value> = Vec::new();
-    let cells = nb
-        .get("cells")
-        .and_then(Value::as_array)
-        .unwrap_or(&empty);
+    let cells = nb.get("cells").and_then(Value::as_array).unwrap_or(&empty);
 
     for cell in cells {
         let cell_type = cell.get("cell_type").and_then(Value::as_str).unwrap_or("");

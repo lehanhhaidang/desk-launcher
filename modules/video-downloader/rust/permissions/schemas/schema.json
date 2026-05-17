@@ -295,6 +295,114 @@
       "type": "string",
       "oneOf": [
         {
+          "description": "Enables the media_image_probe command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-media-image-probe",
+          "markdownDescription": "Enables the media_image_probe command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the media_image_probe command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-media-image-probe",
+          "markdownDescription": "Denies the media_image_probe command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the media_image_process_cancel command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-media-image-process-cancel",
+          "markdownDescription": "Enables the media_image_process_cancel command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the media_image_process_cancel command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-media-image-process-cancel",
+          "markdownDescription": "Denies the media_image_process_cancel command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the media_image_process_cleanup command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-media-image-process-cleanup",
+          "markdownDescription": "Enables the media_image_process_cleanup command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the media_image_process_cleanup command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-media-image-process-cleanup",
+          "markdownDescription": "Denies the media_image_process_cleanup command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the media_image_process_start command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-media-image-process-start",
+          "markdownDescription": "Enables the media_image_process_start command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the media_image_process_start command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-media-image-process-start",
+          "markdownDescription": "Denies the media_image_process_start command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the media_image_read_bytes command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-media-image-read-bytes",
+          "markdownDescription": "Enables the media_image_read_bytes command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the media_image_read_bytes command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-media-image-read-bytes",
+          "markdownDescription": "Denies the media_image_read_bytes command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the media_video_probe command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-media-video-probe",
+          "markdownDescription": "Enables the media_video_probe command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the media_video_probe command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-media-video-probe",
+          "markdownDescription": "Denies the media_video_probe command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the media_video_process_cancel command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-media-video-process-cancel",
+          "markdownDescription": "Enables the media_video_process_cancel command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the media_video_process_cancel command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-media-video-process-cancel",
+          "markdownDescription": "Denies the media_video_process_cancel command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the media_video_process_cleanup command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-media-video-process-cleanup",
+          "markdownDescription": "Enables the media_video_process_cleanup command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the media_video_process_cleanup command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-media-video-process-cleanup",
+          "markdownDescription": "Denies the media_video_process_cleanup command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the media_video_process_start command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-media-video-process-start",
+          "markdownDescription": "Enables the media_video_process_start command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the media_video_process_start command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-media-video-process-start",
+          "markdownDescription": "Denies the media_video_process_start command without any pre-configured scope."
+        },
+        {
           "description": "Enables the video_download_cancel command without any pre-configured scope.",
           "type": "string",
           "const": "allow-video-download-cancel",
@@ -355,10 +463,10 @@
           "markdownDescription": "Denies the video_info command without any pre-configured scope."
         },
         {
-          "description": "Allows every Video Downloader plugin command.\n#### This default permission set includes:\n\n- `allow-video-info`\n- `allow-video-download-start`\n- `allow-video-download-cancel`\n- `allow-video-download-read`\n- `allow-video-download-cleanup`",
+          "description": "Allows every Media Toolbox plugin command (Capture, Images, Videos).\n#### This default permission set includes:\n\n- `allow-video-info`\n- `allow-video-download-start`\n- `allow-video-download-cancel`\n- `allow-video-download-read`\n- `allow-video-download-cleanup`\n- `allow-media-image-probe`\n- `allow-media-image-read-bytes`\n- `allow-media-image-process-start`\n- `allow-media-image-process-cancel`\n- `allow-media-image-process-cleanup`\n- `allow-media-video-probe`\n- `allow-media-video-process-start`\n- `allow-media-video-process-cancel`\n- `allow-media-video-process-cleanup`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Allows every Video Downloader plugin command.\n#### This default permission set includes:\n\n- `allow-video-info`\n- `allow-video-download-start`\n- `allow-video-download-cancel`\n- `allow-video-download-read`\n- `allow-video-download-cleanup`"
+          "markdownDescription": "Allows every Media Toolbox plugin command (Capture, Images, Videos).\n#### This default permission set includes:\n\n- `allow-video-info`\n- `allow-video-download-start`\n- `allow-video-download-cancel`\n- `allow-video-download-read`\n- `allow-video-download-cleanup`\n- `allow-media-image-probe`\n- `allow-media-image-read-bytes`\n- `allow-media-image-process-start`\n- `allow-media-image-process-cancel`\n- `allow-media-image-process-cleanup`\n- `allow-media-video-probe`\n- `allow-media-video-process-start`\n- `allow-media-video-process-cancel`\n- `allow-media-video-process-cleanup`"
         }
       ]
     }

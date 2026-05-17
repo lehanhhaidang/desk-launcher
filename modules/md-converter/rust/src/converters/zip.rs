@@ -14,8 +14,8 @@ use super::ConvertError;
 
 pub fn convert_zip(path: &Path) -> Result<String, ConvertError> {
     let file = std::fs::File::open(path)?;
-    let mut archive = zip::ZipArchive::new(file)
-        .map_err(|e| ConvertError::Parse(format!("open zip: {e}")))?;
+    let mut archive =
+        zip::ZipArchive::new(file).map_err(|e| ConvertError::Parse(format!("open zip: {e}")))?;
 
     let mut out = String::new();
     out.push_str(&format!(

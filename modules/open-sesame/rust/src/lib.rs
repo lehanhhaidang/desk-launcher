@@ -71,8 +71,7 @@ pub fn init() -> TauriPlugin<Wry> {
         .setup(|app, _api| {
             log::info!("open-sesame plugin: initializing");
 
-            let db_path = paths::db_path()
-                .map_err(|e| format!("open-sesame: db path: {e}"))?;
+            let db_path = paths::db_path().map_err(|e| format!("open-sesame: db path: {e}"))?;
             log::info!("open-sesame db at {}", db_path.display());
 
             let conn = rusqlite::Connection::open(&db_path)

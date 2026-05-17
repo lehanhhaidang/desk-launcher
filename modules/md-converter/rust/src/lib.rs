@@ -65,9 +65,7 @@ fn convert_file(path: String) -> Result<ConvertResult, String> {
     })?;
 
     let markdown = converters::convert_path(p, &format).map_err(|e| e.to_string())?;
-    let title = p
-        .file_stem()
-        .map(|s| s.to_string_lossy().into_owned());
+    let title = p.file_stem().map(|s| s.to_string_lossy().into_owned());
 
     Ok(ConvertResult {
         markdown,

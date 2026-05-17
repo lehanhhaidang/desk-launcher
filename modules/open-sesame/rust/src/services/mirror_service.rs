@@ -54,7 +54,14 @@ pub fn copy_to_staging_with_excludes(
     let mut copied = 0;
     let mut skipped = 0;
 
-    copy_dir_recursive(source, staging, &mut copied, &mut skipped, exclude_dirs, true)?;
+    copy_dir_recursive(
+        source,
+        staging,
+        &mut copied,
+        &mut skipped,
+        exclude_dirs,
+        true,
+    )?;
 
     // Xoá files trong staging mà không còn ở source
     let deleted = remove_orphaned(source, staging, exclude_dirs, true)?;
@@ -309,6 +316,9 @@ mod tests {
         let excludes: HashSet<String> = ["wasabi".to_string()].into();
         copy_to_staging_with_excludes(&source, &dest, &excludes).unwrap();
 
-        assert!(dest.join("wasabi/notes.md").exists(), "wasabi should not be deleted");
+        assert!(
+            dest.join("wasabi/notes.md").exists(),
+            "wasabi should not be deleted"
+        );
     }
 }

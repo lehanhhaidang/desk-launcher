@@ -1,12 +1,24 @@
-# Default permission set for the video-downloader plugin.
+# Default permission set for the video-downloader (Media Toolbox) plugin.
 "$schema" = "schemas/schema.json"
 
 [default]
-description = "Allows every Video Downloader plugin command."
+description = "Allows every Media Toolbox plugin command (Capture, Images, Videos)."
 permissions = [
+    # Capture
     "allow-video-info",
     "allow-video-download-start",
     "allow-video-download-cancel",
     "allow-video-download-read",
     "allow-video-download-cleanup",
+    # Images
+    "allow-media-image-probe",
+    "allow-media-image-read-bytes",
+    "allow-media-image-process-start",
+    "allow-media-image-process-cancel",
+    "allow-media-image-process-cleanup",
+    # Videos
+    "allow-media-video-probe",
+    "allow-media-video-process-start",
+    "allow-media-video-process-cancel",
+    "allow-media-video-process-cleanup",
 ]

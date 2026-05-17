@@ -14,11 +14,12 @@ The backend is written in Rust. The frontend uses React 19, TypeScript, Vite mul
 | **Open Sesame** | Project documentation workspace with workspaces, doc sets, file tree browsing, Markdown preview, GitHub device-flow OAuth, and git sync. | `rusqlite` + `git2` + `oauth2` + `keyring` |
 | **Virtual Comtor** | Real-time Japanese/Vietnamese meeting interpreter with Soniox + OpenAI, transcripts, summaries, audio storage, and `.xlsx` export. | `rusqlite` + `keyring` |
 | **Video Downloader** | Downloads video/audio from YouTube, TikTok, Bilibili, and other supported sites through bundled `yt-dlp.exe` and `ffmpeg.exe`. | Tauri sidecars |
+| **Markdown Converter** | Converts Office, PDF, HTML, EPUB and more to Markdown — Rust port of Microsoft MarkItDown. | `calamine` + `zip` + `htmd` + `pdf-extract` |
 
 Each module stores its own SQLite database and settings under:
 
 ```text
-%APPDATA%\com.lehanhhaidang.desklauncher\modules\<id>\
+%APPDATA%\io.desklauncher\modules\<id>\
 ```
 
 ## Repository Layout
@@ -55,6 +56,26 @@ desk-launcher/
 
 ## Architecture
 
+```
+                 desk-launcher.exe (one Tauri process)
+                              |
+              Rust host: desk-launcher crate
+              - registers ALL module plugins at startup
+              - exposes open_module / close_module commands
+                              |
+        +---------+------------+-----------+
+        v         v            v           v
+   Launcher    Port         Open       Video
+   window     Killer       Sesame    Downloader
+   (dash)     window        window     window
+       |         |            |           |
+   launcher  port-killer  open-sesame  video-downloader
+   Vite       Vite          Vite         Vite
+   entry      entry         entry        entry
+```
+
+**One process, many WebView windows.** Each window has its own JS bundle and scoped Tauri capabilities.
+
 ### Multi-window launcher
 
 The dashboard renders module metadata from `apps/launcher/src/modules/registry.ts`. When a user opens a module, the frontend calls the Rust `open_module(id)` command. The launcher then creates a new `WebviewWindow` using the Rust-side mirror in `apps/launcher/src-tauri/src/module_registry.rs`.
@@ -88,8 +109,15 @@ Each module window has a capability file in `apps/launcher/src-tauri/capabilitie
 
 The launcher Vite config wires shared packages and module-local aliases:
 
-- `@desk-launcher/ui` and `@desk-launcher/tauri-bridge` for shared packages.
-- `@os/`, `@cmt/`, and `@vid/` for module-specific source imports.
+| Alias | Points to |
+| --- | --- |
+| `@` | `apps/launcher/src` (launcher only) |
+| `@modules` | `modules/` (used by HTML shims) |
+| `@desk-launcher/ui` | `packages/ui/src` |
+| `@desk-launcher/tauri-bridge` | `packages/tauri-bridge/src` |
+| `@pk`, `@os`, `@cmt`, `@vid`, `@mdc` | Each module's own `frontend/src` |
+
+The same paths are mirrored in `apps/launcher/tsconfig.json`.
 
 ### Tailwind CSS v4 scanning
 
@@ -99,6 +127,17 @@ The Vite root is `apps/launcher/`, while module source code lives outside that d
 @source ".";
 @source "../../../../packages/ui/src";
 ```
+
+### Conventions
+
+- **Module ID**: lowercase kebab-case (`port-killer`). Used as the Rust plugin name, Tauri window label, data dir name, and Vite entry key. **Same string, everywhere.**
+- **Rust commands**: `snake_case`, exposed via `#[tauri::command]`. Invoked from TS as `plugin:<id>|<snake_case>`.
+- **Command params**: camelCase in JS, snake_case in Rust — serde converts automatically.
+- **Errors**: simple modules return `Result<T, String>`. Modules with richer errors define a custom `AppError` enum with `thiserror` + a `Serialize` impl that emits the display string (see `modules/open-sesame/rust/src/error.rs`).
+- **Managed state**: SQLite connections, task handles, etc. go into a `struct AppState` registered via `app.manage(...)`. Commands take `state: State<AppState>`.
+- **Module root component**: default-exported from `<ModuleName>.tsx`, mounted by `apps/launcher/modules-pages/<id>/main.tsx`.
+- **Two registries stay in sync manually**: `apps/launcher/src/modules/registry.ts` (TS, dashboard metadata) and `apps/launcher/src-tauri/src/module_registry.rs` (Rust, window specs).
+- **Modules never talk to each other.** Shared code goes in `packages/` (frontend) or `crates/` (Rust).
 
 ## Requirements
 
@@ -169,14 +208,17 @@ $env:SKIP_SIDECARS = "1"
 
 ## Adding a Module
 
-1. Create a Rust plugin under `modules/<id>/rust/` with `Cargo.toml`, `build.rs`, `permissions/default.toml`, and `src/lib.rs`.
+See **[ADDING-A-MODULE.md](ADDING-A-MODULE.md)** for the full 14-step walkthrough with example code.
+
+High-level checklist:
+
+1. Create the Rust plugin under `modules/<id>/rust/` (`Cargo.toml`, `build.rs`, `permissions/default.toml`, `src/lib.rs`).
 2. Create the React UI under `modules/<id>/frontend/src/`.
-3. Add an HTML shim under `apps/launcher/modules-pages/<id>/index.html` and `main.tsx`.
-4. Add a window capability file under `apps/launcher/src-tauri/capabilities/<id>.json`.
-5. Register the Rust crate in `Cargo.toml`, `apps/launcher/src-tauri/Cargo.toml`, `apps/launcher/src-tauri/src/lib.rs`, and `apps/launcher/src-tauri/src/module_registry.rs`.
+3. Add the HTML shim under `apps/launcher/modules-pages/<id>/`.
+4. Add a capability file under `apps/launcher/src-tauri/capabilities/<id>.json`.
+5. Register the crate in root `Cargo.toml`, `apps/launcher/src-tauri/Cargo.toml`, `lib.rs`, and `module_registry.rs`.
 6. Register the frontend metadata in `apps/launcher/src/modules/registry.ts`.
-7. Add the Vite multi-page entry and aliases in `apps/launcher/vite.config.ts`.
-8. Add TypeScript path aliases in `apps/launcher/tsconfig.json` if the module needs one.
+7. Add the Vite multi-page entry and (optional) alias in `apps/launcher/vite.config.ts` + `tsconfig.json`.
 
 ## Module Origins
 

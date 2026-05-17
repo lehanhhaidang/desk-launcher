@@ -8,12 +8,12 @@
 //!
 //! This helper resolves to the SAME directory that Tauri's
 //! `app.path().app_data_dir()` would return for the launcher's bundle
-//! identifier (`com.lehanhhaidang.desklauncher`). On Windows that's
-//! `%APPDATA%\com.lehanhhaidang.desklauncher\`.
+//! identifier (`io.desklauncher`). On Windows that's
+//! `%APPDATA%\io.desklauncher\`.
 //!
 //! Layout:
 //! ```text
-//! %APPDATA%\com.lehanhhaidang.desklauncher\
+//! %APPDATA%\io.desklauncher\
 //! ├── modules\
 //! │   ├── comtor\        # vcomtor.db, audio\, settings.json
 //! │   ├── open-sesame\   # data.db
@@ -25,7 +25,7 @@
 use std::path::PathBuf;
 
 /// The launcher's bundle identifier — KEEP IN SYNC with tauri.conf.json.
-pub const LAUNCHER_IDENTIFIER: &str = "com.lehanhhaidang.desklauncher";
+pub const LAUNCHER_IDENTIFIER: &str = "io.desklauncher";
 
 #[derive(Debug, thiserror::Error)]
 pub enum PathError {
@@ -37,9 +37,9 @@ pub enum PathError {
 
 /// Root app data dir, matching Tauri's `app_data_dir()` resolution.
 ///
-/// Windows: `%APPDATA%\com.lehanhhaidang.desklauncher\`
-/// Linux:   `~/.local/share/com.lehanhhaidang.desklauncher/`
-/// macOS:   `~/Library/Application Support/com.lehanhhaidang.desklauncher/`
+/// Windows: `%APPDATA%\io.desklauncher\`
+/// Linux:   `~/.local/share/io.desklauncher/`
+/// macOS:   `~/Library/Application Support/io.desklauncher/`
 pub fn launcher_data_dir() -> Result<PathBuf, PathError> {
     let base = dirs::data_dir().ok_or(PathError::NoDataDir)?;
     let path = base.join(LAUNCHER_IDENTIFIER);

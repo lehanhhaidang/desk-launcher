@@ -139,12 +139,7 @@ pub fn update_sync_state(
     Ok(())
 }
 
-pub fn update_remote(
-    conn: &Connection,
-    id: &str,
-    remote_url: &str,
-    branch: &str,
-) -> AppResult<()> {
+pub fn update_remote(conn: &Connection, id: &str, remote_url: &str, branch: &str) -> AppResult<()> {
     conn.execute(
         "UPDATE doc_sets SET remote_url = ?1, branch = ?2, status = 'idle', updated_at = ?3 WHERE id = ?4",
         params![remote_url, branch, chrono::Utc::now(), id],

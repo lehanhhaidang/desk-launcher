@@ -126,7 +126,9 @@ impl SyncProvider for GitProvider {
         // Fetch remote refs to check if branch exists
         let mut fetch_opts = FetchOptions::new();
         fetch_opts.remote_callbacks(self.callbacks());
-        remote.fetch(&[&self.branch], Some(&mut fetch_opts), None).ok();
+        remote
+            .fetch(&[&self.branch], Some(&mut fetch_opts), None)
+            .ok();
 
         // Check if remote branch already has commits
         let remote_ref = format!("refs/remotes/origin/{}", self.branch);
@@ -165,7 +167,10 @@ impl SyncProvider for GitProvider {
         let mut push_opts = PushOptions::new();
         push_opts.remote_callbacks(self.callbacks());
         remote.push(
-            &[&format!("+refs/heads/{}:refs/heads/{}", self.branch, self.branch)],
+            &[&format!(
+                "+refs/heads/{}:refs/heads/{}",
+                self.branch, self.branch
+            )],
             Some(&mut push_opts),
         )?;
 
@@ -394,7 +399,11 @@ mod tests {
         fs::create_dir_all(tmp.path().join(".open-sesame")).unwrap();
         fs::write(tmp.path().join(".open-sesame/doc-set.json"), "{}").unwrap();
         fs::write(tmp.path().join(".open-sesame/device.local.json"), "{}").unwrap();
-        fs::write(tmp.path().join(".gitignore"), ".open-sesame/device.local.json\n").unwrap();
+        fs::write(
+            tmp.path().join(".gitignore"),
+            ".open-sesame/device.local.json\n",
+        )
+        .unwrap();
 
         let provider = GitProvider::new("fake".into(), "user".into(), "url".into(), "main".into());
         provider.commit_index(&repo, Some("test")).unwrap();
@@ -403,8 +412,12 @@ mod tests {
         let tree = head.tree().unwrap();
         assert!(tree.get_path(Path::new("README.md")).is_ok());
         assert!(tree.get_path(Path::new(".gitignore")).is_err());
-        assert!(tree.get_path(Path::new(".open-sesame/doc-set.json")).is_err());
-        assert!(tree.get_path(Path::new(".open-sesame/device.local.json")).is_err());
+        assert!(tree
+            .get_path(Path::new(".open-sesame/doc-set.json"))
+            .is_err());
+        assert!(tree
+            .get_path(Path::new(".open-sesame/device.local.json"))
+            .is_err());
         assert!(!tmp.path().join(".gitignore").exists());
         assert!(fs::read_to_string(tmp.path().join(".git/info/exclude"))
             .unwrap()

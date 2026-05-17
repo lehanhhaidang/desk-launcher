@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-media-video-process-cancel"
+description = "Enables the media_video_process_cancel command without any pre-configured scope."
+commands.allow = ["media_video_process_cancel"]
+
+[[permission]]
+identifier = "deny-media-video-process-cancel"
+description = "Denies the media_video_process_cancel command without any pre-configured scope."
+commands.deny = ["media_video_process_cancel"]
