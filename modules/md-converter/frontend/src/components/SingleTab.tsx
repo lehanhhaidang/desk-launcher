@@ -95,12 +95,17 @@ export function SingleTab({ supported }: Props) {
   const handleSave = async () => {
     if (!result) return
     const defaultName = (result.title || 'output') + '.md'
-    const target = await saveDialog({
-      defaultPath: defaultName,
-      filters: [{ name: 'Markdown', extensions: ['md'] }],
-    })
-    if (target) {
-      await writeTextFile(target, result.markdown)
+    try {
+      setError(null)
+      const target = await saveDialog({
+        defaultPath: defaultName,
+        filters: [{ name: 'Markdown', extensions: ['md'] }],
+      })
+      if (target) {
+        await writeTextFile(target, result.markdown)
+      }
+    } catch (e) {
+      setError(`Save failed: ${String(e)}`)
     }
   }
 
