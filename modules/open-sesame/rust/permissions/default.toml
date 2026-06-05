@@ -30,6 +30,8 @@ permissions = [
     "allow-doc-set-refresh-mirror",
     "allow-doc-set-restore-local-from-mirror",
     "allow-doc-set-keep-both-local-changes",
+    "allow-doc-set-push-from-local",
+    "allow-doc-set-pull-from-repo",
     "allow-doc-set-watch-start",
     "allow-doc-set-watch-stop",
     "allow-config-export",

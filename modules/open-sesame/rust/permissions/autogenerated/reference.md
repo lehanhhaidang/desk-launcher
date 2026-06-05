@@ -30,6 +30,8 @@ Allows every Open Sesame plugin command.
 - `allow-doc-set-refresh-mirror`
 - `allow-doc-set-restore-local-from-mirror`
 - `allow-doc-set-keep-both-local-changes`
+- `allow-doc-set-push-from-local`
+- `allow-doc-set-pull-from-repo`
 - `allow-doc-set-watch-start`
 - `allow-doc-set-watch-stop`
 - `allow-config-export`
@@ -495,6 +497,58 @@ Enables the doc_set_move command without any pre-configured scope.
 <td>
 
 Denies the doc_set_move command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`open-sesame:allow-doc-set-pull-from-repo`
+
+</td>
+<td>
+
+Enables the doc_set_pull_from_repo command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`open-sesame:deny-doc-set-pull-from-repo`
+
+</td>
+<td>
+
+Denies the doc_set_pull_from_repo command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`open-sesame:allow-doc-set-push-from-local`
+
+</td>
+<td>
+
+Enables the doc_set_push_from_local command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`open-sesame:deny-doc-set-push-from-local`
+
+</td>
+<td>
+
+Denies the doc_set_push_from_local command without any pre-configured scope.
 
 </td>
 </tr>

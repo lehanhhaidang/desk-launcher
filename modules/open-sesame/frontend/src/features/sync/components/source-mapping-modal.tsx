@@ -8,16 +8,14 @@ import type {
     AddSourceInput,
     DocSet,
     MappingPreflight,
-    MappingPreflightAction,
     MappingOverview,
     SetSourceMappingInput,
     SourceMappingView,
-    SourceSyncDirection,
 } from '@os/types/models';
 import { MappingPreflightDialog } from './MappingPreflightDialog';
 import { MappingTree } from './MappingTree';
 import { SelectedMappingPanel } from './SelectedMappingPanel';
-import type { FileNode, MappingPreflightRequest } from './source-mapping-types';
+import type { FileNode, MappingAction, MappingPreflightRequest } from './source-mapping-types';
 import {
     collectNodes,
     findNode,
@@ -233,11 +231,7 @@ export function SourceMappingPanel({ docSet, onClose, onDocSetUpdated }: SourceM
         });
     };
 
-    const runPreflight = async (node: FileNode, localPath: string, direction: SourceSyncDirection) => {
-        if (direction === 'mirror_only') {
-            await confirmSelectedMapping(node, localPath, direction, 'map_only');
-            return;
-        }
+    const runPreflight = async (node: FileNode, localPath: string, action: MappingAction) => {
         setLoading(true);
         setError('');
         try {
@@ -248,10 +242,13 @@ export function SourceMappingPanel({ docSet, onClose, onDocSetUpdated }: SourceM
                     local_path: localPath,
                 },
             });
-            if (preflight.status === 'empty') {
-                await confirmSelectedMapping(node, localPath, direction, 'restore_mirror');
+            const hasDifferences =
+                preflight.conflicts > 0 || preflight.only_local > 0 || preflight.only_mirror > 0;
+            if (!hasDifferences) {
+                // Nothing to overwrite or add → apply directly.
+                await confirmSelectedMapping(node, localPath, action);
             } else {
-                setPreflightRequest({ node, localPath, direction, preflight });
+                setPreflightRequest({ node, localPath, action, preflight });
             }
         } catch (err) {
             setError(err instanceof Error ? err.message : String(err));
@@ -263,8 +260,7 @@ export function SourceMappingPanel({ docSet, onClose, onDocSetUpdated }: SourceM
     const confirmSelectedMapping = async (
         node: FileNode,
         localPath: string,
-        direction: SourceSyncDirection,
-        action: MappingPreflightAction = 'map_only',
+        action: MappingAction,
     ) => {
         const nodes = collectNodes(node);
         const basePath = node.path || '.';
@@ -276,10 +272,8 @@ export function SourceMappingPanel({ docSet, onClose, onDocSetUpdated }: SourceM
                 const relative = relativeMirrorPath(basePath, current.path || '.');
                 await updateMapping(source, {
                     enabled: true,
-                    direction,
-                    local_path: direction === 'mirror_only'
-                        ? undefined
-                        : current === node ? localPath : joinLocalPath(localPath, relative),
+                    direction: 'two_way',
+                    local_path: current === node ? localPath : joinLocalPath(localPath, relative),
                 });
             }
             setPendingCheckedPaths((current) => {
@@ -287,19 +281,10 @@ export function SourceMappingPanel({ docSet, onClose, onDocSetUpdated }: SourceM
                 nodes.forEach((currentNode) => next.delete(currentNode.path || '.'));
                 return next;
             });
-            if (action === 'restore_mirror') {
-                await invoke<number>('doc_set_restore_local_from_mirror', { docSetId: docSet.id });
-            } else if (action === 'import_local') {
-                await invoke<number>('doc_set_refresh_mirror', { docSetId: docSet.id });
-            } else if (action === 'keep_both') {
-                await invoke<number>('doc_set_keep_both_local_changes', {
-                    input: {
-                        doc_set_id: docSet.id,
-                        mirror_path: basePath,
-                        local_path: localPath,
-                    },
-                });
-                await invoke<number>('doc_set_restore_local_from_mirror', { docSetId: docSet.id });
+            if (action === 'push') {
+                await invoke<number>('doc_set_push_from_local', { docSetId: docSet.id });
+            } else {
+                await invoke<number>('doc_set_pull_from_repo', { docSetId: docSet.id });
             }
             setPreflightRequest(null);
             await load();
@@ -436,7 +421,7 @@ export function SourceMappingPanel({ docSet, onClose, onDocSetUpdated }: SourceM
                                         ...current,
                                         [selectedNode.path || '.']: path,
                                     }))}
-                                    onConfirm={(localPath, direction) => runPreflight(selectedNode, localPath, direction)}
+                                    onConfirm={(localPath, action) => runPreflight(selectedNode, localPath, action)}
                                     onUpdate={async (patch) => {
                                         setLoading(true);
                                         setError('');
@@ -518,11 +503,10 @@ export function SourceMappingPanel({ docSet, onClose, onDocSetUpdated }: SourceM
                 request={preflightRequest}
                 disabled={loading}
                 onClose={() => setPreflightRequest(null)}
-                onConfirm={(action) => confirmSelectedMapping(
+                onConfirm={() => confirmSelectedMapping(
                     preflightRequest.node,
                     preflightRequest.localPath,
-                    preflightRequest.direction,
-                    action,
+                    preflightRequest.action,
                 )}
             />
         )}

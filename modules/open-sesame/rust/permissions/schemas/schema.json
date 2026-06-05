@@ -499,6 +499,30 @@
           "markdownDescription": "Denies the doc_set_move command without any pre-configured scope."
         },
         {
+          "description": "Enables the doc_set_pull_from_repo command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-doc-set-pull-from-repo",
+          "markdownDescription": "Enables the doc_set_pull_from_repo command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the doc_set_pull_from_repo command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-doc-set-pull-from-repo",
+          "markdownDescription": "Denies the doc_set_pull_from_repo command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the doc_set_push_from_local command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-doc-set-push-from-local",
+          "markdownDescription": "Enables the doc_set_push_from_local command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the doc_set_push_from_local command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-doc-set-push-from-local",
+          "markdownDescription": "Denies the doc_set_push_from_local command without any pre-configured scope."
+        },
+        {
           "description": "Enables the doc_set_refresh_mirror command without any pre-configured scope.",
           "type": "string",
           "const": "allow-doc-set-refresh-mirror",
@@ -811,10 +835,10 @@
           "markdownDescription": "Denies the write_text_file command without any pre-configured scope."
         },
         {
-          "description": "Allows every Open Sesame plugin command.\n#### This default permission set includes:\n\n- `allow-auth-github-start`\n- `allow-auth-github-poll`\n- `allow-auth-list-accounts`\n- `allow-auth-logout`\n- `allow-workspace-list`\n- `allow-workspace-create`\n- `allow-workspace-update`\n- `allow-workspace-delete`\n- `allow-doc-set-detect-strategy`\n- `allow-doc-set-create`\n- `allow-doc-set-list`\n- `allow-doc-set-list-all`\n- `allow-doc-set-delete`\n- `allow-doc-set-move`\n- `allow-doc-set-set-auto-sync`\n- `allow-doc-set-setup-github-remote`\n- `allow-doc-set-import-from-github`\n- `allow-doc-set-sources`\n- `allow-doc-set-mapping-preflight`\n- `allow-doc-set-set-source-mapping`\n- `allow-doc-set-add-source`\n- `allow-doc-set-add-mirror-source`\n- `allow-doc-set-remove-new-mirror-path`\n- `allow-doc-set-refresh-mirror`\n- `allow-doc-set-restore-local-from-mirror`\n- `allow-doc-set-keep-both-local-changes`\n- `allow-doc-set-watch-start`\n- `allow-doc-set-watch-stop`\n- `allow-config-export`\n- `allow-config-import`\n- `allow-sync-up`\n- `allow-sync-down`\n- `allow-sync-force-push`\n- `allow-sync-force-pull`\n- `allow-sync-status`\n- `allow-sync-logs`\n- `allow-file-tree`\n- `allow-file-content`\n- `allow-file-search`\n- `allow-file-toggle-bookmark`\n- `allow-file-list-bookmarks`\n- `allow-write-text-file`\n- `allow-read-text-file`",
+          "description": "Allows every Open Sesame plugin command.\n#### This default permission set includes:\n\n- `allow-auth-github-start`\n- `allow-auth-github-poll`\n- `allow-auth-list-accounts`\n- `allow-auth-logout`\n- `allow-workspace-list`\n- `allow-workspace-create`\n- `allow-workspace-update`\n- `allow-workspace-delete`\n- `allow-doc-set-detect-strategy`\n- `allow-doc-set-create`\n- `allow-doc-set-list`\n- `allow-doc-set-list-all`\n- `allow-doc-set-delete`\n- `allow-doc-set-move`\n- `allow-doc-set-set-auto-sync`\n- `allow-doc-set-setup-github-remote`\n- `allow-doc-set-import-from-github`\n- `allow-doc-set-sources`\n- `allow-doc-set-mapping-preflight`\n- `allow-doc-set-set-source-mapping`\n- `allow-doc-set-add-source`\n- `allow-doc-set-add-mirror-source`\n- `allow-doc-set-remove-new-mirror-path`\n- `allow-doc-set-refresh-mirror`\n- `allow-doc-set-restore-local-from-mirror`\n- `allow-doc-set-keep-both-local-changes`\n- `allow-doc-set-push-from-local`\n- `allow-doc-set-pull-from-repo`\n- `allow-doc-set-watch-start`\n- `allow-doc-set-watch-stop`\n- `allow-config-export`\n- `allow-config-import`\n- `allow-sync-up`\n- `allow-sync-down`\n- `allow-sync-force-push`\n- `allow-sync-force-pull`\n- `allow-sync-status`\n- `allow-sync-logs`\n- `allow-file-tree`\n- `allow-file-content`\n- `allow-file-search`\n- `allow-file-toggle-bookmark`\n- `allow-file-list-bookmarks`\n- `allow-write-text-file`\n- `allow-read-text-file`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Allows every Open Sesame plugin command.\n#### This default permission set includes:\n\n- `allow-auth-github-start`\n- `allow-auth-github-poll`\n- `allow-auth-list-accounts`\n- `allow-auth-logout`\n- `allow-workspace-list`\n- `allow-workspace-create`\n- `allow-workspace-update`\n- `allow-workspace-delete`\n- `allow-doc-set-detect-strategy`\n- `allow-doc-set-create`\n- `allow-doc-set-list`\n- `allow-doc-set-list-all`\n- `allow-doc-set-delete`\n- `allow-doc-set-move`\n- `allow-doc-set-set-auto-sync`\n- `allow-doc-set-setup-github-remote`\n- `allow-doc-set-import-from-github`\n- `allow-doc-set-sources`\n- `allow-doc-set-mapping-preflight`\n- `allow-doc-set-set-source-mapping`\n- `allow-doc-set-add-source`\n- `allow-doc-set-add-mirror-source`\n- `allow-doc-set-remove-new-mirror-path`\n- `allow-doc-set-refresh-mirror`\n- `allow-doc-set-restore-local-from-mirror`\n- `allow-doc-set-keep-both-local-changes`\n- `allow-doc-set-watch-start`\n- `allow-doc-set-watch-stop`\n- `allow-config-export`\n- `allow-config-import`\n- `allow-sync-up`\n- `allow-sync-down`\n- `allow-sync-force-push`\n- `allow-sync-force-pull`\n- `allow-sync-status`\n- `allow-sync-logs`\n- `allow-file-tree`\n- `allow-file-content`\n- `allow-file-search`\n- `allow-file-toggle-bookmark`\n- `allow-file-list-bookmarks`\n- `allow-write-text-file`\n- `allow-read-text-file`"
+          "markdownDescription": "Allows every Open Sesame plugin command.\n#### This default permission set includes:\n\n- `allow-auth-github-start`\n- `allow-auth-github-poll`\n- `allow-auth-list-accounts`\n- `allow-auth-logout`\n- `allow-workspace-list`\n- `allow-workspace-create`\n- `allow-workspace-update`\n- `allow-workspace-delete`\n- `allow-doc-set-detect-strategy`\n- `allow-doc-set-create`\n- `allow-doc-set-list`\n- `allow-doc-set-list-all`\n- `allow-doc-set-delete`\n- `allow-doc-set-move`\n- `allow-doc-set-set-auto-sync`\n- `allow-doc-set-setup-github-remote`\n- `allow-doc-set-import-from-github`\n- `allow-doc-set-sources`\n- `allow-doc-set-mapping-preflight`\n- `allow-doc-set-set-source-mapping`\n- `allow-doc-set-add-source`\n- `allow-doc-set-add-mirror-source`\n- `allow-doc-set-remove-new-mirror-path`\n- `allow-doc-set-refresh-mirror`\n- `allow-doc-set-restore-local-from-mirror`\n- `allow-doc-set-keep-both-local-changes`\n- `allow-doc-set-push-from-local`\n- `allow-doc-set-pull-from-repo`\n- `allow-doc-set-watch-start`\n- `allow-doc-set-watch-stop`\n- `allow-config-export`\n- `allow-config-import`\n- `allow-sync-up`\n- `allow-sync-down`\n- `allow-sync-force-push`\n- `allow-sync-force-pull`\n- `allow-sync-status`\n- `allow-sync-logs`\n- `allow-file-tree`\n- `allow-file-content`\n- `allow-file-search`\n- `allow-file-toggle-bookmark`\n- `allow-file-list-bookmarks`\n- `allow-write-text-file`\n- `allow-read-text-file`"
         }
       ]
     }
