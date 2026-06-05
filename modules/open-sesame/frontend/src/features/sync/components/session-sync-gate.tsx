@@ -140,28 +140,28 @@ export function SessionSyncGate({ children }: { children: ReactNode }) {
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <ArrowDownToLine className="h-5 w-5 text-[var(--primary)]" />
-                            Pull bản mới nhất
+                            Pull latest
                         </DialogTitle>
                         <DialogDescription>
-                            {pullStage === 'ask' && 'Kéo các thay đổi mới nhất từ repo về trước khi bắt đầu làm việc?'}
-                            {pullStage === 'running' && 'Đang kéo về…'}
-                            {pullStage === 'done' && 'Đã đồng bộ về máy.'}
+                            {pullStage === 'ask' && 'Pull the latest changes from the repo before you start working?'}
+                            {pullStage === 'running' && 'Pulling…'}
+                            {pullStage === 'done' && 'Synced to this device.'}
                         </DialogDescription>
                     </DialogHeader>
 
-                    {pullStage === 'running' && <ProgressRow label="Đang kéo" progress={pullProgress} />}
+                    {pullStage === 'running' && <ProgressRow label="Pulling" progress={pullProgress} />}
                     {pullStage === 'done' && pullOutcome && <OutcomeRow outcome={pullOutcome} />}
 
                     <div className="mt-2 flex flex-wrap justify-end gap-2">
                         {pullStage === 'ask' && (
                             <>
                                 <Button variant="ghost" onClick={() => setPullOpen(false)}>
-                                    Bỏ qua
+                                    Skip
                                 </Button>
                                 <Button onClick={() => void runPull()}>Pull</Button>
                             </>
                         )}
-                        {pullStage === 'done' && <Button onClick={() => setPullOpen(false)}>Tiếp tục</Button>}
+                        {pullStage === 'done' && <Button onClick={() => setPullOpen(false)}>Continue</Button>}
                     </div>
                 </DialogContent>
             </Dialog>
@@ -184,20 +184,20 @@ export function SessionSyncGate({ children }: { children: ReactNode }) {
                                 <ArrowUpFromLine className="h-5 w-5 text-[var(--primary)]" />
                             )}
                             {closeStage === 'success'
-                                ? 'Đã đẩy thành công'
+                                ? 'Pushed successfully'
                                 : closeStage === 'fail'
-                                  ? 'Đẩy thất bại'
-                                  : 'Đóng Open Sesame'}
+                                  ? 'Push failed'
+                                  : 'Close Open Sesame'}
                         </DialogTitle>
                         <DialogDescription>
-                            {closeStage === 'confirm' && 'Đẩy các thay đổi lên repo trước khi đóng?'}
-                            {closeStage === 'pushing' && 'Đang đẩy thay đổi lên repo…'}
-                            {closeStage === 'success' && `Cửa sổ sẽ đóng sau ${countdown}s.`}
-                            {closeStage === 'fail' && 'Một số doc-set chưa đẩy được — cửa sổ chưa đóng.'}
+                            {closeStage === 'confirm' && 'Push your changes to the repo before closing?'}
+                            {closeStage === 'pushing' && 'Pushing changes to the repo…'}
+                            {closeStage === 'success' && `Closing in ${countdown}s.`}
+                            {closeStage === 'fail' && 'Some doc-sets could not be pushed — the window stays open.'}
                         </DialogDescription>
                     </DialogHeader>
 
-                    {closeStage === 'pushing' && <ProgressRow label="Đang đẩy" progress={pushProgress} />}
+                    {closeStage === 'pushing' && <ProgressRow label="Pushing" progress={pushProgress} />}
                     {(closeStage === 'success' || closeStage === 'fail') && pushOutcome && (
                         <OutcomeRow outcome={pushOutcome} />
                     )}
@@ -206,26 +206,26 @@ export function SessionSyncGate({ children }: { children: ReactNode }) {
                         {closeStage === 'confirm' && (
                             <>
                                 <Button variant="ghost" onClick={() => setCloseStage(null)}>
-                                    Hủy
+                                    Cancel
                                 </Button>
                                 <Button variant="outline" onClick={() => void destroyWindow()}>
-                                    Đóng không push
+                                    Close without pushing
                                 </Button>
-                                <Button onClick={() => void runPush()}>Push &amp; đóng</Button>
+                                <Button onClick={() => void runPush()}>Push &amp; close</Button>
                             </>
                         )}
                         {closeStage === 'success' && (
-                            <Button onClick={() => void destroyWindow()}>Đóng ngay</Button>
+                            <Button onClick={() => void destroyWindow()}>Close now</Button>
                         )}
                         {closeStage === 'fail' && (
                             <>
                                 <Button variant="ghost" onClick={() => setCloseStage(null)}>
-                                    Ở lại
+                                    Stay
                                 </Button>
                                 <Button variant="outline" onClick={() => void destroyWindow()}>
-                                    Đóng không push
+                                    Close without pushing
                                 </Button>
-                                <Button onClick={() => void runPush()}>Thử lại</Button>
+                                <Button onClick={() => void runPush()}>Retry</Button>
                             </>
                         )}
                     </div>
@@ -256,7 +256,7 @@ function OutcomeRow({ outcome }: { outcome: SessionSyncOutcome }) {
         <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2 text-[var(--on-surface)]">
                 <CheckCircle2 className="h-4 w-4 text-emerald-300" />
-                {outcome.succeeded}/{outcome.total} doc-set · {outcome.filesCount} thay đổi
+                {outcome.succeeded}/{outcome.total} doc-set · {outcome.filesCount} changes
             </div>
             {outcome.failed.length > 0 && (
                 <ul className="space-y-1 rounded-lg border border-[color-mix(in_srgb,var(--error)_30%,transparent)] bg-[color-mix(in_srgb,var(--error)_8%,transparent)] px-3 py-2 text-[var(--error)]">
