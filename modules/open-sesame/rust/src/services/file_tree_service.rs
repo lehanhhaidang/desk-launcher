@@ -78,10 +78,19 @@ fn build_node(
             let mut entries: Vec<FileNode> = fs::read_dir(current)?
                 .filter_map(|e| e.ok())
                 .filter(|e| !should_ignore(&e.file_name().to_string_lossy()))
-                .filter_map(|e| build_node(root, &e.path(), depth + 1, max_depth, git_statuses).ok())
+                .filter_map(|e| {
+                    build_node(root, &e.path(), depth + 1, max_depth, git_statuses).ok()
+                })
                 .collect();
 
-            add_deleted_children(root, &relative, depth, max_depth, git_statuses, &mut entries);
+            add_deleted_children(
+                root,
+                &relative,
+                depth,
+                max_depth,
+                git_statuses,
+                &mut entries,
+            );
 
             entries.sort_by(|a, b| match (a.is_dir, b.is_dir) {
                 (true, false) => std::cmp::Ordering::Less,
@@ -170,15 +179,20 @@ fn add_deleted_children(
         } else {
             format!("{parent_relative}/{name}")
         };
-        let has_nested_deleted = git_statuses
-            .iter()
-            .any(|(candidate, candidate_status)| {
-                candidate_status == "deleted" && candidate.starts_with(&format!("{child_relative}/"))
-            });
+        let has_nested_deleted = git_statuses.iter().any(|(candidate, candidate_status)| {
+            candidate_status == "deleted" && candidate.starts_with(&format!("{child_relative}/"))
+        });
         let is_dir = rest.contains('/') || has_nested_deleted;
         let mut children = if is_dir { Some(Vec::new()) } else { None };
         if let Some(child_entries) = children.as_mut() {
-            add_deleted_children(root, &child_relative, depth + 1, max_depth, git_statuses, child_entries);
+            add_deleted_children(
+                root,
+                &child_relative,
+                depth + 1,
+                max_depth,
+                git_statuses,
+                child_entries,
+            );
         }
 
         entries.push(FileNode {
@@ -191,7 +205,9 @@ fn add_deleted_children(
             extension: if is_dir {
                 None
             } else {
-                Path::new(name).extension().map(|e| e.to_string_lossy().to_string())
+                Path::new(name)
+                    .extension()
+                    .map(|e| e.to_string_lossy().to_string())
             },
             git_status: Some("deleted".into()),
             children,
@@ -361,7 +377,9 @@ mod tests {
 
     fn commit_all(repo: &git2::Repository, message: &str) {
         let mut index = repo.index().unwrap();
-        index.add_all(["*"].iter(), git2::IndexAddOption::DEFAULT, None).unwrap();
+        index
+            .add_all(["*"].iter(), git2::IndexAddOption::DEFAULT, None)
+            .unwrap();
         index.write().unwrap();
         let tree_id = index.write_tree().unwrap();
         let tree = repo.find_tree(tree_id).unwrap();
@@ -371,7 +389,8 @@ mod tests {
             Err(_) => vec![],
         };
         let parent_refs: Vec<&git2::Commit> = parents.iter().collect();
-        repo.commit(Some("HEAD"), &sig, &sig, message, &tree, &parent_refs).unwrap();
+        repo.commit(Some("HEAD"), &sig, &sig, message, &tree, &parent_refs)
+            .unwrap();
     }
 
     #[test]
@@ -452,7 +471,10 @@ mod tests {
 
         let tree = read_tree_with_options(tmp.path(), 2, true).unwrap();
         let children = tree.children.unwrap();
-        let readme = children.iter().find(|node| node.name == "README.md").unwrap();
+        let readme = children
+            .iter()
+            .find(|node| node.name == "README.md")
+            .unwrap();
         let new_file = children.iter().find(|node| node.name == "new.md").unwrap();
         let docs = children.iter().find(|node| node.name == "docs").unwrap();
         let deleted = docs

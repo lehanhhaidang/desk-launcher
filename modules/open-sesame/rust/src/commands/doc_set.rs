@@ -61,9 +61,7 @@ pub async fn doc_set_list(
 }
 
 #[tauri::command]
-pub async fn doc_set_list_all(
-    state: tauri::State<'_, AppState>,
-) -> AppResult<Vec<DocSet>> {
+pub async fn doc_set_list_all(state: tauri::State<'_, AppState>) -> AppResult<Vec<DocSet>> {
     let db = state.db.lock().await;
     let all = crate::db::doc_set_repo::list_all(&db)?;
     Ok(all)
@@ -145,7 +143,10 @@ pub async fn doc_set_set_source_mapping(
     clear_error_status(&db, &doc_set)?;
 
     // Mark has_mapping if any source has an enabled mapping with a local path
-    let any_mapped = overview.sources.iter().any(|s| s.mapping.enabled && s.mapping.local_path.is_some());
+    let any_mapped = overview
+        .sources
+        .iter()
+        .any(|s| s.mapping.enabled && s.mapping.local_path.is_some());
     if any_mapped && !doc_set.has_mapping {
         crate::db::doc_set_repo::update_has_mapping(&db, &doc_set.id, true)?;
     }
@@ -239,7 +240,12 @@ pub async fn doc_set_watch_start(
             .sources
             .iter()
             .filter(|source| source.mapping.enabled)
-            .filter(|source| !matches!(source.mapping.direction, doc_set_manifest_service::SyncDirection::MirrorOnly))
+            .filter(|source| {
+                !matches!(
+                    source.mapping.direction,
+                    doc_set_manifest_service::SyncDirection::MirrorOnly
+                )
+            })
             .filter_map(|source| source.mapping.local_path.as_ref())
             .map(PathBuf::from)
             .collect::<Vec<_>>();
@@ -250,18 +256,27 @@ pub async fn doc_set_watch_start(
         return Ok(());
     };
 
-    let mut watcher = build_doc_set_watcher(app_handle, doc_set_id.clone(), mirror_path.clone(), local_paths.clone())?;
+    let mut watcher = build_doc_set_watcher(
+        app_handle,
+        doc_set_id.clone(),
+        mirror_path.clone(),
+        local_paths.clone(),
+    )?;
     if mirror_path.exists() {
         watcher
             .watch(&mirror_path, RecursiveMode::Recursive)
-            .map_err(|err| crate::error::AppError::Internal(format!("Failed to watch mirror: {err}")))?;
+            .map_err(|err| {
+                crate::error::AppError::Internal(format!("Failed to watch mirror: {err}"))
+            })?;
     }
     for path in local_paths {
         let watch_path = watchable_path(&path);
         if watch_path.exists() {
             watcher
                 .watch(&watch_path, RecursiveMode::Recursive)
-                .map_err(|err| crate::error::AppError::Internal(format!("Failed to watch local path: {err}")))?;
+                .map_err(|err| {
+                    crate::error::AppError::Internal(format!("Failed to watch local path: {err}"))
+                })?;
         }
     }
 
@@ -404,7 +419,10 @@ pub async fn config_import(
         {
             let db = state.db.lock().await;
             if let Err(err) = crate::db::workspace_repo::insert(&db, &ws) {
-                errors.push(format!("Failed to create workspace '{}': {}", ws_input.name, err));
+                errors.push(format!(
+                    "Failed to create workspace '{}': {}",
+                    ws_input.name, err
+                ));
                 continue;
             }
         }
@@ -419,12 +437,20 @@ pub async fn config_import(
                     remote_url: remote_url.clone(),
                     display_name: Some(ds_input.display_name.clone()),
                 };
-                match github_import_service::import_from_github(state.db.clone(), import_input).await {
+                match github_import_service::import_from_github(state.db.clone(), import_input)
+                    .await
+                {
                     Ok(_) => ds_created += 1,
-                    Err(err) => errors.push(format!("Failed to import '{}': {}", ds_input.display_name, err)),
+                    Err(err) => errors.push(format!(
+                        "Failed to import '{}': {}",
+                        ds_input.display_name, err
+                    )),
                 }
             } else {
-                errors.push(format!("Skipped '{}': no remote_url", ds_input.display_name));
+                errors.push(format!(
+                    "Skipped '{}': no remote_url",
+                    ds_input.display_name
+                ));
             }
         }
     }
@@ -468,13 +494,17 @@ fn build_doc_set_watcher(
             }
             last_emit = now;
 
-            let origin = if event.paths.iter().any(|path| path.starts_with(&mirror_path)) {
-                "mirror"
-            } else if event
+            let origin = if event
                 .paths
                 .iter()
-                .any(|path| local_paths.iter().any(|local| path.starts_with(local) || local.starts_with(path)))
+                .any(|path| path.starts_with(&mirror_path))
             {
+                "mirror"
+            } else if event.paths.iter().any(|path| {
+                local_paths
+                    .iter()
+                    .any(|local| path.starts_with(local) || local.starts_with(path))
+            }) {
                 "local"
             } else {
                 "unknown"
@@ -497,7 +527,9 @@ fn build_doc_set_watcher(
 
 fn watchable_path(path: &Path) -> PathBuf {
     if path.is_file() {
-        path.parent().map(Path::to_path_buf).unwrap_or_else(|| path.to_path_buf())
+        path.parent()
+            .map(Path::to_path_buf)
+            .unwrap_or_else(|| path.to_path_buf())
     } else {
         path.to_path_buf()
     }

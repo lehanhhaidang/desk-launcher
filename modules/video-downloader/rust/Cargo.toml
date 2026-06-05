@@ -2,7 +2,7 @@
 name = "tauri-plugin-video-downloader"
 version = "0.1.0"
 edition.workspace = true
-description = "Video Downloader module — spawns bundled yt-dlp.exe (+ ffmpeg.exe) as Tauri sidecars to fetch metadata and download videos/audio."
+description = "Media Toolbox plugin — Capture (yt-dlp), Images (image crate), Videos (ffmpeg). Crate name retained for backwards compatibility."
 authors.workspace = true
 links = "tauri-plugin-video-downloader"
 
@@ -10,7 +10,7 @@ links = "tauri-plugin-video-downloader"
 name = "tauri_plugin_video_downloader"
 
 [build-dependencies]
-tauri-plugin = "2"
+tauri-plugin = { version = "2", features = ["build"] }
 
 [dependencies]
 tauri = { workspace = true }
@@ -21,5 +21,6 @@ log = { workspace = true }
 thiserror = { workspace = true }
 uuid = { version = "1", features = ["v4"] }
 tokio = { version = "1", features = ["sync", "process", "io-util", "rt-multi-thread", "macros"] }
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "webp", "gif", "bmp", "tiff"] }
 
 launcher-paths = { path = "../../../crates/launcher-paths" }

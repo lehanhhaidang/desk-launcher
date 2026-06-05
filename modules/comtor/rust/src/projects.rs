@@ -46,7 +46,10 @@ fn row_to_project(row: &rusqlite::Row) -> rusqlite::Result<Project> {
 
 #[tauri::command]
 pub fn list_projects(state: State<DbState>) -> AppResult<Vec<Project>> {
-    let conn = state.0.lock().map_err(|e| AppError::Internal(e.to_string()))?;
+    let conn = state
+        .0
+        .lock()
+        .map_err(|e| AppError::Internal(e.to_string()))?;
     let mut stmt = conn.prepare(
         "SELECT p.id, p.name, p.description, p.client_name, p.created_at, p.updated_at,
                 (SELECT COUNT(*) FROM meetings m WHERE m.project_id = p.id) AS meeting_count
@@ -63,7 +66,10 @@ pub fn list_projects(state: State<DbState>) -> AppResult<Vec<Project>> {
 
 #[tauri::command]
 pub fn get_project(state: State<DbState>, id: String) -> AppResult<Project> {
-    let conn = state.0.lock().map_err(|e| AppError::Internal(e.to_string()))?;
+    let conn = state
+        .0
+        .lock()
+        .map_err(|e| AppError::Internal(e.to_string()))?;
     let mut stmt = conn.prepare(
         "SELECT p.id, p.name, p.description, p.client_name, p.created_at, p.updated_at,
                 (SELECT COUNT(*) FROM meetings m WHERE m.project_id = p.id) AS meeting_count
@@ -85,7 +91,10 @@ pub fn create_project(state: State<DbState>, input: NewProject) -> AppResult<Str
     }
     let id = Uuid::new_v4().to_string();
     let ts = now_ms();
-    let conn = state.0.lock().map_err(|e| AppError::Internal(e.to_string()))?;
+    let conn = state
+        .0
+        .lock()
+        .map_err(|e| AppError::Internal(e.to_string()))?;
     conn.execute(
         "INSERT INTO projects (id, name, description, client_name, created_at, updated_at)
          VALUES (?1, ?2, ?3, ?4, ?5, ?5)",
@@ -96,7 +105,10 @@ pub fn create_project(state: State<DbState>, input: NewProject) -> AppResult<Str
 
 #[tauri::command]
 pub fn update_project(state: State<DbState>, id: String, patch: ProjectPatch) -> AppResult<()> {
-    let conn = state.0.lock().map_err(|e| AppError::Internal(e.to_string()))?;
+    let conn = state
+        .0
+        .lock()
+        .map_err(|e| AppError::Internal(e.to_string()))?;
     let ts = now_ms();
     if let Some(name) = patch.name {
         conn.execute(
@@ -121,7 +133,10 @@ pub fn update_project(state: State<DbState>, id: String, patch: ProjectPatch) ->
 
 #[tauri::command]
 pub fn delete_project(state: State<DbState>, id: String) -> AppResult<()> {
-    let conn = state.0.lock().map_err(|e| AppError::Internal(e.to_string()))?;
+    let conn = state
+        .0
+        .lock()
+        .map_err(|e| AppError::Internal(e.to_string()))?;
     conn.execute("DELETE FROM projects WHERE id = ?1", [&id])?;
     Ok(())
 }

@@ -1,7 +1,7 @@
 //! Paths for the open-sesame module.
 //!
 //! DB lives under the launcher's per-module data dir
-//! (`%APPDATA%\com.lehanhhaidang.desklauncher\modules\open-sesame\`).
+//! (`%APPDATA%\io.desklauncher\modules\open-sesame\`).
 //!
 //! Git mirrors stay at `~/.open-sesame/mirrors/` per the migration plan:
 //! mirrors can be large git working copies, so we leave them where they
@@ -10,7 +10,7 @@
 use crate::error::{AppError, AppResult};
 use std::path::PathBuf;
 
-/// Per-module data dir: `%APPDATA%\com.lehanhhaidang.desklauncher\modules\open-sesame\`.
+/// Per-module data dir: `%APPDATA%\io.desklauncher\modules\open-sesame\`.
 pub fn app_data_dir() -> AppResult<PathBuf> {
     launcher_paths::module_data_dir("open-sesame")
         .map_err(|e| AppError::Internal(format!("module data dir: {e}")))

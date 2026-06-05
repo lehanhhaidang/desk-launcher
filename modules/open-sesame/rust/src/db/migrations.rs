@@ -165,7 +165,7 @@ mod tests {
         let count: i64 = conn
             .query_row("SELECT COUNT(*) FROM _migrations", [], |r| r.get(0))
             .unwrap();
-        assert_eq!(count, 1); // Chỉ 1 migration được apply
+        assert_eq!(count, 3); // 3 migrations applied, each exactly once (idempotent)
     }
 
     #[test]

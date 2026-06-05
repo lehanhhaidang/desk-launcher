@@ -10,7 +10,7 @@ links = "tauri-plugin-port-killer"
 name = "tauri_plugin_port_killer"
 
 [build-dependencies]
-tauri-plugin = "2"
+tauri-plugin = { version = "2", features = ["build"] }
 
 [dependencies]
 tauri = { workspace = true }

@@ -51,12 +51,21 @@ pub const MODULES: &[ModuleWindowSpec] = &[
     },
     ModuleWindowSpec {
         id: "video-downloader",
-        title: "📥 Video Downloader",
+        title: "Media Toolbox",
         initial_url: "modules-pages/video-downloader/index.html",
         width: 1100.0,
         height: 760.0,
         min_width: Some(800.0),
         min_height: Some(500.0),
+    },
+    ModuleWindowSpec {
+        id: "md-converter",
+        title: "📝 Markdown Converter",
+        initial_url: "modules-pages/md-converter/index.html",
+        width: 1200.0,
+        height: 800.0,
+        min_width: Some(900.0),
+        min_height: Some(600.0),
     },
 ];
 

@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-media-image-process-cancel"
+description = "Enables the media_image_process_cancel command without any pre-configured scope."
+commands.allow = ["media_image_process_cancel"]
+
+[[permission]]
+identifier = "deny-media-image-process-cancel"
+description = "Denies the media_image_process_cancel command without any pre-configured scope."
+commands.deny = ["media_image_process_cancel"]

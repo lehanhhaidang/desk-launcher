@@ -1,0 +1,18 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "md-converter-window",
+  "description": "Permissions for the Markdown Converter module window.",
+  "windows": ["md-converter"],
+  "permissions": [
+    "core:default",
+    "dialog:default",
+    "dialog:allow-save",
+    "fs:default",
+    {
+      "identifier": "fs:allow-write-text-file",
+      "allow": [{ "path": "$HOME/**" }]
+    },
+    "log:default",
+    "md-converter:default"
+  ]
+}

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button } from '@desk-launcher/ui'
+import { Button, Badge } from '@pk/components/ui'
 import { Plus, Play, Square, Pencil, Trash2, AlertCircle, Terminal, ChevronDown } from 'lucide-react'
 import type { TunnelStatus } from '../types/port.types'
 
@@ -23,121 +23,100 @@ export function TunnelManager({
     const [expandedCmd, setExpandedCmd] = useState<string | null>(null)
 
     return (
-        <div className="rounded-xl border border-border/50 bg-card/50 p-4 backdrop-blur">
-            <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-sm font-medium text-muted-foreground">SSH Tunnels</h3>
-                <Button variant="ghost" size="xs" onClick={onAdd}>
+        <div className="rounded-2xl border border-border/40 bg-card/40 p-5">
+            <div className="mb-4 flex items-center justify-between">
+                <div>
+                    <h3 className="text-sm font-semibold">SSH Tunnels</h3>
+                    <p className="text-xs text-muted-foreground">Forward local traffic through SSH</p>
+                </div>
+                <Button variant="outline" size="xs" onClick={onAdd}>
                     <Plus className="size-3" />
                     Add
                 </Button>
             </div>
 
             {tunnels.length === 0 ? (
-                <p className="text-xs italic text-muted-foreground/60">
+                <p className="rounded-xl border border-dashed border-border/30 px-3 py-8 text-center text-xs italic text-muted-foreground">
                     No tunnels configured. Click Add to create an SSH tunnel.
                 </p>
             ) : (
-                <div className="space-y-2">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {tunnels.map((t) => (
-                        <div
-                            key={t.id}
-                            className="rounded-lg border border-border/30 bg-muted/10 p-3"
-                        >
-                            {/* Header: label + status */}
-                            <div className="mb-1.5 flex items-center gap-2">
-                                <span
-                                    className={`inline-block size-2 rounded-full ${
-                                        t.is_running ? 'bg-green-400' : 'bg-red-400'
-                                    }`}
-                                />
-                                <span className="flex-1 truncate text-sm font-medium">
+                        <div key={t.id} className="space-y-3 rounded-xl border border-border/30 bg-background/50 p-4">
+                            <div className="flex items-center gap-2">
+                                <span className={`size-2 shrink-0 rounded-full ${
+                                    t.is_running
+                                        ? 'bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.5)]'
+                                        : 'bg-red-400'
+                                }`} />
+                                <span className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground" title={t.config.label}>
                                     {t.config.label}
                                 </span>
+                                <Badge
+                                    variant="outline"
+                                    className={
+                                        t.is_running
+                                            ? 'border-emerald-400/20 bg-emerald-400/10 text-emerald-400'
+                                            : 'border-red-400/20 bg-red-400/10 text-red-400'
+                                    }
+                                >
+                                    {t.is_running ? 'running' : 'stopped'}
+                                </Badge>
                             </div>
 
-                            {/* Connection info */}
-                            <div className="mb-2 font-mono text-xs text-muted-foreground">
-                                <span className="text-orange-400">{t.config.local_port}</span>
+                            <div className="truncate pk-mono text-xs leading-relaxed text-muted-foreground" title={`${t.config.local_port} → ${t.config.remote_host}:${t.config.remote_port} via ${t.config.ssh_user}@${t.config.ssh_host}`}>
+                                <span className="text-cyan-400">{t.config.local_port}</span>
                                 {' → '}
-                                {t.config.remote_host}:<span className="text-green-400">{t.config.remote_port}</span>
+                                {t.config.remote_host}:<span className="text-emerald-400">{t.config.remote_port}</span>
                                 {' via '}
                                 {t.config.ssh_user}@{t.config.ssh_host}
                                 {t.config.ssh_port !== 22 && `:${t.config.ssh_port}`}
                             </div>
 
-                            {/* Error */}
                             {t.error && (
-                                <div className="mb-2 flex items-start gap-1.5 rounded bg-red-500/10 px-2 py-1 text-xs text-red-400">
+                                <div className="flex items-start gap-1.5 rounded-lg border border-red-400/20 bg-red-400/10 px-2.5 py-1.5 text-xs text-red-400">
                                     <AlertCircle className="mt-0.5 size-3 shrink-0" />
-                                    <span className="break-all">{t.error}</span>
+                                    <span className="min-w-0">{t.error}</span>
                                 </div>
                             )}
 
-                            {/* Command preview (expandable) */}
                             {t.command && (
-                                <div className="mb-2">
+                                <div>
                                     <button
                                         type="button"
-                                        className="flex w-full items-center gap-1.5 text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+                                        className="flex w-full items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
                                         onClick={() => setExpandedCmd(expandedCmd === t.id ? null : t.id)}
                                     >
                                         <Terminal className="size-3" />
                                         <span>Command</span>
-                                        <ChevronDown className={`size-3 ml-auto transition-transform ${expandedCmd === t.id ? 'rotate-180' : ''}`} />
+                                        <ChevronDown className={`ml-auto size-3 transition-transform ${expandedCmd === t.id ? 'rotate-180' : ''}`} />
                                     </button>
                                     {expandedCmd === t.id && (
-                                        <div className="mt-1 rounded bg-muted/30 px-2.5 py-1.5 font-mono text-[11px] text-muted-foreground break-all select-all">
+                                        <div className="mt-1.5 select-all overflow-x-auto rounded-lg border bg-background/50 px-2.5 py-1.5 pk-mono text-[11px] text-muted-foreground">
                                             {t.command}
                                         </div>
                                     )}
                                 </div>
                             )}
 
-                            {/* Actions */}
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-1 border-t border-border/30 pt-3">
                                 {t.is_running ? (
-                                    <Button
-                                        variant="ghost"
-                                        size="icon-xs"
-                                        onClick={() => onStop(t.id)}
-                                        className="text-red-400 hover:text-red-300"
-                                        title="Stop"
-                                    >
+                                    <Button variant="ghost" size="icon-xs" onClick={() => onStop(t.id)} className="text-red-400 hover:bg-red-400/10" title="Stop">
                                         <Square className="size-3" />
                                     </Button>
                                 ) : (
-                                    <Button
-                                        variant="ghost"
-                                        size="icon-xs"
-                                        onClick={() => onStart(t.id)}
-                                        className="text-green-400 hover:text-green-300"
-                                        title="Start"
-                                    >
+                                    <Button variant="ghost" size="icon-xs" onClick={() => onStart(t.id)} className="text-green-400 hover:bg-green-400/10" title="Start">
                                         <Play className="size-3" />
                                     </Button>
                                 )}
-                                <Button
-                                    variant="ghost"
-                                    size="icon-xs"
-                                    onClick={() => onEdit(t.id)}
-                                    className="text-muted-foreground hover:text-foreground"
-                                    title="Edit"
-                                >
+                                <Button variant="ghost" size="icon-xs" onClick={() => onEdit(t.id)} title="Edit">
                                     <Pencil className="size-3" />
                                 </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="icon-xs"
-                                    onClick={() => onDelete(t.id)}
-                                    className="text-muted-foreground hover:text-red-400"
-                                    title="Delete"
-                                >
+                                <Button variant="ghost" size="icon-xs" onClick={() => onDelete(t.id)} className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive" title="Delete">
                                     <Trash2 className="size-3" />
                                 </Button>
                                 {t.is_running && t.pid && (
-                                    <span className="ml-auto text-xs text-muted-foreground/50">
-                                        PID {t.pid}
-                                    </span>
+                                    <span className="ml-auto pk-mono text-xs text-muted-foreground">PID {t.pid}</span>
                                 )}
                             </div>
                         </div>

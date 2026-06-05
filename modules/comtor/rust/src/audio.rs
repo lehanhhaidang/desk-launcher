@@ -23,7 +23,9 @@ pub fn get_audio(meeting_id: String) -> AppResult<Vec<u8>> {
     let dir = audio_dir()?;
     let path = dir.join(format!("{meeting_id}.webm"));
     if !path.exists() {
-        return Err(AppError::NotFound(format!("audio for meeting {meeting_id}")));
+        return Err(AppError::NotFound(format!(
+            "audio for meeting {meeting_id}"
+        )));
     }
     Ok(std::fs::read(&path)?)
 }

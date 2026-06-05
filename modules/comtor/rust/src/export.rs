@@ -16,7 +16,9 @@ pub async fn export_xlsx(
         .save_file(move |path| {
             let _ = tx.send(path);
         });
-    let chosen = rx.recv().map_err(|e| crate::error::AppError::Internal(e.to_string()))?;
+    let chosen = rx
+        .recv()
+        .map_err(|e| crate::error::AppError::Internal(e.to_string()))?;
     let Some(file_path) = chosen else {
         return Ok(None);
     };

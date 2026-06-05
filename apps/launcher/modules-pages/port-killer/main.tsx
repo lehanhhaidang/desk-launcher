@@ -8,8 +8,6 @@ import '@modules/port-killer/frontend/src/styles.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <div className="min-h-screen bg-background text-foreground p-6">
-      <PortKiller />
-    </div>
+    <PortKiller />
   </React.StrictMode>,
 )

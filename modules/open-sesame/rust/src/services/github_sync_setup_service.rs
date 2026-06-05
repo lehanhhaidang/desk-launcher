@@ -4,9 +4,9 @@ use crate::models::account::ProviderType;
 use crate::models::doc_set::{DocSet, GithubRemoteMode, SetupGithubRemoteInput};
 use crate::providers::git_provider::GitProvider;
 use crate::providers::SyncProvider;
+use crate::services::doc_set_manifest_service;
 use crate::services::repo_service;
 use crate::services::sync_service;
-use crate::services::doc_set_manifest_service;
 use crate::utils::secret_store;
 use rusqlite::Connection;
 use std::path::Path;
@@ -44,7 +44,9 @@ pub async fn setup_github_remote(
                 .unwrap_or_else(|| normalize_repo_name(&doc_set.display_name));
 
             if repo_name.is_empty() {
-                return Err(AppError::Validation("Repository name cannot be empty".into()));
+                return Err(AppError::Validation(
+                    "Repository name cannot be empty".into(),
+                ));
             }
 
             let repo = repo_service::create_github_repo(

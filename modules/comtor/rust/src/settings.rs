@@ -88,9 +88,17 @@ fn keyring_delete(account: &str) -> AppResult<()> {
 #[tauri::command]
 pub fn get_settings() -> AppResult<SettingsView> {
     let prefs = read_prefs()?;
-    let soniox_key_set = keyring_get(ACCOUNT_SONIOX)?.map(|v| !v.is_empty()).unwrap_or(false);
-    let openai_key_set = keyring_get(ACCOUNT_OPENAI)?.map(|v| !v.is_empty()).unwrap_or(false);
-    Ok(SettingsView { soniox_key_set, openai_key_set, prefs })
+    let soniox_key_set = keyring_get(ACCOUNT_SONIOX)?
+        .map(|v| !v.is_empty())
+        .unwrap_or(false);
+    let openai_key_set = keyring_get(ACCOUNT_OPENAI)?
+        .map(|v| !v.is_empty())
+        .unwrap_or(false);
+    Ok(SettingsView {
+        soniox_key_set,
+        openai_key_set,
+        prefs,
+    })
 }
 
 #[tauri::command]

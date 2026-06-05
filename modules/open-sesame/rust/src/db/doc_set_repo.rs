@@ -139,12 +139,7 @@ pub fn update_sync_state(
     Ok(())
 }
 
-pub fn update_remote(
-    conn: &Connection,
-    id: &str,
-    remote_url: &str,
-    branch: &str,
-) -> AppResult<()> {
+pub fn update_remote(conn: &Connection, id: &str, remote_url: &str, branch: &str) -> AppResult<()> {
     conn.execute(
         "UPDATE doc_sets SET remote_url = ?1, branch = ?2, status = 'idle', updated_at = ?3 WHERE id = ?4",
         params![remote_url, branch, chrono::Utc::now(), id],
@@ -171,6 +166,18 @@ pub fn update_has_mapping(conn: &Connection, id: &str, has_mapping: bool) -> App
 pub fn delete(conn: &Connection, id: &str) -> AppResult<()> {
     conn.execute("DELETE FROM doc_sets WHERE id = ?1", params![id])?;
     Ok(())
+}
+
+/// After a crash or quit mid-sync, a doc-set can be left stuck in `syncing`,
+/// which makes every future sync op reject with "Sync already in progress"
+/// (see `sync_service`). Reset any such rows back to `idle` on startup.
+/// Returns the number of rows changed.
+pub fn reset_syncing_to_idle(conn: &Connection) -> AppResult<usize> {
+    let changed = conn.execute(
+        "UPDATE doc_sets SET status = 'idle', updated_at = ?1 WHERE status = 'syncing'",
+        params![chrono::Utc::now()],
+    )?;
+    Ok(changed)
 }
 
 #[cfg(test)]
@@ -265,6 +272,33 @@ mod tests {
 
         let found = find_by_id(&conn, "ds1").unwrap();
         assert!(found.is_none());
+    }
+
+    #[test]
+    fn test_reset_syncing_to_idle_only_clears_syncing() {
+        let conn = setup_db();
+        insert(&conn, &make_doc_set("ds1", "Stuck")).unwrap();
+        insert(&conn, &make_doc_set("ds2", "Errored")).unwrap();
+        insert(&conn, &make_doc_set("ds3", "Fine")).unwrap();
+        update_status(&conn, "ds1", &DocSetStatus::Syncing).unwrap();
+        update_status(&conn, "ds2", &DocSetStatus::Error).unwrap();
+
+        let changed = reset_syncing_to_idle(&conn).unwrap();
+
+        assert_eq!(changed, 1);
+        assert_eq!(
+            find_by_id(&conn, "ds1").unwrap().unwrap().status,
+            DocSetStatus::Idle
+        );
+        // Non-syncing statuses are left untouched.
+        assert_eq!(
+            find_by_id(&conn, "ds2").unwrap().unwrap().status,
+            DocSetStatus::Error
+        );
+        assert_eq!(
+            find_by_id(&conn, "ds3").unwrap().unwrap().status,
+            DocSetStatus::Idle
+        );
     }
 
     #[test]

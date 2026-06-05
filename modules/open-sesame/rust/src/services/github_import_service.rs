@@ -51,7 +51,10 @@ pub async fn import_from_github(
     let display_name = input
         .display_name
         .filter(|name| !name.trim().is_empty())
-        .unwrap_or_else(|| read_manifest_name(&mirror_path).unwrap_or_else(|| repo_name_from_url(&input.remote_url)));
+        .unwrap_or_else(|| {
+            read_manifest_name(&mirror_path)
+                .unwrap_or_else(|| repo_name_from_url(&input.remote_url))
+        });
 
     let now = chrono::Utc::now();
     let mirror_path_str = mirror_path.to_string_lossy().to_string();
@@ -113,7 +116,13 @@ mod tests {
 
     #[test]
     fn test_repo_name_from_url() {
-        assert_eq!(repo_name_from_url("https://github.com/user/docs.git"), "docs");
-        assert_eq!(repo_name_from_url("git@github.com:user/project-docs.git"), "project-docs");
+        assert_eq!(
+            repo_name_from_url("https://github.com/user/docs.git"),
+            "docs"
+        );
+        assert_eq!(
+            repo_name_from_url("git@github.com:user/project-docs.git"),
+            "project-docs"
+        );
     }
 }

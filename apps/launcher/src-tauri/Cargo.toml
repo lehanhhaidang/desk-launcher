@@ -38,3 +38,4 @@ tauri-plugin-port-killer       = { path = "../../../modules/port-killer/rust" }
 tauri-plugin-open-sesame       = { path = "../../../modules/open-sesame/rust" }
 tauri-plugin-comtor            = { path = "../../../modules/comtor/rust" }
 tauri-plugin-video-downloader  = { path = "../../../modules/video-downloader/rust" }
+tauri-plugin-md-converter      = { path = "../../../modules/md-converter/rust" }

@@ -5,7 +5,7 @@
 // in sync is part of adding a module.
 
 export type ModuleCategory = 'productivity' | 'media' | 'dev' | 'utility'
-export type ModuleIcon = 'plug' | 'book-open' | 'languages' | 'download'
+export type ModuleIcon = 'plug' | 'book-open' | 'languages' | 'download' | 'file-text'
 
 export interface ModuleWindowConfig {
   title: string
@@ -86,20 +86,38 @@ export const MODULES: readonly ModuleDescriptor[] = [
   },
   {
     id: 'video-downloader',
-    displayName: 'Video Downloader',
-    shortName: 'Video',
-    description: 'Download videos/audio from YouTube, TikTok, Bilibili and more via bundled yt-dlp + ffmpeg.',
+    displayName: 'Media Toolbox',
+    shortName: 'Media',
+    description: 'Capture links and prepare local image/video workflows with yt-dlp and ffmpeg.',
     icon: 'download',
     category: 'media',
     accentClass: 'from-violet-500/20 to-purple-400/10 text-violet-300 border-violet-400/20',
     health: 'beta',
     windowConfig: {
-      title: 'Video Downloader',
+      title: 'Media Toolbox',
       width: 1100,
       height: 760,
       minWidth: 800,
       minHeight: 500,
       initialUrl: 'modules-pages/video-downloader/index.html',
+    },
+  },
+  {
+    id: 'md-converter',
+    displayName: 'Markdown Converter',
+    shortName: 'MD',
+    description: 'Convert Office, PDF, HTML, EPUB and more to Markdown — Rust port of Microsoft MarkItDown.',
+    icon: 'file-text',
+    category: 'utility',
+    accentClass: 'from-amber-500/20 to-orange-400/10 text-amber-300 border-amber-400/20',
+    health: 'beta',
+    windowConfig: {
+      title: 'Markdown Converter',
+      width: 1200,
+      height: 800,
+      minWidth: 900,
+      minHeight: 600,
+      initialUrl: 'modules-pages/md-converter/index.html',
     },
   },
 ] as const

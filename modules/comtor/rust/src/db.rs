@@ -5,7 +5,7 @@ use std::sync::Mutex;
 pub struct DbState(pub Mutex<Connection>);
 
 /// Initialize the Comtor SQLite DB under the launcher's per-module data dir
-/// (`%APPDATA%\com.lehanhhaidang.desklauncher\modules\comtor\`). Also creates
+/// (`%APPDATA%\io.desklauncher\modules\comtor\`). Also creates
 /// the sibling `audio/` directory for stored meeting recordings.
 pub fn init() -> AppResult<DbState> {
     let dir = launcher_paths::module_data_dir("comtor")

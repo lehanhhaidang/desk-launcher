@@ -93,8 +93,7 @@ pub fn delete(db: &Connection, id: &str) -> AppResult<()> {
 
 pub fn move_to_workspace(db: &Connection, id: &str, workspace_id: &str) -> AppResult<DocSet> {
     // Verify doc set exists
-    doc_set_repo::find_by_id(db, id)?
-        .ok_or_else(|| AppError::NotFound("Doc set".into()))?;
+    doc_set_repo::find_by_id(db, id)?.ok_or_else(|| AppError::NotFound("Doc set".into()))?;
 
     // Verify target workspace exists
     workspace_repo::find_by_id(db, workspace_id)?

@@ -71,8 +71,7 @@ pub fn init() -> TauriPlugin<Wry> {
         .setup(|app, _api| {
             log::info!("open-sesame plugin: initializing");
 
-            let db_path = paths::db_path()
-                .map_err(|e| format!("open-sesame: db path: {e}"))?;
+            let db_path = paths::db_path().map_err(|e| format!("open-sesame: db path: {e}"))?;
             log::info!("open-sesame db at {}", db_path.display());
 
             let conn = rusqlite::Connection::open(&db_path)
@@ -81,6 +80,14 @@ pub fn init() -> TauriPlugin<Wry> {
                 .map_err(|e| format!("open-sesame: pragmas: {e}"))?;
             migrations::run_migrations(&conn)
                 .map_err(|e| format!("open-sesame: migrations: {e}"))?;
+
+            // Recover doc-sets left stuck in `syncing` by a crash/quit mid-sync;
+            // otherwise every future sync op for them is rejected forever.
+            match db::doc_set_repo::reset_syncing_to_idle(&conn) {
+                Ok(n) if n > 0 => log::info!("open-sesame: reset {n} doc-set(s) stuck in 'syncing'"),
+                Ok(_) => {}
+                Err(e) => log::warn!("open-sesame: failed to reset stuck 'syncing' doc-sets: {e}"),
+            }
 
             app.manage(AppState::new(conn));
             Ok(())

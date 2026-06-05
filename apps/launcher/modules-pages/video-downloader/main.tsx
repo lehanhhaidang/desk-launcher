@@ -5,11 +5,10 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import VideoDownloader from '@vid/VideoDownloader'
 import '../../../../packages/ui/src/theme.css'
+import '@modules/video-downloader/frontend/src/styles.css'
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <div className="dark min-h-screen bg-background text-foreground p-6">
-      <VideoDownloader />
-    </div>
+    <VideoDownloader />
   </React.StrictMode>,
 )

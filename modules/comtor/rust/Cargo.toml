@@ -13,7 +13,7 @@ links = "tauri-plugin-comtor"
 name = "tauri_plugin_comtor"
 
 [build-dependencies]
-tauri-plugin = "2"
+tauri-plugin = { version = "2", features = ["build"] }
 
 [dependencies]
 tauri = { workspace = true }

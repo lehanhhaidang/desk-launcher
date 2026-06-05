@@ -39,3 +39,5 @@ apps/launcher/src-tauri/gen/
 
 # Plan files (private workspace)
 .claude/
+
+desk-launcher-docs/tasks/
