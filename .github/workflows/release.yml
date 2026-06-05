@@ -1,0 +1,61 @@
+name: release
+
+# Builds the Windows NSIS installer and publishes a GitHub Release, but only
+# when a version tag is pushed (e.g. `v0.1.0`). Cut a release like this:
+#   1. Bump "version" in apps/launcher/src-tauri/tauri.conf.json + package.json.
+#   2. Merge to main.
+#   3. git tag v0.1.0 && git push origin v0.1.0
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch: # allow manual runs from the Actions tab
+
+permissions:
+  contents: write # required to create the Release
+
+jobs:
+  release:
+    # Windows is required: NSIS bundling, the MSVC toolchain, and the sidecar
+    # script (npm run sidecars) which uses PowerShell to unzip ffmpeg.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: swatinem/rust-cache@v2
+
+      - name: Check tag matches app version
+        shell: pwsh
+        run: |
+          $v = (Get-Content apps/launcher/src-tauri/tauri.conf.json -Raw | ConvertFrom-Json).version
+          $tag = "${{ github.ref_name }}".TrimStart('v')
+          if ($v -ne $tag) {
+            throw "Tag '$tag' != app version '$v'. Bump tauri.conf.json / package.json to match the tag first."
+          }
+          Write-Host "Releasing version $v"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download Video Downloader sidecars (yt-dlp, ffmpeg)
+        run: npm run sidecars
+
+      - name: Build installer and publish release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: apps/launcher
+          tagName: ${{ github.ref_name }}
+          releaseName: Desk Launcher ${{ github.ref_name }}
+          releaseBody: |
+            Windows installer (NSIS) is attached below.
+            > Unsigned build — Windows SmartScreen may warn about an unknown publisher.
+          releaseDraft: true # review, then click Publish. Set false to auto-publish.
+          prerelease: false
