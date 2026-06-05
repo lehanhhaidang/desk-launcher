@@ -121,7 +121,7 @@ fn test_remove_new_mirror_path_removes_untracked_source() {
 }
 
 #[test]
-fn test_copy_mirror_to_local_propagates_deleted_mirror_source() {
+fn test_copy_mirror_to_local_skips_missing_mirror_source() {
     let tmp = TempDir::new().unwrap();
     let source = tmp.path().join("source");
     let mirror = tmp.path().join("mirror");
@@ -163,8 +163,12 @@ fn test_copy_mirror_to_local_propagates_deleted_mirror_source() {
     fs::remove_dir_all(mirror.join("child")).unwrap();
     let removed = copy_enabled_mirror_to_local(&doc_set).unwrap();
 
-    assert_eq!(removed, 1);
-    assert!(!local_child.exists());
+    // An entirely-absent mirror source is treated as drift, not a deliberate
+    // delete: the mapped local folder is preserved (symmetric with the push
+    // side, which skips a missing local source).
+    assert_eq!(removed, 0);
+    assert!(local_child.exists());
+    assert!(local_child.join("note.md").exists());
 }
 
 #[test]

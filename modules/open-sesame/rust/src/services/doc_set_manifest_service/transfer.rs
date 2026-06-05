@@ -1,7 +1,6 @@
 use crate::error::AppResult;
 use crate::models::doc_set::DocSet;
 use crate::services::mirror_service;
-use std::fs;
 use std::path::Path;
 
 use super::models::SyncDirection;
@@ -94,7 +93,11 @@ pub fn copy_enabled_mirror_to_local(doc_set: &DocSet) -> AppResult<usize> {
         let source_mirror = mirror.join(&source.mirror_path);
         let local = Path::new(local_path);
         if !source_mirror.exists() {
-            copied += remove_local_path(local)?;
+            // Source folder is entirely absent from the mirror. Skip instead of
+            // wiping the whole mapped local folder: an absent source usually
+            // means a drifted/incomplete mirror, not a deliberate delete, and a
+            // wholesale delete risks data loss. This mirrors the push side
+            // (copy_enabled_local_to_mirror), which skips a missing local source.
             continue;
         }
 
@@ -112,16 +115,4 @@ pub fn copy_enabled_mirror_to_local(doc_set: &DocSet) -> AppResult<usize> {
     }
 
     Ok(copied)
-}
-
-fn remove_local_path(path: &Path) -> AppResult<usize> {
-    if !path.exists() {
-        return Ok(0);
-    }
-    if path.is_dir() {
-        fs::remove_dir_all(path)?;
-    } else {
-        fs::remove_file(path)?;
-    }
-    Ok(1)
 }

@@ -1,5 +1,5 @@
 # TASK: Fix lỗi reliability + UX cho module Open Sesame
-_Created: 2026-06-05 · Status: in-progress (Đợt 1 partial)_
+_Created: 2026-06-05 · Status: in-progress (Đợt 1 done; P1/P2 pending)_
 
 ## Request
 Sau khi review module Open Sesame: liệt kê các lỗi đã tìm thấy + hướng fix, gom thành một plan để duyệt trước khi sửa code.
@@ -50,7 +50,7 @@ Mỗi lỗi dưới đây đã đọc & verify trực tiếp trên code (không 
 | # | Action (file → change) | Verify | Status |
 |---|---|---|---|
 | 1 | `db/doc_set_repo.rs`: thêm `reset_syncing_to_idle(conn)` (UPDATE status='idle' WHERE status='syncing'). Gọi trong `lib.rs::init()` sau `run_migrations`. | Unit test: insert doc-set status=syncing → gọi reset → assert idle. Manual: kill app khi đang sync, mở lại, sync chạy được. | ✅ done |
-| 2 | `transfer.rs:96-98`: bỏ auto `remove_local_path` khi source mirror mất; thay bằng skip + trả 0 (không xóa folder local). Việc xóa file lẻ thừa vẫn do `remove_orphaned` xử lý khi source tồn tại. | Unit test: mirror sub-source không tồn tại → local folder được giữ nguyên, copied=0. | ⚠️ hoãn |
+| 2 | `transfer.rs:96-98`: bỏ auto `remove_local_path` khi source mirror mất; thay bằng skip + trả 0 (không xóa folder local). Việc xóa file lẻ thừa vẫn do `remove_orphaned` xử lý khi source tồn tại. | Unit test: mirror sub-source không tồn tại → local folder được giữ nguyên, copied=0. | ✅ done |
 
 ### Đợt 2 — P1 (nên làm)
 | # | Action (file → change) | Verify | Status |
@@ -89,7 +89,7 @@ Mọi row ✅ kèm bằng chứng · mọi symbol đổi đã grep lại call si
 
 ### Đợt 1 — 2026-06-05, branch `fix/open-sesame-sync-reliability`
 - **#1 (P0-1)** ✅ `db/doc_set_repo.rs::reset_syncing_to_idle()` + gọi trong `lib.rs::setup()` sau migrations. Test `test_reset_syncing_to_idle_only_clears_syncing` pass (chỉ reset `syncing`, không đụng `error`/khác). Evidence: `cargo test -p tauri-plugin-open-sesame` → **106 passed, 0 failed**.
-- **#2 (P0-2)** ⚠️ **TẠM HOÃN — premise của plan sai**. Có test cố ý `test_copy_mirror_to_local_propagates_deleted_mirror_source` (`doc_set_manifest_service/tests.rs:124-168`) khẳng định: xóa folder source trong mirror → xóa folder local đã map là **hành vi sync CÓ CHỦ ĐÍCH** (propagate deletion), không phải bug vô tình. Đã **revert** thay đổi P0-2, chờ user quyết hướng (giữ nguyên / guard hẹp chống drift / vẫn đổi sang skip + cập nhật test).
+- **#2 (P0-2)** ✅ **làm theo hướng nhất quán (skip)** — quyết định sau khi phân tích cùng user. Phát hiện then chốt: chiều **push** (`copy_enabled_local_to_mirror`) đã **bỏ qua khi local source vắng** (chốt an toàn `if !local.exists() { continue }`), nhưng chiều **pull** lại **xóa trắng folder local** khi mirror source vắng → **bất đối xứng**. Sửa pull cho khớp push: source vắng hoàn toàn → `continue` (không xóa). Bỏ hàm `remove_local_path`. Đổi test cũ `propagates_deleted_mirror_source` → `test_copy_mirror_to_local_skips_missing_mirror_source` (giờ assert local được giữ, `copied=0`). Đánh đổi đã thống nhất với user: không còn lan truyền việc "xóa thẳng nguyên folder trên repo" (hiếm gặp). Evidence: 106 passed, 0 failed.
 - **Phụ trợ (bắt buộc để chạy được test)**: thêm `tempfile` vào `[dev-dependencies]` — trước đó **thiếu → toàn bộ test suite của crate không compile** (9 file test dùng `tempfile`); sửa assertion stale trong `test_migrations_idempotent` (1 → 3 migrations). Cả 2 là lỗi pre-existing chỉ lộ ra khi suite chạy lại được.
 - Chưa làm (commit sau): P1-1..P1-6, P2-1..P2-4, UX-1..UX-3.
 
