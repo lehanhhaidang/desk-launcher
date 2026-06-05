@@ -122,6 +122,17 @@ function MarkdownBody({ content }: { content: string }) {
               )
             }
 
+            // Block code (fenced / multiline): keep highlight.js token classes
+            // and let the <pre> wrapper own the box. Only inline code gets the pill.
+            const isBlock = /language-/.test(className || '') || String(children).includes('\n')
+            if (isBlock) {
+              return (
+                <code {...props} className={`${className || ''} md-code-block`}>
+                  {children}
+                </code>
+              )
+            }
+
             return (
               <code {...props} className={`${className || ''} rounded bg-[rgba(183,156,255,0.12)] px-1.5 py-0.5 font-mono text-[13px] text-[var(--primary)]`}>
                 {children}

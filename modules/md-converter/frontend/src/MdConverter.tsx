@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { PointerEvent as ReactPointerEvent } from 'react'
 import { open as openDialog, save as saveDialog } from '@tauri-apps/plugin-dialog'
 import { readDir, writeTextFile } from '@tauri-apps/plugin-fs'
 import { join } from '@tauri-apps/api/path'
@@ -48,6 +49,12 @@ export default function MdConverter() {
   const [dropActive, setDropActive] = useState(false)
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [splitPct, setSplitPct] = useState<number>(() => {
+    const stored = Number(window.localStorage.getItem('md-converter:split-pct'))
+    return Number.isFinite(stored) && stored >= 25 && stored <= 75 ? stored : 50
+  })
+  const mainRef = useRef<HTMLDivElement>(null)
+  const splitRef = useRef(splitPct)
 
   useEffect(() => {
     supportedExtensions()
@@ -213,6 +220,26 @@ export default function MdConverter() {
     }
   }
 
+  const startSplitResize = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    const container = mainRef.current
+    if (!container) return
+    const rect = container.getBoundingClientRect()
+    const handleMove = (moveEvent: PointerEvent) => {
+      const pct = ((moveEvent.clientX - rect.left) / rect.width) * 100
+      const clamped = Math.min(75, Math.max(25, pct))
+      splitRef.current = clamped
+      setSplitPct(clamped)
+    }
+    const handleUp = () => {
+      window.removeEventListener('pointermove', handleMove)
+      window.removeEventListener('pointerup', handleUp)
+      window.localStorage.setItem('md-converter:split-pct', String(splitRef.current))
+    }
+    window.addEventListener('pointermove', handleMove)
+    window.addEventListener('pointerup', handleUp)
+  }, [])
+
   return (
     <div className="mdc-bg flex h-screen flex-col overflow-hidden text-[var(--on-surface)]">
       <header className="mdc-panel m-3 mb-2 rounded-xl border px-4 py-3 text-[var(--on-surface)]">
@@ -281,8 +308,11 @@ export default function MdConverter() {
         )}
       </header>
 
-      <main className="grid min-h-0 flex-1 grid-cols-1 gap-3 px-3 pb-3 lg:grid-cols-2">
-        <section className="mdc-panel flex min-h-0 flex-col overflow-hidden rounded-xl border">
+      <main ref={mainRef} className="flex min-h-0 flex-1 px-3 pb-3">
+        <section
+          style={{ width: `${splitPct}%` }}
+          className="mdc-panel flex min-h-0 min-w-0 flex-col overflow-hidden rounded-xl border"
+        >
           <div className="flex h-11 shrink-0 items-center justify-between border-b border-[var(--outline-variant)] px-4">
             <div className="flex items-center gap-2 text-sm font-bold">
               <PanelLeft className="h-4 w-4 text-[var(--primary)]" />
@@ -319,7 +349,17 @@ export default function MdConverter() {
           )}
         </section>
 
-        <section className="mdc-panel flex min-h-0 flex-col overflow-hidden rounded-xl border">
+        <div
+          role="separator"
+          aria-orientation="vertical"
+          title="Drag to resize panels"
+          onPointerDown={startSplitResize}
+          className="group mx-1.5 flex w-1.5 shrink-0 cursor-col-resize items-center justify-center"
+        >
+          <div className="h-10 w-1 rounded-full bg-[var(--outline-variant)] transition-colors group-hover:bg-[color-mix(in_srgb,var(--primary)_55%,transparent)]" />
+        </div>
+
+        <section className="mdc-panel flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border">
           <div className="flex h-11 shrink-0 items-center justify-between border-b border-[var(--outline-variant)] px-4">
             <div className="flex items-center gap-2 text-sm font-bold">
               <PanelRight className="h-4 w-4 text-[var(--purple)]" />

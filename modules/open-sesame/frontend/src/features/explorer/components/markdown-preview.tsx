@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
 import remarkGfm from 'remark-gfm';
-import { AlertCircle, FileText } from 'lucide-react';
+import { AlertCircle, FileText, ImageOff, Loader2 } from 'lucide-react';
+import { readFile } from '@tauri-apps/plugin-fs';
 import { LoadingState } from '@os/components/ui';
 import { invoke } from '@os/lib/tauri';
+import { dirOf, isRemoteOrData, mimeFromExt, resolveLocalPath } from '@os/lib/file-kinds';
 import { MermaidDiagram } from './mermaid-diagram';
 
 interface FileContent {
@@ -25,6 +27,7 @@ interface MarkdownDocumentProps {
     size?: number;
     truncated?: boolean;
     extension?: string | null;
+    basePath?: string;
 }
 
 const markdownExtensions = new Set(['md', 'markdown', 'mdown', 'mkdn']);
@@ -80,11 +83,12 @@ export function MarkdownPreview({ filePath, fileName }: MarkdownPreviewProps) {
             size={content.size}
             truncated={content.truncated}
             extension={content.extension}
+            basePath={dirOf(filePath)}
         />
     );
 }
 
-export function MarkdownDocument({ content, fileName, size, truncated = false, extension }: MarkdownDocumentProps) {
+export function MarkdownDocument({ content, fileName, size, truncated = false, extension, basePath }: MarkdownDocumentProps) {
     const isMarkdown = useMemo(() => {
         const ext = (extension || fileName.split('.').pop() || '').toLowerCase();
         return markdownExtensions.has(ext);
@@ -106,7 +110,7 @@ export function MarkdownDocument({ content, fileName, size, truncated = false, e
             </div>
 
             <div className="mx-auto max-w-4xl p-6">
-                {isMarkdown ? <MarkdownBody content={content} /> : (
+                {isMarkdown ? <MarkdownBody content={content} basePath={basePath} /> : (
                     <pre className="overflow-x-auto whitespace-pre-wrap rounded-xl border border-[var(--outline-variant)] bg-[rgba(10,11,16,0.72)] p-4 font-mono text-sm leading-6 text-[var(--on-surface)] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02)]">
                         {content}
                     </pre>
@@ -116,7 +120,7 @@ export function MarkdownDocument({ content, fileName, size, truncated = false, e
     );
 }
 
-function MarkdownBody({ content }: { content: string }) {
+function MarkdownBody({ content, basePath }: { content: string; basePath?: string }) {
     return (
         <article className="max-w-none text-[15px] leading-7 text-[var(--on-surface-variant)]">
             <ReactMarkdown
@@ -176,6 +180,18 @@ function MarkdownBody({ content }: { content: string }) {
                             return <MermaidDiagram chart={code} />;
                         }
 
+                        // Block code (fenced / multiline): keep highlight.js token
+                        // classes and let the <pre> wrapper own the box. Only inline
+                        // code gets the rounded "pill" treatment.
+                        const isBlock = /language-/.test(className || '') || String(children).includes('\n');
+                        if (isBlock) {
+                            return (
+                                <code {...props} className={`${className || ''} md-code-block`}>
+                                    {children}
+                                </code>
+                            );
+                        }
+
                         return (
                             <code {...props} className={`${className || ''} rounded bg-[rgba(183,156,255,0.12)] px-1.5 py-0.5 font-mono text-[13px] text-[var(--primary)]`}>
                                 {children}
@@ -192,6 +208,13 @@ function MarkdownBody({ content }: { content: string }) {
                             {children}
                         </a>
                     ),
+                    img: ({ src, alt }) => (
+                        <MarkdownImage
+                            src={typeof src === 'string' ? src : undefined}
+                            alt={typeof alt === 'string' ? alt : undefined}
+                            basePath={basePath}
+                        />
+                    ),
                 }}
             >
                 {content}
@@ -204,6 +227,68 @@ function formatFileSize(bytes: number): string {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function MarkdownImage({ src, alt, basePath }: { src?: string; alt?: string; basePath?: string }) {
+    const [resolved, setResolved] = useState<string | null>(src && isRemoteOrData(src) ? src : null);
+    const [failed, setFailed] = useState(false);
+
+    useEffect(() => {
+        if (!src) {
+            setFailed(true);
+            return;
+        }
+        if (isRemoteOrData(src)) {
+            setResolved(src);
+            setFailed(false);
+            return;
+        }
+        let cancelled = false;
+        let objectUrl: string | null = null;
+        setResolved(null);
+        setFailed(false);
+        const abs = resolveLocalPath(basePath ?? '', src);
+        readFile(abs)
+            .then((bytes) => {
+                if (cancelled) return;
+                objectUrl = URL.createObjectURL(new Blob([bytes], { type: mimeFromExt(abs) }));
+                setResolved(objectUrl);
+            })
+            .catch(() => {
+                if (!cancelled) setFailed(true);
+            });
+        return () => {
+            cancelled = true;
+            if (objectUrl) URL.revokeObjectURL(objectUrl);
+        };
+    }, [src, basePath]);
+
+    if (failed) {
+        return (
+            <span className="my-2 inline-flex items-center gap-1.5 rounded-md border border-[var(--outline-variant)] bg-[rgba(255,255,255,0.03)] px-2 py-1 text-xs text-[var(--on-surface-variant)]">
+                <ImageOff className="h-3.5 w-3.5 shrink-0" />
+                {alt || 'image unavailable'}
+            </span>
+        );
+    }
+
+    if (!resolved) {
+        return (
+            <span className="my-2 inline-flex items-center gap-1.5 rounded-md border border-[var(--outline-variant)] bg-[rgba(255,255,255,0.03)] px-2 py-1 text-xs text-[var(--on-surface-variant)]">
+                <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin" />
+                {alt || 'loading image'}
+            </span>
+        );
+    }
+
+    return (
+        <img
+            src={resolved}
+            alt={alt ?? ''}
+            loading="lazy"
+            className="my-4 h-auto max-w-full rounded-xl border border-[var(--outline-variant)]"
+        />
+    );
 }
 
 function looksLikeMermaid(code: string): boolean {
