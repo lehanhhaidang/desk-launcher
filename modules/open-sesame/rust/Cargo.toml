@@ -34,3 +34,6 @@ async-trait = "0.1"
 keyring = "2"
 
 launcher-paths = { path = "../../../crates/launcher-paths" }
+
+[dev-dependencies]
+tempfile = "3"
