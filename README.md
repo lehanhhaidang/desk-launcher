@@ -206,6 +206,23 @@ To skip this step in CI or when managing sidecars yourself, set:
 $env:SKIP_SIDECARS = "1"
 ```
 
+## Releasing
+
+A GitHub Actions workflow (`.github/workflows/release.yml`) builds the Windows installer and publishes a GitHub Release when you push a version tag (`v*`):
+
+1. Bump `version` in `apps/launcher/src-tauri/tauri.conf.json` and `package.json` (e.g. `0.1.0` → `0.2.0`) and merge to `main`.
+2. Tag and push:
+
+   ```powershell
+   git tag v0.2.0
+   git push origin v0.2.0
+   ```
+
+3. The `release` job builds on `windows-latest` (running `npm run sidecars` for the bundled `yt-dlp.exe`/`ffmpeg.exe`) and attaches the NSIS `.exe` to a **draft** Release.
+4. Open the **Releases** tab and click **Publish**.
+
+The tag must match the app version in `tauri.conf.json` (the workflow fails otherwise). No secrets are needed — it uses the automatic `GITHUB_TOKEN`. The installer is currently **unsigned**, so Windows SmartScreen may warn about an unknown publisher.
+
 ## Adding a Module
 
 See **[ADDING-A-MODULE.md](ADDING-A-MODULE.md)** for the full 14-step walkthrough with example code.

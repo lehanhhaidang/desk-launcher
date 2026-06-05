@@ -58,7 +58,7 @@ Nhấn **Device Paths** trên toolbar để chọn nơi tài liệu sẽ nằm t
 
 1. Nhấn **Select Whole Repo** để check toàn bộ tree.
 2. Ở panel phải, nhấn **Path** để browse chọn local folder.
-3. Nhấn **Confirm Mapping**.
+3. Nhấn **Push from local** (local thắng) hoặc **Pull from repo** (repo thắng).
 
 ### Advanced Mapping
 
@@ -67,40 +67,35 @@ Cho trường hợp nhiều folder cần map vào nhiều local path khác nhau:
 1. **Panel trái — Repo tree**: check các folder/file muốn map.
 2. **Panel phải — Chi tiết**: cấu hình từng item:
    - **Local path**: browse hoặc nhập đường dẫn.
-   - **Sync mode**: chọn chiều đồng bộ.
-   - **Enabled**: bật/tắt mapping.
-3. Nhấn **Confirm Mapping**.
+   - **Enabled**: bật/tắt việc sync source này trên máy này.
+3. Nhấn **Push from local** hoặc **Pull from repo** để áp dụng (xem dưới).
 
-### Các Chế Độ Sync
+### Push From Local vs Pull From Repo
 
-| Chế độ | Hành vi |
+Khi confirm mapping, bạn chọn bên nào thắng ngay lúc đó. Cả hai đều theo hướng
+và **không bao giờ xóa** file riêng của bên kia:
+
+| Hành động | Hành vi |
 | --- | --- |
-| Two-way | Thay đổi sync 2 chiều. |
-| Local to mirror | Chỉ push local → mirror. |
-| Mirror to local | Chỉ pull mirror → local. |
-| Keep in mirror only | File chỉ ở trong mirror, không map ra local. |
+| **Push from local** | Máy này thắng — file local ghi đè mirror khi xung đột. File chỉ có ở repo được giữ. |
+| **Pull from repo** | Repo thắng — mirror ghi đè file local khi xung đột. File chỉ có ở máy này được giữ. |
 
-### Preflight Check
+Sau lựa chọn ban đầu này, source là 2 chiều: dùng nút **Pull** / **Push** trên toolbar (hoặc auto-sync) cho việc sync hằng ngày.
 
-Khi map vào path đã có file, app so sánh 2 bên:
+### Preview Tác Động
 
-| Metric | Ý nghĩa |
+Khi Push/Pull sẽ thay đổi file đang có, một bản preview hiện ra trước để bạn
+thấy chính xác chuyện gì xảy ra trước khi xác nhận. Theo hướng bạn chọn:
+
+| Cột | Ý nghĩa |
 | --- | --- |
-| Same | Files giống hệt. |
-| Only in repo | Files chỉ có trong mirror. |
-| Only local | Files chỉ có ở local. |
-| Conflicts | Cùng tên nhưng khác nội dung. |
+| **Overwrite** | File khác nội dung — bên thắng ghi đè bên thua. |
+| **Add** | File được mang sang từ bên thắng. |
+| **Keep** | File chỉ có ở bên thua — giữ nguyên (không bao giờ xóa). |
 
-Rồi chọn cách xử lý:
+Danh sách file bị ảnh hưởng được liệt kê; nhấn **Push from local** / **Pull from repo** để áp dụng, hoặc **Cancel**. Nếu không có gì khác biệt, mapping được áp dụng luôn không cần hỏi.
 
-| Option | Hành vi |
-| --- | --- |
-| Map Only | Chỉ ghi nhận mapping, không copy file. Sync bắt đầu từ lần push/pull sau. |
-| Import Local | Copy local → mirror. Local là source of truth, changes chờ push. |
-| Keep Both | Merge 2 bên, không xóa gì. Cả local và mirror đều có tất cả files. |
-| Use Repo Mirror | Copy mirror → local. Repo là source of truth, ghi đè local. |
-
-> **Mẹo:** Nếu tất cả files đều SAME và 0 conflicts → chọn **Map Only** là đủ.
+> Push/Pull không bao giờ xóa file — chỉ khác ở chỗ bên nào thắng khi file xung đột.
 
 ### Thêm Local Folder Mới Vào Repo
 
@@ -139,6 +134,12 @@ Rồi chọn cách xử lý:
 - Tự động push mỗi 5 phút khi có thay đổi.
 - Nếu có lỗi/conflict → tắt auto sync và hiện notification.
 - Auto sync chỉ push — bạn cần pull thủ công.
+
+### Pull Khi Mở / Push Khi Đóng
+
+- Khi mở Open Sesame, một hộp thoại mời **Pull** bản mới nhất từ mọi doc set đã kết nối để bạn bắt đầu ở trạng thái đồng bộ.
+- Khi đóng cửa sổ, một hộp thoại mời **Push** thay đổi trước. Nó hiện tiến độ, báo kết quả, rồi đóng sau vài giây đếm ngược. Nếu push lỗi, cửa sổ ở lại để không mất gì.
+- Mấy hộp thoại này tách biệt với **Auto Sync** — bật/tắt Auto không ảnh hưởng tới chúng.
 
 ### Force Push / Force Pull
 
@@ -194,10 +195,10 @@ Tính năng hỗ trợ:
 - Tables (GitHub Flavored Markdown)
 - Code blocks với syntax highlighting
 - Mermaid diagrams (` ```mermaid `)
-- Links, images, task lists
-- Bold, italic, strikethrough
+- Links, task lists, bold/italic/strikethrough
+- **Ảnh inline**, kể cả file ảnh local được tham chiếu trong tài liệu
 
-Files không phải markdown (.txt, .json, .yaml, etc.) hiển thị dạng plain text.
+File text/code (.txt, .json, .yaml, etc.) hiển thị dạng plain text. Bấm vào file **ảnh** sẽ mở trong viewer inline; **file nhị phân khác** (Word, Excel, PowerPoint, PDF, …) mở bằng app mặc định của hệ điều hành.
 
 ### Tìm Kiếm
 
@@ -216,7 +217,7 @@ Trên máy mới:
 3. Mở **Device Paths**.
 4. Chọn toàn bộ repo hoặc từng folder.
 5. Chọn local paths cho máy hiện tại.
-6. Dùng preflight để quyết định cách xử lý files đã có.
+6. Với mỗi mapping chọn **Pull from repo** (repo thắng); preview tác động hiện những gì sẽ thay đổi.
 
 GitHub là nguồn dữ liệu chung, nhưng mỗi thiết bị vẫn dùng cấu trúc folder local riêng.
 

@@ -126,6 +126,23 @@ Nếu muốn bỏ qua bước này trong CI hoặc tự quản lý sidecar:
 $env:SKIP_SIDECARS = "1"
 ```
 
+## Phát Hành (Release)
+
+GitHub Actions (`.github/workflows/release.yml`) build installer Windows và tạo GitHub Release khi bạn push tag version (`v*`):
+
+1. Bump `version` trong `apps/launcher/src-tauri/tauri.conf.json` và `package.json` (vd `0.1.0` → `0.2.0`) rồi merge vào `main`.
+2. Tag và push:
+
+   ```powershell
+   git tag v0.2.0
+   git push origin v0.2.0
+   ```
+
+3. Job `release` build trên `windows-latest` (chạy `npm run sidecars` để có `yt-dlp.exe`/`ffmpeg.exe`) và đính file NSIS `.exe` vào một Release **nháp**.
+4. Mở tab **Releases** → bấm **Publish**.
+
+Tag phải khớp version trong `tauri.conf.json` (không khớp thì workflow tự fail). Không cần secret nào — dùng `GITHUB_TOKEN` tự động. Installer hiện **chưa ký số** nên Windows SmartScreen có thể cảnh báo "unknown publisher".
+
 ## Thêm module mới
 
 1. **Tạo Rust plugin** `modules/<id>/rust/` (Cargo.toml, build.rs, permissions/default.toml, src/lib.rs với `Builder::new("<id>")`)
