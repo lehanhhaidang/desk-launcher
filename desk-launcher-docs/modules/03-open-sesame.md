@@ -140,6 +140,8 @@ Open Sesame is the largest Desk Launcher module: a project-documentation workspa
 | `doc_set_refresh_mirror` | `doc_set_id` | Copy enabled local sources → mirror; returns file count. |
 | `doc_set_restore_local_from_mirror` | `doc_set_id` | Copy enabled mirror sources → local; returns file count. |
 | `doc_set_keep_both_local_changes` | `input: MappingPreflightInput` | Keep-both: copy new/conflicting local files into mirror (conflicts as unique copies). |
+| `doc_set_push_from_local` | `doc_set_id` | **Directional reconcile** — force-copy enabled local sources → mirror (local wins; overwrites conflicts, keeps repo-only files, never deletes). Backs the mapping "Push from local" action. |
+| `doc_set_pull_from_repo` | `doc_set_id` | **Directional reconcile** — force-copy enabled mirror sources → local (repo wins; overwrites conflicts, keeps local-only files, never deletes). Backs the mapping "Pull from repo" action. |
 | `doc_set_watch_start` | `doc_set_id` | Start a `notify` watcher on mirror + mapped local paths (debounced `fs:change`). |
 | `doc_set_watch_stop` | `doc_set_id` | Drop the watcher. |
 | `config_export` | `workspace_ids` | Serialize selected workspaces' doc-sets → `ExportConfig`. |
@@ -180,7 +182,7 @@ Open Sesame is the largest Desk Launcher module: a project-documentation workspa
 - `features/workspace/` — `workspace-content.tsx` is the main shell (sidebar + active doc-set explorer + modals); `workspace-dashboard`, `workspace-overview`, `workspace-list`, `workspace-form`. `hooks/use-workspaces.ts` for CRUD + auto-select-first.
 - `features/doc-set/` — `doc-set-card`, `doc-set-form` (create flow). `hooks/use-doc-sets.ts` for list/create/delete.
 - `features/explorer/` — `explorer-layout.tsx` (resizable tree + preview; routes file clicks by kind via `lib/file-kinds.ts` → inline text preview / image viewer / OS default app; listens to `fs:change`/`sync:update` to refresh), `file-tree` (git-status icons), `markdown-preview` (react-markdown + rehype-highlight + remark-gfm; renders inline local images by reading bytes → blob URL, and renders block vs inline code correctly), `image-preview` (standalone image viewer, bytes → blob URL), `mermaid-diagram` (lazy-loaded mermaid, strict security), `search-bar`.
-- `features/sync/` — `sync-controls` (up/down/force buttons), `sync-history`, `github-remote-setup-modal`, `source-mapping-modal` + `MappingTree`/`SelectedMappingPanel`/`MappingPreflightDialog` (the mapping/preflight UI), plus `source-mapping-types.ts`/`source-mapping-utils.ts`. `hooks/use-sync.ts` wraps the 4 sync commands + `sync_status` and subscribes to `sync:update`.
+- `features/sync/` — `sync-controls` (up/down/force buttons), `sync-history`, `github-remote-setup-modal`, `source-mapping-modal` + `MappingTree`/`SelectedMappingPanel` (two directional actions: **Push from local** / **Pull from repo**) + `MappingPreflightDialog` (directional impact preview — overwrite/add/keep), plus `source-mapping-types.ts`/`source-mapping-utils.ts`. `session-sync-gate.tsx` (mounted in `App.tsx`, backed by `use-session-sync.ts`) shows pull-on-open / push-on-close confirm modals. `hooks/use-sync.ts` wraps the per-doc-set sync commands + `sync_status` and subscribes to `sync:update`.
 - `features/help/` — `help-modal.tsx` renders bundled EN/VI guide Markdown (`?raw` imports) via the Markdown renderer.
 
 ### Lib / Layout
@@ -191,7 +193,7 @@ Open Sesame is the largest Desk Launcher module: a project-documentation workspa
 - `hooks/use-tauri-event.ts` — generic subscribe-with-cleanup hook.
 - `components/layout/app-layout.tsx` — sidebar + `WorkspaceContent`; `sidebar.tsx` — workspace switcher.
 - `components/ui/*` — shadcn-style primitives: `button`, `input`, `select`, `modal`, `dialog` (Radix), `spinner`/`LoadingState`/`LoadingSkeleton`; barrel-exported via `index.ts`.
-- `App.tsx` / `main.tsx` — router gate (LoginScreen vs AppLayout) and React root.
+- `App.tsx` / `main.tsx` — router gate (LoginScreen vs `SessionSyncGate` → AppLayout) and React root.
 - `types/models.ts` — TS mirrors of all Rust models/DTOs; `types/errors.ts` — `AppError` shape.
 
 ---
@@ -238,7 +240,7 @@ Think of each doc-set as: **local source folder(s) ↔ managed git mirror (`~/.o
 
 - **Creation**: `doc_set_create` validates the source dir, `mirror_service::copy_to_staging` snapshots it into the mirror (skipping `.git`/`node_modules`/`.open-sesame`/etc.), writes the manifest + a default two-way mapping, and inserts the row (status `idle`, no remote yet). `strategy_detector` informs the UI but the stored strategy is always `Mirrored`.
 - **Remote setup**: `doc_set_setup_github_remote` either creates a new GitHub repo (`repo_service::create_github_repo`, name slugified) or links an existing validated `.git` URL, then `GitProvider::init_local` wires the `origin` remote. Persists `remote_url`/`branch`.
-- **Mapping & preflight** (per device): the user maps each manifest source to a local path and a `SyncDirection`. Before committing, `doc_set_mapping_preflight` hashes mirror vs local and classifies into `same`/`only_mirror`/`only_local`/`conflicts`, yielding a status `empty`|`safe`|`needs_decision`|`has_conflicts`. The UI then chooses: restore-from-mirror, import-local, or **keep-both** (`doc_set_keep_both_local_changes` copies new local files in, and conflicting files as `*-local-copy` variants). `doc_set_set_source_mapping` saves the mapping into `device.local.json` and sets `has_mapping`.
+- **Mapping & reconcile** (per device): the user maps each manifest source to a local path, then picks one of two directional actions. `doc_set_mapping_preflight` hashes mirror vs local (`same`/`only_mirror`/`only_local`/`conflicts`) and, when anything differs, the UI shows a directional impact preview (overwrite/add/keep) before applying. **Push from local** (`doc_set_push_from_local`) force-copies local→mirror (local wins); **Pull from repo** (`doc_set_pull_from_repo`) force-copies mirror→local (repo wins). Both overwrite conflicts in the chosen direction and **never delete** the other side's unique files. `doc_set_set_source_mapping` saves the mapping (`direction` always `two_way`) into `device.local.json` and sets `has_mapping`. _(The older 4-way `SyncDirection` and the keep-both/import/restore preflight actions remain in the backend for back-compat but are no longer surfaced.)_
 - **Sync state machine** (`sync_service`): each op sets `doc_sets.status = syncing` (guards against concurrent sync), releases the DB lock, then runs the provider over the mirror, and finally records `last_commit`/`last_synced_at` (success) or `status = error`, plus a `sync_logs` row. Events `sync:update {started|completed|failed}` bracket the op.
   - **sync_up**: if mirror is clean, first copy enabled local→mirror (respecting direction, excluding sibling sub-source dirs); commit the mirror (excluding `.open-sesame`); push. A non-fast-forward push returns a `diverged` `SyncIssue`.
   - **sync_down**: fetch + merge-analysis. Only **up-to-date / unborn / fast-forward** are auto-applied; a true divergence returns a `Conflict` Sync error. Then copy enabled mirror→local.

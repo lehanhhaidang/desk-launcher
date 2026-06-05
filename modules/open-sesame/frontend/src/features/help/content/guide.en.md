@@ -58,7 +58,7 @@ Use **Device Paths** on the toolbar to decide where repo content should live on 
 
 1. Click **Select Whole Repo** to check the entire tree.
 2. In the right panel, click **Path** to browse for a local folder.
-3. Click **Confirm Mapping**.
+3. Click **Push from local** (your local files win) or **Pull from repo** (the repo's files win).
 
 ### Advanced Mapping
 
@@ -67,40 +67,35 @@ For multi-device setups where different folders need different local paths:
 1. **Left panel — Repo tree**: check the folders/files you want to map.
 2. **Right panel — Detail**: configure each selected item:
    - **Local path**: browse or type the path on this machine.
-   - **Sync mode**: choose the sync direction.
-   - **Enabled**: toggle the mapping on/off.
-3. Click **Confirm Mapping**.
+   - **Enabled**: toggle whether this source syncs on this device.
+3. Click **Push from local** or **Pull from repo** to apply (see below).
 
-### Sync Modes
+### Push From Local vs Pull From Repo
 
-| Mode | Behavior |
+When you confirm a mapping you choose which side wins right now. Both are
+directional and **never delete** the other side's unique files:
+
+| Action | Behavior |
 | --- | --- |
-| Two-way | Changes sync in both directions. |
-| Local to mirror | Only push local changes to the mirror. |
-| Mirror to local | Only pull mirror changes to local. |
-| Keep in mirror only | File stays in the mirror, no local path needed. |
+| **Push from local** | This device wins — your local files overwrite the repo mirror on conflicts. Files that exist only in the repo are kept. |
+| **Pull from repo** | The repo wins — the repo mirror overwrites your local files on conflicts. Files that exist only on your device are kept. |
 
-### Preflight Check
+After this initial choice the source stays two-way: use the **Pull** / **Push** toolbar buttons (or auto-sync) for day-to-day syncing.
 
-When you map to a local path that already has files, a comparison screen appears:
+### Impact Preview
 
-| Metric | Meaning |
+When Push or Pull would change existing files, a preview appears first so you
+see exactly what happens before confirming. For the direction you chose:
+
+| Column | Meaning |
 | --- | --- |
-| Same | Files identical on both sides. |
-| Only in repo | Files only in the mirror, not locally. |
-| Only local | Files only on your machine, not in the mirror. |
-| Conflicts | Same filename but different content. |
+| **Overwrite** | Files that differ — the winning side replaces the losing side. |
+| **Add** | Files brought over from the winning side. |
+| **Keep** | Files that exist only on the losing side — left untouched (never deleted). |
 
-Then choose how to handle it:
+The affected files are listed; click **Push from local** / **Pull from repo** to apply, or **Cancel**. If nothing differs, the mapping is applied without a prompt.
 
-| Option | What happens |
-| --- | --- |
-| Map Only | Only records the mapping. No files are copied. Sync starts from the next push/pull. |
-| Import Local | Copies local files into the mirror. Local becomes the source of truth — changes wait to be pushed. |
-| Keep Both | Merges both sides. Nothing is deleted. Both local and mirror get all files. |
-| Use Repo Mirror | Copies mirror files to local. The repo is the source of truth — local conflicts are overwritten. |
-
-> **Tip:** If all files are SAME and 0 conflicts, **Map Only** is sufficient.
+> Push/Pull never delete files — the only effect is who wins on conflicting files.
 
 ### Add a New Local Folder to the Repo
 
@@ -139,6 +134,12 @@ At the bottom of Device Paths, expand **"Add a new local folder into this repo"*
 - Pushes automatically every 5 minutes when changes are detected.
 - If an error or conflict occurs, auto sync is disabled and a notification appears.
 - Auto sync only pushes — you still need to pull manually.
+
+### Pull on Open / Push on Close
+
+- When you open Open Sesame, a prompt offers to **Pull** the latest from every connected doc set so you start in sync.
+- When you close the window, a prompt offers to **Push** your changes first. It shows progress, reports the result, then closes after a short countdown. If a push fails, the window stays open so nothing is lost.
+- These prompts are separate from **Auto Sync** — toggling Auto does not change them.
 
 ### Force Push / Force Pull
 
@@ -194,10 +195,10 @@ Supported features:
 - GitHub Flavored Markdown tables
 - Code blocks with syntax highlighting
 - Mermaid diagrams (` ```mermaid `)
-- Links, images, task lists
-- Bold, italic, strikethrough
+- Links, task lists, bold/italic/strikethrough
+- **Inline images**, including local image files referenced from the document
 
-Non-markdown files (.txt, .json, .yaml, etc.) are displayed as plain text.
+Text and code files (.txt, .json, .yaml, etc.) are shown as plain text. Clicking an **image** file opens it in an inline viewer; **other binary files** (Word, Excel, PowerPoint, PDF, …) open in your operating system's default app.
 
 ### Search
 
@@ -216,7 +217,7 @@ On a new computer:
 3. Open **Device Paths**.
 4. Select the whole repo or specific folders.
 5. Choose local paths for this computer.
-6. Use the preflight screen to decide how to handle existing files.
+6. For each mapping choose **Pull from repo** (repo wins); the impact preview shows what will change.
 
 This keeps GitHub as the shared source of truth while allowing every device to use different local folder locations.
 
