@@ -5832,6 +5832,7 @@ dependencies = [
  "sha2",
  "tauri",
  "tauri-plugin",
+ "tempfile",
  "thiserror 1.0.69",
  "tokio",
  "tracing",
