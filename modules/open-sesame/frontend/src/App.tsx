@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useAuth } from '@os/features/auth/hooks/use-auth';
 import { LoginScreen } from '@os/features/auth/components/login-screen';
 import { AppLayout } from '@os/components/layout/app-layout';
+import { SessionSyncGate } from '@os/features/sync/components/session-sync-gate';
 import { LoadingState } from '@os/components/ui';
 
 export default function App() {
@@ -29,7 +30,14 @@ export default function App() {
         {!isLoggedIn ? (
           <Route path="*" element={<LoginScreen />} />
         ) : (
-          <Route path="/*" element={<AppLayout />} />
+          <Route
+            path="/*"
+            element={
+              <SessionSyncGate>
+                <AppLayout />
+              </SessionSyncGate>
+            }
+          />
         )}
       </Routes>
     </BrowserRouter>

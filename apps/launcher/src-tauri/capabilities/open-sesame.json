@@ -5,6 +5,7 @@
   "windows": ["open-sesame"],
   "permissions": [
     "core:default",
+    "core:window:allow-destroy",
     "dialog:default",
     "opener:default",
     "log:default",
