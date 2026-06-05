@@ -2,12 +2,15 @@ import { useEffect, useState, useCallback } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { FileTree, type FileNode } from './file-tree';
 import { MarkdownPreview } from './markdown-preview';
+import { ImagePreview } from './image-preview';
 import { SearchBar } from './search-bar';
 import { SyncControls } from '@os/features/sync/components/sync-controls';
 import { SourceMappingPanel } from '@os/features/sync/components/source-mapping-modal';
 import { SyncHistory } from '@os/features/sync/components/sync-history';
-import { PanelLeftClose, PanelLeft, History, RefreshCw } from 'lucide-react';
+import { PanelLeftClose, PanelLeft, History, RefreshCw, ExternalLink } from 'lucide-react';
+import { openPath } from '@tauri-apps/plugin-opener';
 import { invoke } from '@os/lib/tauri';
+import { classifyFile } from '@os/lib/file-kinds';
 import { onFileChange, onSyncUpdate, type FileChangeEvent, type SyncUpdateEvent } from '@os/lib/events';
 import type { DocSet } from '@os/types/models';
 
@@ -91,42 +94,36 @@ export function ExplorerLayout({ docSet, onDocSetUpdated, initialShowMapping }: 
         refreshFiles();
     }, [sourcePath, refreshFiles]);
 
-    const handleSelectFile = useCallback((node: FileNode) => {
-        setSelectedFile(node);
+    const handleOpenExternal = useCallback((node: FileNode) => {
+        openPath(node.absolute_path).catch((err) => {
+            console.error('Failed to open file in default app', err);
+        });
     }, []);
 
-    const handleSearchSelect = useCallback(async (filePath: string) => {
-        // Create a minimal FileNode from search result
+    const handleSelectFile = useCallback((node: FileNode) => {
+        setSelectedFile(node);
+        // Binary / Office / PDF / archive files can't be previewed — hand them
+        // off to the OS default app. Images + text/code preview inline.
+        if (classifyFile(node.name) === 'external') {
+            handleOpenExternal(node);
+        }
+    }, [handleOpenExternal]);
+
+    const handleSearchSelect = useCallback((filePath: string) => {
         const parts = filePath.split('/');
         const name = parts[parts.length - 1];
-        try {
-            // Try to load the full node info
-            await invoke<FileNode>('file_tree', { sourcePath, maxDepth: 0 });
-            setSelectedFile({
-                name,
-                path: filePath,
-                absolute_path: `${sourcePath}/${filePath}`,
-                is_dir: false,
-                size: null,
-                modified: null,
-                extension: name.includes('.') ? name.split('.').pop() || null : null,
-                git_status: null,
-                children: null,
-            });
-        } catch {
-            setSelectedFile({
-                name,
-                path: filePath,
-                absolute_path: `${sourcePath}/${filePath}`,
-                is_dir: false,
-                size: null,
-                modified: null,
-                extension: name.includes('.') ? name.split('.').pop() || null : null,
-                git_status: null,
-                children: null,
-            });
-        }
-    }, [sourcePath]);
+        handleSelectFile({
+            name,
+            path: filePath,
+            absolute_path: `${sourcePath}/${filePath}`,
+            is_dir: false,
+            size: null,
+            modified: null,
+            extension: name.includes('.') ? name.split('.').pop() || null : null,
+            git_status: null,
+            children: null,
+        });
+    }, [handleSelectFile, sourcePath]);
 
     const startSidebarResize = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
         event.preventDefault();
@@ -242,10 +239,31 @@ export function ExplorerLayout({ docSet, onDocSetUpdated, initialShowMapping }: 
                                 onDocSetUpdated={onDocSetUpdated}
                             />
                         ) : selectedFile && !selectedFile.is_dir ? (
-                            <MarkdownPreview
-                                filePath={selectedFile.absolute_path}
-                                fileName={selectedFile.name}
-                            />
+                            (() => {
+                                const kind = classifyFile(selectedFile.name);
+                                if (kind === 'image') {
+                                    return (
+                                        <ImagePreview
+                                            filePath={selectedFile.absolute_path}
+                                            fileName={selectedFile.name}
+                                        />
+                                    );
+                                }
+                                if (kind === 'external') {
+                                    return (
+                                        <ExternalFilePanel
+                                            node={selectedFile}
+                                            onReopen={() => handleOpenExternal(selectedFile)}
+                                        />
+                                    );
+                                }
+                                return (
+                                    <MarkdownPreview
+                                        filePath={selectedFile.absolute_path}
+                                        fileName={selectedFile.name}
+                                    />
+                                );
+                            })()
                         ) : (
                             <div className="flex h-full items-center justify-center text-sm font-medium text-[var(--on-surface-variant)]">
                                 Select a file to preview
@@ -265,6 +283,28 @@ export function ExplorerLayout({ docSet, onDocSetUpdated, initialShowMapping }: 
                         </div>
                     )}
                 </div>
+            </div>
+        </div>
+    );
+}
+
+function ExternalFilePanel({ node, onReopen }: { node: FileNode; onReopen: () => void }) {
+    return (
+        <div className="flex h-full items-center justify-center p-6">
+            <div className="soft-panel flex max-w-sm flex-col items-center gap-3 rounded-xl border p-6 text-center">
+                <ExternalLink className="h-8 w-8 text-[var(--primary)]" />
+                <div className="text-sm text-[var(--on-surface)]">
+                    <span className="font-bold">{node.name}</span> was opened in your default app.
+                </div>
+                <p className="text-xs text-[var(--on-surface-variant)]">
+                    This file type can&apos;t be previewed here.
+                </p>
+                <button
+                    onClick={onReopen}
+                    className="rounded-lg border border-[var(--outline-variant)] bg-[var(--surface-bright)] px-3 py-1.5 text-sm font-medium text-[var(--on-surface)] transition-colors hover:text-[var(--primary)]"
+                >
+                    Open again
+                </button>
             </div>
         </div>
     );

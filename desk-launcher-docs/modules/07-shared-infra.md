@@ -1,0 +1,121 @@
+# MODULE: SHARED PACKAGES & INFRASTRUCTURE
+
+## OVERVIEW
+This is **not a business domain** — it is the cross-cutting foundation that every business module (Port Killer, Open Sesame, Comtor, Video Downloader, MD Converter) builds on. It comprises the shared React UI primitives (`packages/ui`), the Tauri/HTTP bridge helper (`packages/tauri-bridge`), the `launcher-paths` Rust crate that hands each module its own isolated data directory under `%APPDATA%\io.desklauncher\`, and the build/sidecar tooling (`scripts/ensure-sidecars.mjs`, workspace wiring in root `package.json` / `Cargo.toml` / `vite.config.ts`). It is the concrete realization of the README rule: *"Modules never talk to each other. Shared code goes in `packages/` (frontend) or `crates/` (Rust)."*
+
+---
+
+## KEY FEATURES
+- **Shared UI primitives**: shadcn/Radix-based React components (Button, Input, Card, Badge, Select, Tabs, LoadingSpinner) plus the `cn` class-merge util and a central `theme.css`, exported from one barrel and consumed via the `@desk-launcher/ui` alias.
+- **Tauri/HTTP bridge**: `@desk-launcher/tauri-bridge` provides `apiRequest`, `apiDownload`, and a runtime-detected `API_BASE_URL` (Tauri host vs. browser dev) for talking to a local backend.
+- **Per-module data isolation**: the `launcher-paths` crate resolves `%APPDATA%\io.desklauncher\modules\<id>\` for any module by id, auto-creating the dir on first use — consumed by **every** Rust module that persists state.
+- **Sidecar provisioning**: `scripts/ensure-sidecars.mjs` downloads `yt-dlp.exe` and `ffmpeg.exe` into the launcher's `binaries/` dir with a target-triple suffix before `npm run dev`/`build` (gated by `SKIP_SIDECARS`).
+- **Source-only packages via aliases**: the two frontend packages have no `package.json`; they are wired into the launcher build purely through Vite path aliases, and their peer libs live in `apps/launcher/package.json`.
+
+---
+
+## FRONTEND PACKAGES
+
+### `@desk-launcher/ui` (`packages/ui/src/`)
+Barrel: `index.ts`. All components are shadcn-style, built on `radix-ui` + `class-variance-authority`, and styled with Tailwind classes merged through `cn`. Consumed via the Vite alias `@desk-launcher/ui` → `packages/ui/src`.
+
+| Export | File | Description |
+|---|---|---|
+| `cn` | `utils.ts` | `twMerge(clsx(...))` class-name combiner used by every component. |
+| `Button`, `buttonVariants` | `components/button.tsx` | CVA button; variants (default/destructive/outline/secondary/ghost/link) and sizes (default/xs/sm/lg + icon variants); `asChild` via Radix `Slot`. |
+| `Input` | `components/input.tsx` | Styled native `<input>` wrapper. |
+| `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter` | `components/card.tsx` | Card layout primitives. (`CardAction` is defined in-file but **not** re-exported from the barrel.) |
+| `Badge` | `components/badge.tsx` | CVA pill/badge with default/secondary/destructive/outline/ghost/link variants; `asChild`. |
+| `LoadingSpinner` | `components/loading-spinner.tsx` | Spinner with `size` prop `'sm' \| 'md' \| 'lg'`. |
+| `Select`, `SelectContent`, `SelectGroup`, `SelectItem`, `SelectLabel`, `SelectSeparator`, `SelectTrigger`, `SelectValue` | `components/select.tsx` | Radix Select wrappers (scroll buttons defined internally; not exported from barrel). |
+| `Tabs`, `TabsContent`, `TabsList`, `TabsTrigger` | `components/tabs.tsx` | Radix Tabs wrappers; `TabsList` supports `default`/`line` variants. |
+
+Plus a non-JS asset: **`theme.css`** — imports Tailwind, `tw-animate-css`, `shadcn/tailwind.css`, and the full Quicksand font family (Latin + Latin-ext + Vietnamese weights), and declares the `@theme` design tokens. Loaded centrally so every module window inherits the same look; pulled in by the launcher's `main.css`.
+
+### `@desk-launcher/tauri-bridge` (`packages/tauri-bridge/src/`)
+Barrel: `index.ts`. Thin `fetch` wrappers around a local backend. Consumed via the Vite alias `@desk-launcher/tauri-bridge` → `packages/tauri-bridge/src`.
+
+| Export | File | Description |
+|---|---|---|
+| `API_BASE_URL` | `api-client.ts` | Resolved at load: `http://127.0.0.1:8000` when `__TAURI_INTERNALS__` is present (running inside the Tauri webview), else `VITE_API_URL` or `http://localhost:8000` for browser dev. |
+| `apiRequest<T>(endpoint, options?)` | `api-client.ts` | Generic JSON request (`method`, `body`, `signal`, `headers`); sets `Content-Type: application/json` when a body is present; throws `Error(detail)` on non-2xx. |
+| `apiDownload(endpoint, body, signal?)` | `api-client.ts` | POSTs JSON and returns `{ blob, filename }`, parsing `filename` from the `Content-Disposition` header (fallback `'download'`). |
+
+---
+
+## RUST CRATES
+
+### `launcher-paths` (`crates/launcher-paths/`)
+A tiny, dependency-light crate (`dirs = "5"`, workspace `thiserror`) whose entire job is to resolve per-module data directories consistently. Source: `src/lib.rs` (63 lines, all of it below). It exists so modules **do not** hard-code their own bundle identifier or call `app.path().app_data_dir()` directly — doing so would scatter their databases into folders separate from the rest of the launcher.
+
+| Public item | Signature | Description |
+|---|---|---|
+| `LAUNCHER_IDENTIFIER` | `pub const &str = "io.desklauncher"` | The launcher's bundle id; must stay in sync with `tauri.conf.json`. |
+| `PathError` | `pub enum { NoDataDir, Io(std::io::Error) }` | `thiserror` error type. `NoDataDir` = OS data dir unresolvable; `Io` = `create_dir_all` failure (via `#[from]`). |
+| `launcher_data_dir()` | `fn() -> Result<PathBuf, PathError>` | Root dir matching Tauri's `app_data_dir()`: `%APPDATA%\io.desklauncher\` (Win), `~/.local/share/io.desklauncher/` (Linux), `~/Library/Application Support/io.desklauncher/` (macOS). Calls `create_dir_all` so the dir exists on return. |
+| `module_data_dir(module_id)` | `fn(&str) -> Result<PathBuf, PathError>` | `<launcher_data_dir>/modules/<module_id>/`, auto-created. The primary entry point every module uses. |
+| `module_data_file(module_id, filename)` | `fn(&str, &str) -> Result<PathBuf, PathError>` | Convenience: `module_data_dir(id).join(filename)`; parent dir auto-created. |
+
+Data dir convention: the OS app-data root is derived once from `dirs::data_dir()` + `LAUNCHER_IDENTIFIER`. Each module is namespaced under `modules\<id>\`, e.g. `%APPDATA%\io.desklauncher\modules\comtor\` (holds `vcomtor.db`, `audio\`, `settings.json`), `...\modules\open-sesame\` (`data.db`), etc. Launcher-level state (`launcher.toml`, migration markers) sits at the root next to `modules\`. Directories are created lazily on the first resolving call, so there is no separate setup step.
+
+---
+
+## BUILD & TOOLING
+
+### Workspace wiring
+- **Root `package.json`** — npm workspaces are **`apps/*` only** (the `packages/*` dirs are *not* npm workspaces; they're source folders resolved by Vite alias). Scripts: `sidecars` (runs the sidecar script), `dev` = `sidecars && tauri dev`, `build` = `sidecars && tauri build`, plus `frontend:dev`/`frontend:build`/`tauri` which delegate to the `@desk-launcher/launcher` workspace. So **every** `npm run dev`/`build` provisions sidecars first.
+- **Root `Cargo.toml`** — Cargo workspace (`resolver = "2"`). Members: `apps/launcher/src-tauri`, `crates/launcher-paths`, and each module's `modules/<id>/rust`. Shared `workspace.package` (`edition = "2021"`, `rust-version = "1.77.2"`, authors) and `workspace.dependencies` (tauri 2.10, tauri-build 2.5.4, serde, serde_json, log, anyhow, thiserror) that modules inherit via `{ workspace = true }`.
+- **Vite shared aliases** (`apps/launcher/vite.config.ts`) — `@desk-launcher/ui` → `packages/ui/src`, `@desk-launcher/tauri-bridge` → `packages/tauri-bridge/src`, and `@modules` → `modules/`. (The launcher doc covers the full alias list, including per-module `@os`/`@cmt`/`@vid`/`@mdc`/`@pk` and the multi-page `rollupOptions.input`.) Because these packages ship no `package.json`, their runtime deps (`clsx`, `class-variance-authority`, `radix-ui`, `tailwind-merge`, `lucide-react`, `@fontsource/quicksand`, etc.) are declared in `apps/launcher/package.json`.
+
+### Sidecar provisioning — `scripts/ensure-sidecars.mjs`
+A standalone Node ESM script (no deps beyond `node:` built-ins). Hard-coded `targetTriple = x86_64-pc-windows-msvc` (Windows-first). It ensures two binaries exist under `apps/launcher/src-tauri/binaries/` with the triple suffix Tauri requires for sidecars:
+- **yt-dlp** → `yt-dlp-x86_64-pc-windows-msvc.exe`, downloaded directly from the yt-dlp GitHub "latest" release (follows 30x redirects).
+- **ffmpeg** → `ffmpeg-x86_64-pc-windows-msvc.exe`: downloads gyan.dev's `ffmpeg-release-essentials.zip` to a temp dir, expands it via PowerShell `Expand-Archive`, recursively locates `ffmpeg.exe`, copies it into `binaries/`, and cleans up the temp dir.
+
+Each binary is skipped if it already exists and is non-empty (`hasFile`). Setting **`SKIP_SIDECARS=1`** short-circuits the whole script (`process.exit(0)`) — useful in CI or offline builds. Triggered automatically as the first step of `npm run dev` and `npm run build`.
+
+---
+
+## CONSUMED BY
+
+| Shared piece | Consumers |
+|---|---|
+| `launcher-paths` crate | **All Rust crates that persist state**: launcher host (`apps/launcher/src-tauri`), Comtor (`audio.rs`, `db.rs`, `settings.rs`), Open Sesame (`utils/paths.rs`), Video Downloader (`paths.rs`). Port Killer and MD Converter do **not** depend on it (no on-disk state). |
+| `@desk-launcher/ui` | All module frontends + the launcher dashboard. Verified imports: launcher `Dashboard.tsx` / `ModuleCard.tsx`, MD Converter `MdConverter.tsx` / `SingleTab.tsx` / `BatchTab.tsx`. Other module frontends consume it via the same alias. |
+| `@desk-launcher/tauri-bridge` | Module frontends that call a local HTTP backend (wired via the Vite alias). |
+| Sidecars (`yt-dlp`, `ffmpeg`) | **Video Downloader** only — it is the only module that shells out to these CLI binaries. |
+| `theme.css` | The launcher (`apps/launcher/src/main.css`) → applies to every module window. |
+
+---
+
+## TRIGGERS & SIDE EFFECTS (hidden flows)
+
+### Inbound
+- `npm run dev` / `npm run build` → invoke `scripts/ensure-sidecars.mjs` before launching/bundling Tauri.
+- Any Rust module command that needs storage → calls `launcher_paths::module_data_dir(<id>)` (e.g. Comtor opening its SQLite DB, Video Downloader resolving its output/temp dir).
+- The launcher's CSS pipeline → imports `packages/ui/src/theme.css`, which pulls Tailwind, animations, shadcn tokens, and the Quicksand font set.
+
+### Outbound
+- **Filesystem**: `launcher-paths` creates per-module data dirs (`create_dir_all`) under `%APPDATA%\io.desklauncher\modules\<id>\` on first call; the sidecar script creates `binaries/` and a temp ffmpeg work dir.
+- **Network**: the sidecar script downloads binaries from `github.com/yt-dlp` and `gyan.dev` at dev/build time (the only place this shared layer reaches the network).
+- **Subprocess**: the sidecar script spawns PowerShell `Expand-Archive` to unpack the ffmpeg zip.
+
+---
+
+## NOTES / GOTCHAS
+- **"Modules never talk to each other"** (README) — this layer *is* the sanctioned sharing channel. Cross-module reuse goes through `packages/` (frontend) or `crates/` (Rust), never module-to-module imports.
+- **Bundled binaries are gitignored** — `.gitignore` excludes `apps/launcher/src-tauri/binaries/`, so a fresh clone has no `yt-dlp`/`ffmpeg` until the sidecar script runs.
+- **Target-triple naming is mandatory** — Tauri matches sidecars by the `-x86_64-pc-windows-msvc.exe` suffix; renaming breaks resolution. The triple is hard-coded (Windows-first project).
+- **Frontend packages have no `package.json`** — `packages/ui` and `packages/tauri-bridge` are source-only, resolved by Vite alias; they are *not* npm workspaces (only `apps/*` is). Their peer deps live in `apps/launcher/package.json`.
+- **First-call dir creation** — `launcher-paths` functions always `create_dir_all`, so they double as setup; never assume the dir is missing.
+- **Always pass `module_data_dir` your real module id** — hard-coding a different bundle identifier or calling Tauri's `app_data_dir()` directly is exactly what this crate exists to prevent.
+- **`CardAction` and the Select scroll buttons** are implemented but intentionally not re-exported from their barrels — import the listed exports only.
+
+---
+
+## RELATED MODULES
+- [01-launcher-host](./01-launcher-host.md) — consumes shared packages & registers modules
+- [02-port-killer](./02-port-killer.md), [03-open-sesame](./03-open-sesame.md), [04-comtor](./04-comtor.md), [05-video-downloader](./05-video-downloader.md), [06-md-converter](./06-md-converter.md) — all consume this shared layer
+
+---
+_Last updated: 2026-06-05 · Synced: desk-launcher@acbb5c5 · Format: v1_

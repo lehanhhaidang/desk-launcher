@@ -307,3 +307,10 @@ button {
     @apply font-sans;
   }
 }
+
+/* Markdown code blocks: the <pre> wrapper owns the box; drop highlight.js's own
+   background/padding so block code isn't double-boxed and token colors show. */
+.hljs.md-code-block {
+  background: transparent;
+  padding: 0;
+}

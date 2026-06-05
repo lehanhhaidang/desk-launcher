@@ -27,7 +27,8 @@
     {
       "identifier": "opener:allow-open-path",
       "allow": [
-        { "path": "$HOME/.open-sesame/**" }
+        { "path": "$HOME/.open-sesame/**" },
+        { "path": "$HOME/**" }
       ]
     },
     {
