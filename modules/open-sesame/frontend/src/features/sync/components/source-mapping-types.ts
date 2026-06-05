@@ -1,4 +1,4 @@
-import type { MappingPreflight, SourceSyncDirection } from '@os/types/models';
+import type { MappingPreflight } from '@os/types/models';
 
 export interface FileNode {
     name: string;
@@ -9,9 +9,12 @@ export interface FileNode {
     children: FileNode[] | null;
 }
 
+/** The two directional reconcile actions the mapping UI offers. */
+export type MappingAction = 'push' | 'pull';
+
 export interface MappingPreflightRequest {
     node: FileNode;
     localPath: string;
-    direction: SourceSyncDirection;
+    action: MappingAction;
     preflight: MappingPreflight;
 }

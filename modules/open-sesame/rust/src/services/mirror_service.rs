@@ -87,6 +87,80 @@ pub fn copy_from_staging_with_excludes(
     copy_to_staging_with_excludes(staging, source, exclude_dirs)
 }
 
+/// Force-copy every file from `source` into `dest`, overwriting unconditionally
+/// (no mtime check) and **without** removing files that exist only in `dest`.
+/// Used by the directional reconcile (Push from local / Pull from repo): the
+/// chosen side wins on conflicts and brings its files over, but nothing is deleted.
+pub fn force_copy_with_excludes(
+    source: &Path,
+    dest: &Path,
+    exclude_dirs: &HashSet<String>,
+) -> AppResult<CopyResult> {
+    if !source.exists() {
+        return Err(crate::error::AppError::Io(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            "Source path not found",
+        )));
+    }
+
+    if source.is_file() {
+        if let Some(parent) = dest.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        fs::copy(source, dest)?;
+        return Ok(CopyResult {
+            copied: 1,
+            skipped: 0,
+            deleted: 0,
+        });
+    }
+
+    fs::create_dir_all(dest)?;
+    let mut copied = 0;
+    let mut skipped = 0;
+    force_copy_dir_recursive(source, dest, &mut copied, &mut skipped, exclude_dirs, true)?;
+    Ok(CopyResult {
+        copied,
+        skipped,
+        deleted: 0,
+    })
+}
+
+fn force_copy_dir_recursive(
+    source: &Path,
+    dest: &Path,
+    copied: &mut usize,
+    skipped: &mut usize,
+    exclude_dirs: &HashSet<String>,
+    is_top_level: bool,
+) -> AppResult<()> {
+    for entry in fs::read_dir(source)? {
+        let entry = entry?;
+        let name = entry.file_name();
+        let name_str = name.to_string_lossy();
+
+        if should_skip(&name_str) {
+            *skipped += 1;
+            continue;
+        }
+        if is_top_level && entry.path().is_dir() && exclude_dirs.contains(name_str.as_ref()) {
+            *skipped += 1;
+            continue;
+        }
+
+        let src_path = entry.path();
+        let dst_path = dest.join(&name);
+        if src_path.is_dir() {
+            fs::create_dir_all(&dst_path)?;
+            force_copy_dir_recursive(&src_path, &dst_path, copied, skipped, exclude_dirs, false)?;
+        } else {
+            fs::copy(&src_path, &dst_path)?;
+            *copied += 1;
+        }
+    }
+    Ok(())
+}
+
 fn copy_dir_recursive(
     source: &Path,
     dest: &Path,
@@ -320,5 +394,29 @@ mod tests {
             dest.join("wasabi/notes.md").exists(),
             "wasabi should not be deleted"
         );
+    }
+
+    #[test]
+    fn test_force_copy_overwrites_regardless_of_mtime_and_keeps_orphans() {
+        let tmp = TempDir::new().unwrap();
+        let source = tmp.path().join("source");
+        let dest = tmp.path().join("dest");
+        fs::create_dir_all(&source).unwrap();
+        fs::create_dir_all(&dest).unwrap();
+
+        fs::write(source.join("a.md"), "from source").unwrap();
+        // Make dest's conflicting file NEWER, to prove mtime is ignored.
+        std::thread::sleep(std::time::Duration::from_millis(20));
+        fs::write(dest.join("a.md"), "newer in dest").unwrap();
+        fs::write(dest.join("orphan.md"), "only in dest").unwrap();
+
+        let result = force_copy_with_excludes(&source, &dest, &HashSet::new()).unwrap();
+
+        // Conflict overwritten by source even though dest was newer.
+        assert_eq!(fs::read_to_string(dest.join("a.md")).unwrap(), "from source");
+        // Orphan kept (no deletion).
+        assert!(dest.join("orphan.md").exists());
+        assert_eq!(result.deleted, 0);
+        assert_eq!(result.copied, 1);
     }
 }

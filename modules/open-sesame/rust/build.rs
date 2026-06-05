@@ -31,6 +31,8 @@ const COMMANDS: &[&str] = &[
     "doc_set_refresh_mirror",
     "doc_set_restore_local_from_mirror",
     "doc_set_keep_both_local_changes",
+    "doc_set_push_from_local",
+    "doc_set_pull_from_repo",
     "doc_set_watch_start",
     "doc_set_watch_stop",
     "config_export",

@@ -144,7 +144,7 @@ pub(super) fn push_preflight_sample(
     path: String,
     kind: &str,
 ) {
-    if samples.len() >= 8 {
+    if samples.len() >= 100 {
         return;
     }
     samples.push(MappingPreflightSample {

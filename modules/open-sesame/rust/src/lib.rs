@@ -50,6 +50,8 @@ pub fn init() -> TauriPlugin<Wry> {
             commands::doc_set::doc_set_refresh_mirror,
             commands::doc_set::doc_set_restore_local_from_mirror,
             commands::doc_set::doc_set_keep_both_local_changes,
+            commands::doc_set::doc_set_push_from_local,
+            commands::doc_set::doc_set_pull_from_repo,
             commands::doc_set::doc_set_watch_start,
             commands::doc_set::doc_set_watch_stop,
             commands::doc_set::config_export,

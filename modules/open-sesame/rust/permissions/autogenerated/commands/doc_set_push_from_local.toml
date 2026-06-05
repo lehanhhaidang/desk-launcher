@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-doc-set-push-from-local"
+description = "Enables the doc_set_push_from_local command without any pre-configured scope."
+commands.allow = ["doc_set_push_from_local"]
+
+[[permission]]
+identifier = "deny-doc-set-push-from-local"
+description = "Denies the doc_set_push_from_local command without any pre-configured scope."
+commands.deny = ["doc_set_push_from_local"]

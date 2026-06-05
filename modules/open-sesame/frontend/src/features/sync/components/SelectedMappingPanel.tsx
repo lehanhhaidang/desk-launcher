@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { open } from '@tauri-apps/plugin-dialog';
-import { FolderOpen, Trash2 } from 'lucide-react';
-import { Button, Select } from '@os/components/ui';
-import type { SetSourceMappingInput, SourceMappingView, SourceSyncDirection } from '@os/types/models';
-import type { FileNode } from './source-mapping-types';
+import { ArrowDownToLine, ArrowUpFromLine, FolderOpen, Trash2 } from 'lucide-react';
+import { Button } from '@os/components/ui';
+import type { SetSourceMappingInput, SourceMappingView } from '@os/types/models';
+import type { FileNode, MappingAction } from './source-mapping-types';
 import { countChildren } from './source-mapping-utils';
 
 export function SelectedMappingPanel({
@@ -27,14 +27,12 @@ export function SelectedMappingPanel({
     disabled: boolean;
     onEnable: () => void;
     onDraftPath: (path: string) => void;
-    onConfirm: (localPath: string, direction: SourceSyncDirection) => Promise<void>;
+    onConfirm: (localPath: string, action: MappingAction) => Promise<void>;
     onUpdate: (patch: Partial<SetSourceMappingInput>) => Promise<void>;
     onRemoveFromMirror: () => void;
 }) {
     const counts = useMemo(() => countChildren(node), [node]);
     const localPath = draftLocalPath ?? source?.mapping.local_path ?? mappedLocalPath ?? '';
-    const direction = source?.mapping.direction || 'two_way';
-    const requiresLocalPath = direction !== 'mirror_only';
     const canRemoveFromMirror = node.git_status === 'untracked';
 
     const browseLocal = async () => {
@@ -44,7 +42,7 @@ export function SelectedMappingPanel({
         }
     };
 
-    if (!pending && !mappedLocalPath && direction !== 'mirror_only') {
+    if (!pending && !mappedLocalPath) {
         return (
             <div className="p-1">
                 <p className="text-sm font-bold text-[var(--on-surface)]">{node.name}</p>
@@ -95,51 +93,22 @@ export function SelectedMappingPanel({
                     Local path on this device
                 </label>
                 <div className="grid gap-2 md:grid-cols-[1fr_auto]">
-                <input
-                    value={localPath}
-                    onChange={(event) => onDraftPath(event.target.value)}
-                    placeholder={node.is_dir ? 'Choose a local folder...' : 'Choose a local file path...'}
-                    disabled={disabled || !requiresLocalPath}
-                    className="h-8 min-w-0 rounded-md border border-[var(--outline-variant)] bg-[var(--surface-container-highest)] px-3 text-sm text-[var(--on-surface)]"
-                />
-                <Button variant="outline" onClick={browseLocal} disabled={disabled || !requiresLocalPath}>
-                    <FolderOpen className="h-4 w-4" />
-                    Path
-                </Button>
+                    <input
+                        value={localPath}
+                        onChange={(event) => onDraftPath(event.target.value)}
+                        placeholder={node.is_dir ? 'Choose a local folder...' : 'Choose a local file path...'}
+                        disabled={disabled}
+                        className="h-8 min-w-0 rounded-md border border-[var(--outline-variant)] bg-[var(--surface-container-highest)] px-3 text-sm text-[var(--on-surface)]"
+                    />
+                    <Button variant="outline" onClick={browseLocal} disabled={disabled}>
+                        <FolderOpen className="h-4 w-4" />
+                        Path
+                    </Button>
                 </div>
             </div>
 
-            <div className="mt-3 grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]">
-                <div className="min-w-0 space-y-2">
-                    <label className="block text-xs font-bold uppercase tracking-wide text-[var(--on-surface-variant)]">
-                        Sync mode
-                    </label>
-                    <Select
-                        value={direction}
-                        disabled={disabled}
-                        onChange={(value) => {
-                            if (value === 'mirror_only') {
-                                void onUpdate({ local_path: undefined, direction: value, enabled: true });
-                                return;
-                            }
-                            void onUpdate({ direction: value });
-                        }}
-                        options={[
-                            { value: 'two_way', label: 'Two-way' },
-                            { value: 'local_to_mirror', label: 'Local to mirror' },
-                            { value: 'mirror_to_local', label: 'Mirror to local' },
-                            { value: 'mirror_only', label: 'Keep in mirror only' },
-                        ]}
-                        className="w-full"
-                    />
-                    <p className="text-xs text-[var(--on-surface-variant)]">
-                        {direction === 'mirror_only'
-                            ? 'This item stays in the repo mirror on this device and will not sync to a local path.'
-                            : 'Files will sync between the repo mirror and the local path above using this mode.'}
-                    </p>
-                </div>
-                <div className="flex items-end justify-start md:justify-end">
-                    <label className="flex h-8 items-center gap-1.5 text-xs font-bold text-[var(--on-surface-variant)]">
+            <div className="mt-3 flex items-center justify-between gap-2">
+                <label className="flex items-center gap-1.5 text-xs font-bold text-[var(--on-surface-variant)]">
                     <input
                         type="checkbox"
                         checked={source?.mapping.enabled ?? true}
@@ -147,21 +116,12 @@ export function SelectedMappingPanel({
                         onChange={(event) => void onUpdate({ enabled: event.target.checked })}
                         className="h-3.5 w-3.5 accent-[var(--primary)]"
                     />
-                    Enabled
+                    Enabled (sync this source)
                 </label>
-                </div>
-            </div>
-
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-                <Button
-                    onClick={() => void onConfirm(localPath, direction)}
-                    disabled={disabled || (requiresLocalPath && !localPath.trim())}
-                >
-                    {mappedLocalPath ? 'Update Mapping' : 'Confirm Mapping'}
-                </Button>
                 {canRemoveFromMirror && (
                     <Button
                         variant="outline"
+                        size="sm"
                         onClick={onRemoveFromMirror}
                         disabled={disabled}
                         className="border-[color-mix(in_srgb,var(--error)_38%,transparent)] text-[var(--error)] hover:bg-[color-mix(in_srgb,var(--error)_10%,transparent)]"
@@ -171,6 +131,28 @@ export function SelectedMappingPanel({
                     </Button>
                 )}
             </div>
+
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                <Button
+                    onClick={() => void onConfirm(localPath, 'push')}
+                    disabled={disabled || !localPath.trim()}
+                >
+                    <ArrowUpFromLine className="h-4 w-4" />
+                    Push from local
+                </Button>
+                <Button
+                    variant="outline"
+                    onClick={() => void onConfirm(localPath, 'pull')}
+                    disabled={disabled || !localPath.trim()}
+                >
+                    <ArrowDownToLine className="h-4 w-4" />
+                    Pull from repo
+                </Button>
+            </div>
+            <p className="mt-2 text-xs text-[var(--on-surface-variant)]">
+                <b>Push from local</b>: this device wins — local overwrites repo (repo-only files kept).{' '}
+                <b>Pull from repo</b>: repo wins — repo overwrites local (local-only files kept).
+            </p>
         </div>
     );
 }

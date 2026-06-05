@@ -226,6 +226,44 @@ pub async fn doc_set_keep_both_local_changes(
     Ok(count)
 }
 
+/// Push from local (local wins): force-copy local → mirror for every enabled
+/// source. Drops the DB lock before the filesystem copy.
+#[tauri::command]
+pub async fn doc_set_push_from_local(
+    state: tauri::State<'_, AppState>,
+    doc_set_id: String,
+) -> AppResult<usize> {
+    let doc_set = {
+        let db = state.db.lock().await;
+        doc_set_service::get_by_id(&db, &doc_set_id)?
+    };
+    let count = doc_set_manifest_service::push_from_local(&doc_set)?;
+    {
+        let db = state.db.lock().await;
+        clear_error_status(&db, &doc_set)?;
+    }
+    Ok(count)
+}
+
+/// Pull from repo (repo wins): force-copy mirror → local for every enabled
+/// source. Drops the DB lock before the filesystem copy.
+#[tauri::command]
+pub async fn doc_set_pull_from_repo(
+    state: tauri::State<'_, AppState>,
+    doc_set_id: String,
+) -> AppResult<usize> {
+    let doc_set = {
+        let db = state.db.lock().await;
+        doc_set_service::get_by_id(&db, &doc_set_id)?
+    };
+    let count = doc_set_manifest_service::pull_from_repo(&doc_set)?;
+    {
+        let db = state.db.lock().await;
+        clear_error_status(&db, &doc_set)?;
+    }
+    Ok(count)
+}
+
 #[tauri::command]
 pub async fn doc_set_watch_start(
     app_handle: AppHandle,

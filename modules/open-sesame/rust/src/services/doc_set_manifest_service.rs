@@ -20,4 +20,6 @@ pub use models::{
 pub use overview::{mapping_overview, set_source_mapping, write_manifest};
 pub use preflight::{mapping_preflight, preserve_local_changes_in_mirror};
 pub use sources::{add_mirror_source, add_source, remove_new_mirror_path};
-pub use transfer::{copy_enabled_local_to_mirror, copy_enabled_mirror_to_local};
+pub use transfer::{
+    copy_enabled_local_to_mirror, copy_enabled_mirror_to_local, pull_from_repo, push_from_local,
+};
