@@ -11,6 +11,10 @@ Allows every MySSH plugin command.
 - `allow-list-groups`
 - `allow-create-group`
 - `allow-delete-group`
+- `allow-open-session`
+- `allow-send-input`
+- `allow-resize-session`
+- `allow-close-session`
 
 ## Permission Table
 
@@ -20,6 +24,32 @@ Allows every MySSH plugin command.
 <th>Description</th>
 </tr>
 
+
+<tr>
+<td>
+
+`myssh:allow-close-session`
+
+</td>
+<td>
+
+Enables the close_session command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-close-session`
+
+</td>
+<td>
+
+Denies the close_session command without any pre-configured scope.
+
+</td>
+</tr>
 
 <tr>
 <td>
@@ -173,6 +203,84 @@ Enables the list_hosts command without any pre-configured scope.
 <td>
 
 Denies the list_hosts command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:allow-open-session`
+
+</td>
+<td>
+
+Enables the open_session command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-open-session`
+
+</td>
+<td>
+
+Denies the open_session command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:allow-resize-session`
+
+</td>
+<td>
+
+Enables the resize_session command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-resize-session`
+
+</td>
+<td>
+
+Denies the resize_session command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:allow-send-input`
+
+</td>
+<td>
+
+Enables the send_input command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-send-input`
+
+</td>
+<td>
+
+Denies the send_input command without any pre-configured scope.
 
 </td>
 </tr>

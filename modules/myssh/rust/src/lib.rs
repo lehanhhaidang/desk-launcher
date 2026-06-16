@@ -9,6 +9,7 @@ pub mod commands;
 pub mod db;
 pub mod error;
 pub mod models;
+pub mod services;
 pub mod state;
 pub mod utils;
 
@@ -28,6 +29,10 @@ pub fn init() -> TauriPlugin<Wry> {
             commands::groups::list_groups,
             commands::groups::create_group,
             commands::groups::delete_group,
+            commands::session::open_session,
+            commands::session::send_input,
+            commands::session::resize_session,
+            commands::session::close_session,
         ])
         .setup(|app, _api| {
             log::info!("myssh plugin: initializing");

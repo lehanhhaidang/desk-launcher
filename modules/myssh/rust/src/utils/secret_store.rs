@@ -27,6 +27,15 @@ pub fn resolve_secret(reference: &str) -> AppResult<String> {
         .map_err(|e| AppError::Keyring(format!("read secret: {e}")))
 }
 
+/// Fetch a host's secret by host id, returning `None` when none is stored.
+pub fn get_host_secret(host_id: &str) -> AppResult<Option<String>> {
+    match entry(host_id)?.get_password() {
+        Ok(secret) => Ok(Some(secret)),
+        Err(keyring::Error::NoEntry) => Ok(None),
+        Err(e) => Err(AppError::Keyring(format!("read secret: {e}"))),
+    }
+}
+
 /// Delete a stored secret. A missing entry is treated as success.
 pub fn delete_host_secret(reference: &str) -> AppResult<()> {
     let key = reference.strip_prefix(KEYRING_PREFIX).unwrap_or(reference);

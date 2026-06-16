@@ -1,5 +1,6 @@
 pub mod group_repo;
 pub mod host_repo;
+pub mod known_hosts_repo;
 pub mod migrations;
 
 use crate::error::{AppError, AppResult};

@@ -1,0 +1,63 @@
+import { X } from 'lucide-react'
+import { TerminalView } from './TerminalView'
+
+export interface SessionTab {
+  key: string
+  hostId: string
+  label: string
+}
+
+interface Props {
+  tabs: SessionTab[]
+  activeKey: string | null
+  onActivate: (key: string) => void
+  onClose: (key: string) => void
+}
+
+export function TerminalWorkspace({ tabs, activeKey, onActivate, onClose }: Props) {
+  return (
+    <div className="flex h-full flex-col">
+      <div className="flex items-center gap-1 overflow-x-auto border-b border-white/10 bg-black/20 px-2 py-1.5">
+        {tabs.map((tab) => (
+          <div
+            key={tab.key}
+            onClick={() => onActivate(tab.key)}
+            className={`flex cursor-pointer items-center gap-2 rounded-md px-3 py-1.5 text-sm transition ${
+              activeKey === tab.key
+                ? 'bg-cyan-300/15 text-cyan-100'
+                : 'text-[#9aa6b6] hover:bg-white/5'
+            }`}
+          >
+            <span className="max-w-[160px] truncate">{tab.label}</span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                onClose(tab.key)
+              }}
+              className="opacity-50 transition hover:opacity-100"
+              title="Close tab"
+            >
+              <X className="size-3.5" />
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* All terminals stay mounted; only the active one is visible so background
+          sessions keep streaming. visibility:hidden (not display:none) preserves
+          layout size so xterm's fit addon can still measure. */}
+      <div className="relative flex-1">
+        {tabs.map((tab) => (
+          <div
+            key={tab.key}
+            className="absolute inset-0 p-2"
+            style={{ visibility: activeKey === tab.key ? 'visible' : 'hidden' }}
+          >
+            <TerminalView hostId={tab.hostId} active={activeKey === tab.key} />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}

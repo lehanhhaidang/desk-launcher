@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { Plus, Search, Server, Pencil, Trash2, FolderPlus, TerminalSquare } from 'lucide-react'
 import { Button } from '@desk-launcher/ui'
 import { HostDialog } from './components/HostDialog'
+import { TerminalWorkspace, type SessionTab } from './terminal/TerminalWorkspace'
 import {
   createGroup,
   deleteGroup,
@@ -23,6 +24,8 @@ export default function MySSH() {
   const [editing, setEditing] = useState<Host | null>(null)
   const [newGroupOpen, setNewGroupOpen] = useState(false)
   const [newGroupName, setNewGroupName] = useState('')
+  const [tabs, setTabs] = useState<SessionTab[]>([])
+  const [activeTab, setActiveTab] = useState<string | null>(null)
 
   const refresh = useCallback(async () => {
     try {
@@ -116,8 +119,17 @@ export default function MySSH() {
   }
 
   const connect = (host: Host) => {
-    // Terminal sessions arrive in the next milestone; this wires the entry point.
-    toast.info(`Connecting to ${host.label}… (terminal lands in the next build)`)
+    const key = crypto.randomUUID()
+    setTabs((t) => [...t, { key, hostId: host.id, label: host.label }])
+    setActiveTab(key)
+  }
+
+  const closeTab = (key: string) => {
+    setTabs((prev) => {
+      const next = prev.filter((t) => t.key !== key)
+      setActiveTab((cur) => (cur === key ? (next.at(-1)?.key ?? null) : cur))
+      return next
+    })
   }
 
   return (
@@ -181,6 +193,7 @@ export default function MySSH() {
                 hosts={list}
                 selectedId={selectedId}
                 onSelect={setSelectedId}
+                onConnect={connect}
                 onDeleteGroup={() => onDeleteGroup(group)}
               />
             )
@@ -190,6 +203,7 @@ export default function MySSH() {
             hosts={grouped.get(null) ?? []}
             selectedId={selectedId}
             onSelect={setSelectedId}
+            onConnect={connect}
           />
           {hosts.length === 0 && (
             <p className="px-3 py-8 text-center text-sm text-[#7c8797]">
@@ -201,7 +215,14 @@ export default function MySSH() {
 
       {/* Main */}
       <main className="flex flex-1 flex-col">
-        {selected ? (
+        {tabs.length > 0 ? (
+          <TerminalWorkspace
+            tabs={tabs}
+            activeKey={activeTab}
+            onActivate={setActiveTab}
+            onClose={closeTab}
+          />
+        ) : selected ? (
           <div className="flex h-full flex-col p-8">
             <div className="myssh-panel rounded-xl border p-6">
               <div className="mb-4 flex items-start justify-between">
@@ -261,12 +282,14 @@ function GroupSection({
   hosts,
   selectedId,
   onSelect,
+  onConnect,
   onDeleteGroup,
 }: {
   title: string
   hosts: Host[]
   selectedId: string | null
   onSelect: (id: string) => void
+  onConnect: (host: Host) => void
   onDeleteGroup?: () => void
 }) {
   if (hosts.length === 0 && !onDeleteGroup) return null
@@ -290,6 +313,8 @@ function GroupSection({
         <button
           key={host.id}
           onClick={() => onSelect(host.id)}
+          onDoubleClick={() => onConnect(host)}
+          title="Double-click to connect"
           className={`flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left transition ${
             selectedId === host.id ? 'bg-cyan-300/12 text-cyan-100' : 'hover:bg-white/[0.04]'
           }`}

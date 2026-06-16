@@ -10,4 +10,8 @@ permissions = [
     "allow-list-groups",
     "allow-create-group",
     "allow-delete-group",
+    "allow-open-session",
+    "allow-send-input",
+    "allow-resize-session",
+    "allow-close-session",
 ]

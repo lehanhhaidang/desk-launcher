@@ -1,18 +1,25 @@
+use crate::services::ssh_client::SessionRequest;
 use rusqlite::Connection;
+use std::collections::HashMap;
 use std::sync::Arc;
-use tokio::sync::Mutex;
+use tokio::sync::{mpsc, Mutex};
 
-/// Plugin-scoped managed state. The session and forward registries are added
-/// in the terminal and port-forwarding milestones; for now the SQLite handle
-/// backs host/group/snippet metadata.
+/// Plugin-scoped managed state.
+///
+/// - `db` backs host/group/snippet metadata.
+/// - `sessions` maps a live session id to the sender that drives its SSH
+///   channel task (input, resize, close). The task itself owns the russh
+///   handle + channel.
 pub struct AppState {
     pub db: Arc<Mutex<Connection>>,
+    pub sessions: Arc<Mutex<HashMap<String, mpsc::Sender<SessionRequest>>>>,
 }
 
 impl AppState {
     pub fn new(conn: Connection) -> Self {
         Self {
             db: Arc::new(Mutex::new(conn)),
+            sessions: Arc::new(Mutex::new(HashMap::new())),
         }
     }
 }

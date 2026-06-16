@@ -9,6 +9,10 @@ const COMMANDS: &[&str] = &[
     "list_groups",
     "create_group",
     "delete_group",
+    "open_session",
+    "send_input",
+    "resize_session",
+    "close_session",
 ];
 
 fn main() {

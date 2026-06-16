@@ -295,6 +295,18 @@
       "type": "string",
       "oneOf": [
         {
+          "description": "Enables the close_session command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-close-session",
+          "markdownDescription": "Enables the close_session command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the close_session command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-close-session",
+          "markdownDescription": "Denies the close_session command without any pre-configured scope."
+        },
+        {
           "description": "Enables the create_group command without any pre-configured scope.",
           "type": "string",
           "const": "allow-create-group",
@@ -367,6 +379,42 @@
           "markdownDescription": "Denies the list_hosts command without any pre-configured scope."
         },
         {
+          "description": "Enables the open_session command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-open-session",
+          "markdownDescription": "Enables the open_session command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the open_session command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-open-session",
+          "markdownDescription": "Denies the open_session command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the resize_session command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-resize-session",
+          "markdownDescription": "Enables the resize_session command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the resize_session command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-resize-session",
+          "markdownDescription": "Denies the resize_session command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the send_input command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-send-input",
+          "markdownDescription": "Enables the send_input command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the send_input command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-send-input",
+          "markdownDescription": "Denies the send_input command without any pre-configured scope."
+        },
+        {
           "description": "Enables the update_host command without any pre-configured scope.",
           "type": "string",
           "const": "allow-update-host",
@@ -379,10 +427,10 @@
           "markdownDescription": "Denies the update_host command without any pre-configured scope."
         },
         {
-          "description": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`",
+          "description": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`\n- `allow-open-session`\n- `allow-send-input`\n- `allow-resize-session`\n- `allow-close-session`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`"
+          "markdownDescription": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`\n- `allow-open-session`\n- `allow-send-input`\n- `allow-resize-session`\n- `allow-close-session`"
         }
       ]
     }
