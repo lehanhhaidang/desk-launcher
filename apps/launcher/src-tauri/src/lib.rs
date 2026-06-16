@@ -15,7 +15,7 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_opener::init())
         // Module plugins:
-        .plugin(tauri_plugin_port_killer::init())
+        .plugin(tauri_plugin_myssh::init())
         .plugin(tauri_plugin_open_sesame::init())
         .plugin(tauri_plugin_comtor::init())
         .plugin(tauri_plugin_video_downloader::init())

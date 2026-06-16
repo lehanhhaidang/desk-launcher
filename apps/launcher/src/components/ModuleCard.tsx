@@ -1,13 +1,12 @@
 import type { ModuleDescriptor } from '../modules/registry'
 import { Button } from '@desk-launcher/ui'
 import {
-  Cable,
   Download,
   FileText,
   FolderOpen,
   Languages,
-  Plug,
   Rocket,
+  Terminal,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -27,7 +26,7 @@ type Accent = {
 }
 
 const accentMap: Record<string, Accent> = {
-  'port-killer': {
+  myssh: {
     icon: 'text-cyan-200 shadow-[0_0_18px_rgba(124,238,230,0.14)]',
     chip: 'border-cyan-200/30 bg-cyan-200/10 text-cyan-100',
     button: 'bg-cyan-200 text-[#071413] hover:bg-cyan-100',
@@ -65,7 +64,7 @@ const accentMap: Record<string, Accent> = {
 }
 
 const iconMap: Record<ModuleDescriptor['icon'], LucideIcon> = {
-  plug: Plug,
+  terminal: Terminal,
   'book-open': FolderOpen,
   languages: Languages,
   download: Download,
@@ -73,7 +72,7 @@ const iconMap: Record<ModuleDescriptor['icon'], LucideIcon> = {
 }
 
 const statusLabel: Record<string, string> = {
-  'port-killer': 'Stable',
+  myssh: 'Beta',
   'open-sesame': 'Active',
   comtor: 'Beta',
   'video-downloader': 'Ready',
@@ -81,7 +80,7 @@ const statusLabel: Record<string, string> = {
 }
 
 export function ModuleCard({ module, opening, isOpen, onOpen }: Props) {
-  const Icon = module.id === 'port-killer' ? Cable : iconMap[module.icon]
+  const Icon = iconMap[module.icon]
   const accent = accentMap[module.id] ?? accentMap['video-downloader']
   const label = isOpen ? 'Active' : statusLabel[module.id] ?? module.health
 

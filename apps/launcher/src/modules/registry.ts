@@ -5,7 +5,7 @@
 // in sync is part of adding a module.
 
 export type ModuleCategory = 'productivity' | 'media' | 'dev' | 'utility'
-export type ModuleIcon = 'plug' | 'book-open' | 'languages' | 'download' | 'file-text'
+export type ModuleIcon = 'terminal' | 'book-open' | 'languages' | 'download' | 'file-text'
 
 export interface ModuleWindowConfig {
   title: string
@@ -31,21 +31,21 @@ export interface ModuleDescriptor {
 
 export const MODULES: readonly ModuleDescriptor[] = [
   {
-    id: 'port-killer',
-    displayName: 'Port Killer',
-    shortName: 'Ports',
-    description: 'Inspect listening ports, clean up stuck processes, and manage SSH tunnels.',
-    icon: 'plug',
+    id: 'myssh',
+    displayName: 'MySSH',
+    shortName: 'SSH',
+    description: 'Termius-style SSH client: managed hosts, multi-tab terminals, snippets, and port forwarding.',
+    icon: 'terminal',
     category: 'dev',
     accentClass: 'from-sky-500/20 to-cyan-400/10 text-sky-300 border-sky-400/20',
-    health: 'ready',
+    health: 'beta',
     windowConfig: {
-      title: 'Port Killer',
-      width: 1100,
-      height: 720,
-      minWidth: 800,
-      minHeight: 500,
-      initialUrl: 'modules-pages/port-killer/index.html',
+      title: 'MySSH',
+      width: 1280,
+      height: 820,
+      minWidth: 1000,
+      minHeight: 640,
+      initialUrl: 'modules-pages/myssh/index.html',
     },
   },
   {

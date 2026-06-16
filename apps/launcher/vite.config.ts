@@ -39,7 +39,7 @@ export default defineConfig({
       '@cmt': path.resolve(__dirname, '../../modules/comtor/frontend/src'),
       '@vid': path.resolve(__dirname, '../../modules/video-downloader/frontend/src'),
       '@mdc': path.resolve(__dirname, '../../modules/md-converter/frontend/src'),
-      '@pk': path.resolve(__dirname, '../../modules/port-killer/frontend/src'),
+      '@myssh': path.resolve(__dirname, '../../modules/myssh/frontend/src'),
     },
   },
   build: {
@@ -48,7 +48,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         launcher: resolve(__dirname, 'index.html'),
-        'port-killer': resolve(__dirname, 'modules-pages/port-killer/index.html'),
+        myssh: resolve(__dirname, 'modules-pages/myssh/index.html'),
         'open-sesame': resolve(__dirname, 'modules-pages/open-sesame/index.html'),
         comtor: resolve(__dirname, 'modules-pages/comtor/index.html'),
         'video-downloader': resolve(__dirname, 'modules-pages/video-downloader/index.html'),

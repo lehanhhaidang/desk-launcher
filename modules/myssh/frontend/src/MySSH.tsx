@@ -1,0 +1,322 @@
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { confirm } from '@tauri-apps/plugin-dialog'
+import { toast } from 'sonner'
+import { Plus, Search, Server, Pencil, Trash2, FolderPlus, TerminalSquare } from 'lucide-react'
+import { Button } from '@desk-launcher/ui'
+import { HostDialog } from './components/HostDialog'
+import {
+  createGroup,
+  deleteGroup,
+  deleteHost,
+  listGroups,
+  listHosts,
+  type Group,
+  type Host,
+} from './api/myssh-api'
+
+export default function MySSH() {
+  const [hosts, setHosts] = useState<Host[]>([])
+  const [groups, setGroups] = useState<Group[]>([])
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [search, setSearch] = useState('')
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [editing, setEditing] = useState<Host | null>(null)
+  const [newGroupOpen, setNewGroupOpen] = useState(false)
+  const [newGroupName, setNewGroupName] = useState('')
+
+  const refresh = useCallback(async () => {
+    try {
+      const [h, g] = await Promise.all([listHosts(), listGroups()])
+      setHosts(h)
+      setGroups(g)
+    } catch (e) {
+      toast.error(`Failed to load: ${errMessage(e)}`)
+    }
+  }, [])
+
+  useEffect(() => {
+    refresh()
+  }, [refresh])
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    if (!q) return hosts
+    return hosts.filter((h) =>
+      [h.label, h.hostname, h.username, ...h.tags].some((s) => s.toLowerCase().includes(q)),
+    )
+  }, [hosts, search])
+
+  const grouped = useMemo(() => {
+    const byGroup = new Map<string | null, Host[]>()
+    for (const h of filtered) {
+      const key = h.groupId ?? null
+      const arr = byGroup.get(key) ?? []
+      arr.push(h)
+      byGroup.set(key, arr)
+    }
+    return byGroup
+  }, [filtered])
+
+  const selected = hosts.find((h) => h.id === selectedId) ?? null
+
+  const openNew = () => {
+    setEditing(null)
+    setDialogOpen(true)
+  }
+
+  const openEdit = (host: Host) => {
+    setEditing(host)
+    setDialogOpen(true)
+  }
+
+  const onDelete = async (host: Host) => {
+    const ok = await confirm(`Delete "${host.label}"? This cannot be undone.`, {
+      title: 'Delete host',
+      kind: 'warning',
+    })
+    if (!ok) return
+    try {
+      await deleteHost(host.id)
+      if (selectedId === host.id) setSelectedId(null)
+      toast.success('Host deleted')
+      refresh()
+    } catch (e) {
+      toast.error(`Delete failed: ${errMessage(e)}`)
+    }
+  }
+
+  const submitNewGroup = async () => {
+    const name = newGroupName.trim()
+    if (!name) {
+      setNewGroupOpen(false)
+      return
+    }
+    try {
+      await createGroup(name)
+      setNewGroupName('')
+      setNewGroupOpen(false)
+      refresh()
+    } catch (e) {
+      toast.error(`Could not create group: ${errMessage(e)}`)
+    }
+  }
+
+  const onDeleteGroup = async (group: Group) => {
+    const ok = await confirm(`Delete group "${group.name}"? Hosts inside become ungrouped.`, {
+      title: 'Delete group',
+      kind: 'warning',
+    })
+    if (!ok) return
+    try {
+      await deleteGroup(group.id)
+      refresh()
+    } catch (e) {
+      toast.error(`Delete failed: ${errMessage(e)}`)
+    }
+  }
+
+  const connect = (host: Host) => {
+    // Terminal sessions arrive in the next milestone; this wires the entry point.
+    toast.info(`Connecting to ${host.label}… (terminal lands in the next build)`)
+  }
+
+  return (
+    <div className="myssh-bg flex h-screen w-screen text-[#edf3f7]">
+      {/* Sidebar */}
+      <aside className="myssh-panel flex w-80 flex-col border-r">
+        <header className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-2">
+            <TerminalSquare className="size-5 text-cyan-300" />
+            <span className="text-sm font-semibold tracking-wide">MySSH</span>
+          </div>
+          <div className="flex gap-1">
+            <Button size="icon-sm" variant="ghost" title="New group" onClick={() => setNewGroupOpen(true)}>
+              <FolderPlus className="size-4" />
+            </Button>
+            <Button size="icon-sm" variant="ghost" title="New host" onClick={openNew}>
+              <Plus className="size-4" />
+            </Button>
+          </div>
+        </header>
+
+        <div className="px-4 pb-3">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-[#7c8797]" />
+            <input
+              className="w-full rounded-md border border-white/10 bg-white/[0.04] py-1.5 pl-8 pr-3 text-sm outline-none focus:border-cyan-300/40"
+              placeholder="Search hosts…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {newGroupOpen && (
+          <div className="px-4 pb-2">
+            <input
+              autoFocus
+              className="w-full rounded-md border border-cyan-300/30 bg-white/[0.05] px-3 py-1.5 text-sm outline-none"
+              placeholder="Group name, Enter to save"
+              value={newGroupName}
+              onChange={(e) => setNewGroupName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') submitNewGroup()
+                if (e.key === 'Escape') {
+                  setNewGroupName('')
+                  setNewGroupOpen(false)
+                }
+              }}
+              onBlur={submitNewGroup}
+            />
+          </div>
+        )}
+
+        <div className="flex-1 overflow-y-auto px-2 pb-4">
+          {groups.map((group) => {
+            const list = grouped.get(group.id) ?? []
+            return (
+              <GroupSection
+                key={group.id}
+                title={group.name}
+                hosts={list}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+                onDeleteGroup={() => onDeleteGroup(group)}
+              />
+            )
+          })}
+          <GroupSection
+            title="Ungrouped"
+            hosts={grouped.get(null) ?? []}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+          />
+          {hosts.length === 0 && (
+            <p className="px-3 py-8 text-center text-sm text-[#7c8797]">
+              No hosts yet. Click <span className="text-cyan-300">+</span> to add one.
+            </p>
+          )}
+        </div>
+      </aside>
+
+      {/* Main */}
+      <main className="flex flex-1 flex-col">
+        {selected ? (
+          <div className="flex h-full flex-col p-8">
+            <div className="myssh-panel rounded-xl border p-6">
+              <div className="mb-4 flex items-start justify-between">
+                <div>
+                  <h1 className="text-xl font-semibold">{selected.label}</h1>
+                  <p className="mt-1 font-mono text-sm text-[#9aa6b6]">
+                    {selected.username}@{selected.hostname}:{selected.port}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => openEdit(selected)}>
+                    <Pencil className="size-4" /> Edit
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => onDelete(selected)}>
+                    <Trash2 className="size-4" /> Delete
+                  </Button>
+                </div>
+              </div>
+
+              <dl className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
+                <Row label="Auth method" value={selected.authMethod} />
+                <Row label="Stored secret" value={selected.hasSecret ? 'Yes' : 'No'} />
+                {selected.authMethod === 'key' && (
+                  <Row label="Key file" value={selected.keyPath ?? '—'} />
+                )}
+                <Row label="Tags" value={selected.tags.length ? selected.tags.join(', ') : '—'} />
+              </dl>
+
+              <div className="mt-6">
+                <Button onClick={() => connect(selected)}>
+                  <TerminalSquare className="size-4" /> Connect
+                </Button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex h-full flex-col items-center justify-center text-center text-[#7c8797]">
+            <Server className="mb-4 size-12 opacity-40" />
+            <p className="text-sm">Select a host to see its details, or create a new one.</p>
+          </div>
+        )}
+      </main>
+
+      <HostDialog
+        open={dialogOpen}
+        host={editing}
+        groups={groups}
+        onClose={() => setDialogOpen(false)}
+        onSaved={refresh}
+      />
+    </div>
+  )
+}
+
+function GroupSection({
+  title,
+  hosts,
+  selectedId,
+  onSelect,
+  onDeleteGroup,
+}: {
+  title: string
+  hosts: Host[]
+  selectedId: string | null
+  onSelect: (id: string) => void
+  onDeleteGroup?: () => void
+}) {
+  if (hosts.length === 0 && !onDeleteGroup) return null
+  return (
+    <div className="mb-2">
+      <div className="group flex items-center justify-between px-3 py-1.5">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-[#7c8797]">
+          {title}
+        </span>
+        {onDeleteGroup && (
+          <button
+            className="opacity-0 transition group-hover:opacity-100"
+            title="Delete group"
+            onClick={onDeleteGroup}
+          >
+            <Trash2 className="size-3.5 text-[#7c8797] hover:text-[#ffb4ab]" />
+          </button>
+        )}
+      </div>
+      {hosts.map((host) => (
+        <button
+          key={host.id}
+          onClick={() => onSelect(host.id)}
+          className={`flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left transition ${
+            selectedId === host.id ? 'bg-cyan-300/12 text-cyan-100' : 'hover:bg-white/[0.04]'
+          }`}
+        >
+          <Server className="size-4 shrink-0 text-[#7c8797]" />
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-medium">{host.label}</span>
+            <span className="block truncate font-mono text-xs text-[#7c8797]">
+              {host.username}@{host.hostname}
+            </span>
+          </span>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <>
+      <dt className="text-[#7c8797]">{label}</dt>
+      <dd className="truncate font-mono">{value}</dd>
+    </>
+  )
+}
+
+function errMessage(e: unknown): string {
+  if (e && typeof e === 'object' && 'message' in e) return String((e as { message: unknown }).message)
+  return String(e)
+}
