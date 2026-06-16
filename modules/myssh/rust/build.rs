@@ -13,6 +13,10 @@ const COMMANDS: &[&str] = &[
     "send_input",
     "resize_session",
     "close_session",
+    "list_snippets",
+    "create_snippet",
+    "update_snippet",
+    "delete_snippet",
 ];
 
 fn main() {

@@ -14,4 +14,8 @@ permissions = [
     "allow-send-input",
     "allow-resize-session",
     "allow-close-session",
+    "allow-list-snippets",
+    "allow-create-snippet",
+    "allow-update-snippet",
+    "allow-delete-snippet",
 ]

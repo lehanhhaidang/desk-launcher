@@ -40,6 +40,18 @@ export interface Group {
   createdAt: number
 }
 
+export interface Snippet {
+  id: string
+  name: string
+  command: string
+  createdAt: number
+}
+
+export interface SnippetInput {
+  name: string
+  command: string
+}
+
 export const listHosts = () => invoke<Host[]>(ns('list_hosts'))
 export const createHost = (input: HostInput) => invoke<Host>(ns('create_host'), { input })
 export const updateHost = (id: string, input: HostInput) =>
@@ -49,6 +61,14 @@ export const deleteHost = (id: string) => invoke<void>(ns('delete_host'), { id }
 export const listGroups = () => invoke<Group[]>(ns('list_groups'))
 export const createGroup = (name: string) => invoke<Group>(ns('create_group'), { input: { name } })
 export const deleteGroup = (id: string) => invoke<void>(ns('delete_group'), { id })
+
+// --- Snippets ---
+
+export const listSnippets = () => invoke<Snippet[]>(ns('list_snippets'))
+export const createSnippet = (input: SnippetInput) => invoke<Snippet>(ns('create_snippet'), { input })
+export const updateSnippet = (id: string, input: SnippetInput) =>
+  invoke<Snippet>(ns('update_snippet'), { id, input })
+export const deleteSnippet = (id: string) => invoke<void>(ns('delete_snippet'), { id })
 
 // --- Sessions ---
 

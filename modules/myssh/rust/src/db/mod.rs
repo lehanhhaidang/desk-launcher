@@ -2,6 +2,7 @@ pub mod group_repo;
 pub mod host_repo;
 pub mod known_hosts_repo;
 pub mod migrations;
+pub mod snippet_repo;
 
 use crate::error::{AppError, AppResult};
 use rusqlite::Connection;

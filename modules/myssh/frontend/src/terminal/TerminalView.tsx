@@ -16,15 +16,20 @@ interface Props {
   hostId: string
   /** Whether this terminal's tab is currently visible. */
   active: boolean
+  /** Reports the live session id (or null when it ends) so the parent can
+   *  route snippets to the active session. */
+  onSession?: (sessionId: string | null) => void
 }
 
 const encoder = new TextEncoder()
 
-export function TerminalView({ hostId, active }: Props) {
+export function TerminalView({ hostId, active, onSession }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const termRef = useRef<XTerm | null>(null)
   const fitRef = useRef<FitAddon | null>(null)
   const sessionIdRef = useRef<string | null>(null)
+  const onSessionRef = useRef(onSession)
+  onSessionRef.current = onSession
 
   useEffect(() => {
     const container = containerRef.current
@@ -60,6 +65,7 @@ export function TerminalView({ hostId, active }: Props) {
           return
         }
         sessionIdRef.current = sessionId
+        onSessionRef.current?.(sessionId)
         unlistenData = await onSessionData(sessionId, (bytes) => term.write(bytes))
         unlistenExit = await onSessionExit(sessionId, () => {
           term.write('\r\n\x1b[33m[session closed]\x1b[0m\r\n')
@@ -91,6 +97,7 @@ export function TerminalView({ hostId, active }: Props) {
       unlistenExit?.()
       const id = sessionIdRef.current
       if (id) closeSession(id).catch(() => {})
+      onSessionRef.current?.(null)
       term.dispose()
     }
   }, [hostId])

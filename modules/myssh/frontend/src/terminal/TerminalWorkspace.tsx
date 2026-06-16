@@ -12,9 +12,10 @@ interface Props {
   activeKey: string | null
   onActivate: (key: string) => void
   onClose: (key: string) => void
+  onSessionForTab?: (tabKey: string, sessionId: string | null) => void
 }
 
-export function TerminalWorkspace({ tabs, activeKey, onActivate, onClose }: Props) {
+export function TerminalWorkspace({ tabs, activeKey, onActivate, onClose, onSessionForTab }: Props) {
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-1 overflow-x-auto border-b border-white/10 bg-black/20 px-2 py-1.5">
@@ -54,7 +55,11 @@ export function TerminalWorkspace({ tabs, activeKey, onActivate, onClose }: Prop
             className="absolute inset-0 p-2"
             style={{ visibility: activeKey === tab.key ? 'visible' : 'hidden' }}
           >
-            <TerminalView hostId={tab.hostId} active={activeKey === tab.key} />
+            <TerminalView
+              hostId={tab.hostId}
+              active={activeKey === tab.key}
+              onSession={(sid) => onSessionForTab?.(tab.key, sid)}
+            />
           </div>
         ))}
       </div>

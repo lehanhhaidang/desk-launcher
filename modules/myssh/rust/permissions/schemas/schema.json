@@ -331,6 +331,18 @@
           "markdownDescription": "Denies the create_host command without any pre-configured scope."
         },
         {
+          "description": "Enables the create_snippet command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-create-snippet",
+          "markdownDescription": "Enables the create_snippet command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the create_snippet command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-create-snippet",
+          "markdownDescription": "Denies the create_snippet command without any pre-configured scope."
+        },
+        {
           "description": "Enables the delete_group command without any pre-configured scope.",
           "type": "string",
           "const": "allow-delete-group",
@@ -355,6 +367,18 @@
           "markdownDescription": "Denies the delete_host command without any pre-configured scope."
         },
         {
+          "description": "Enables the delete_snippet command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-delete-snippet",
+          "markdownDescription": "Enables the delete_snippet command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the delete_snippet command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-delete-snippet",
+          "markdownDescription": "Denies the delete_snippet command without any pre-configured scope."
+        },
+        {
           "description": "Enables the list_groups command without any pre-configured scope.",
           "type": "string",
           "const": "allow-list-groups",
@@ -377,6 +401,18 @@
           "type": "string",
           "const": "deny-list-hosts",
           "markdownDescription": "Denies the list_hosts command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the list_snippets command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-list-snippets",
+          "markdownDescription": "Enables the list_snippets command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the list_snippets command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-list-snippets",
+          "markdownDescription": "Denies the list_snippets command without any pre-configured scope."
         },
         {
           "description": "Enables the open_session command without any pre-configured scope.",
@@ -427,10 +463,22 @@
           "markdownDescription": "Denies the update_host command without any pre-configured scope."
         },
         {
-          "description": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`\n- `allow-open-session`\n- `allow-send-input`\n- `allow-resize-session`\n- `allow-close-session`",
+          "description": "Enables the update_snippet command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-update-snippet",
+          "markdownDescription": "Enables the update_snippet command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the update_snippet command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-update-snippet",
+          "markdownDescription": "Denies the update_snippet command without any pre-configured scope."
+        },
+        {
+          "description": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`\n- `allow-open-session`\n- `allow-send-input`\n- `allow-resize-session`\n- `allow-close-session`\n- `allow-list-snippets`\n- `allow-create-snippet`\n- `allow-update-snippet`\n- `allow-delete-snippet`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`\n- `allow-open-session`\n- `allow-send-input`\n- `allow-resize-session`\n- `allow-close-session`"
+          "markdownDescription": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`\n- `allow-open-session`\n- `allow-send-input`\n- `allow-resize-session`\n- `allow-close-session`\n- `allow-list-snippets`\n- `allow-create-snippet`\n- `allow-update-snippet`\n- `allow-delete-snippet`"
         }
       ]
     }

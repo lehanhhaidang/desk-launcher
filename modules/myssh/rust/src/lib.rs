@@ -33,6 +33,10 @@ pub fn init() -> TauriPlugin<Wry> {
             commands::session::send_input,
             commands::session::resize_session,
             commands::session::close_session,
+            commands::snippets::list_snippets,
+            commands::snippets::create_snippet,
+            commands::snippets::update_snippet,
+            commands::snippets::delete_snippet,
         ])
         .setup(|app, _api| {
             log::info!("myssh plugin: initializing");

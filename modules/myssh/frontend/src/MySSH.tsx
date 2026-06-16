@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { confirm } from '@tauri-apps/plugin-dialog'
 import { toast } from 'sonner'
-import { Plus, Search, Server, Pencil, Trash2, FolderPlus, TerminalSquare } from 'lucide-react'
+import { Code2, Plus, Search, Server, Pencil, Trash2, FolderPlus, TerminalSquare } from 'lucide-react'
 import { Button } from '@desk-launcher/ui'
 import { HostDialog } from './components/HostDialog'
+import { SnippetsPanel } from './components/SnippetsPanel'
 import { TerminalWorkspace, type SessionTab } from './terminal/TerminalWorkspace'
 import {
   createGroup,
@@ -11,9 +12,12 @@ import {
   deleteHost,
   listGroups,
   listHosts,
+  sendInput,
   type Group,
   type Host,
 } from './api/myssh-api'
+
+const encoder = new TextEncoder()
 
 export default function MySSH() {
   const [hosts, setHosts] = useState<Host[]>([])
@@ -26,6 +30,24 @@ export default function MySSH() {
   const [newGroupName, setNewGroupName] = useState('')
   const [tabs, setTabs] = useState<SessionTab[]>([])
   const [activeTab, setActiveTab] = useState<string | null>(null)
+  const [snippetsOpen, setSnippetsOpen] = useState(false)
+  const sessionMap = useRef<Map<string, string>>(new Map())
+
+  const registerSession = useCallback((tabKey: string, sessionId: string | null) => {
+    if (sessionId) sessionMap.current.set(tabKey, sessionId)
+    else sessionMap.current.delete(tabKey)
+  }, [])
+
+  const runSnippet = (command: string) => {
+    const sid = activeTab ? sessionMap.current.get(activeTab) : undefined
+    if (!sid) {
+      toast.error('Open a session first, then run a snippet')
+      return
+    }
+    sendInput(sid, Array.from(encoder.encode(`${command}\n`))).catch((e) =>
+      toast.error(`Could not send snippet: ${errMessage(e)}`),
+    )
+  }
 
   const refresh = useCallback(async () => {
     try {
@@ -142,6 +164,9 @@ export default function MySSH() {
             <span className="text-sm font-semibold tracking-wide">MySSH</span>
           </div>
           <div className="flex gap-1">
+            <Button size="icon-sm" variant="ghost" title="Snippets" onClick={() => setSnippetsOpen(true)}>
+              <Code2 className="size-4" />
+            </Button>
             <Button size="icon-sm" variant="ghost" title="New group" onClick={() => setNewGroupOpen(true)}>
               <FolderPlus className="size-4" />
             </Button>
@@ -221,6 +246,7 @@ export default function MySSH() {
             activeKey={activeTab}
             onActivate={setActiveTab}
             onClose={closeTab}
+            onSessionForTab={registerSession}
           />
         ) : selected ? (
           <div className="flex h-full flex-col p-8">
@@ -272,6 +298,12 @@ export default function MySSH() {
         groups={groups}
         onClose={() => setDialogOpen(false)}
         onSaved={refresh}
+      />
+
+      <SnippetsPanel
+        open={snippetsOpen}
+        onClose={() => setSnippetsOpen(false)}
+        onRun={runSnippet}
       />
     </div>
   )
