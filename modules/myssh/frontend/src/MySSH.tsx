@@ -1,10 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { confirm } from '@tauri-apps/plugin-dialog'
 import { toast } from 'sonner'
-import { Code2, Plus, Search, Server, Pencil, Trash2, FolderPlus, TerminalSquare } from 'lucide-react'
+import {
+  ArrowRightLeft,
+  Code2,
+  FolderPlus,
+  Pencil,
+  Plus,
+  Search,
+  Server,
+  TerminalSquare,
+  Trash2,
+} from 'lucide-react'
 import { Button } from '@desk-launcher/ui'
 import { HostDialog } from './components/HostDialog'
 import { SnippetsPanel } from './components/SnippetsPanel'
+import { ForwardsPanel } from './components/ForwardsPanel'
 import { TerminalWorkspace, type SessionTab } from './terminal/TerminalWorkspace'
 import {
   createGroup,
@@ -31,6 +42,7 @@ export default function MySSH() {
   const [tabs, setTabs] = useState<SessionTab[]>([])
   const [activeTab, setActiveTab] = useState<string | null>(null)
   const [snippetsOpen, setSnippetsOpen] = useState(false)
+  const [forwardsOpen, setForwardsOpen] = useState(false)
   const sessionMap = useRef<Map<string, string>>(new Map())
 
   const registerSession = useCallback((tabKey: string, sessionId: string | null) => {
@@ -164,6 +176,9 @@ export default function MySSH() {
             <span className="text-sm font-semibold tracking-wide">MySSH</span>
           </div>
           <div className="flex gap-1">
+            <Button size="icon-sm" variant="ghost" title="Port forwarding" onClick={() => setForwardsOpen(true)}>
+              <ArrowRightLeft className="size-4" />
+            </Button>
             <Button size="icon-sm" variant="ghost" title="Snippets" onClick={() => setSnippetsOpen(true)}>
               <Code2 className="size-4" />
             </Button>
@@ -305,6 +320,8 @@ export default function MySSH() {
         onClose={() => setSnippetsOpen(false)}
         onRun={runSnippet}
       />
+
+      <ForwardsPanel open={forwardsOpen} onClose={() => setForwardsOpen(false)} hosts={hosts} />
     </div>
   )
 }

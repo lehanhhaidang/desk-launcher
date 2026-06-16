@@ -17,6 +17,11 @@ const COMMANDS: &[&str] = &[
     "create_snippet",
     "update_snippet",
     "delete_snippet",
+    "list_forwards",
+    "create_forward",
+    "delete_forward",
+    "start_forward",
+    "stop_forward",
 ];
 
 fn main() {

@@ -1,3 +1,4 @@
+pub mod forward_repo;
 pub mod group_repo;
 pub mod host_repo;
 pub mod known_hosts_repo;

@@ -52,6 +52,33 @@ export interface SnippetInput {
   command: string
 }
 
+export interface Forward {
+  id: string
+  hostId: string
+  kind: string
+  bindAddr: string
+  bindPort: number
+  destHost: string
+  destPort: number
+  label: string
+  createdAt: number
+}
+
+export interface ForwardInput {
+  hostId: string
+  kind: string
+  bindAddr: string
+  bindPort: number
+  destHost: string
+  destPort: number
+  label: string
+}
+
+export interface ForwardStatus {
+  forward: Forward
+  running: boolean
+}
+
 export const listHosts = () => invoke<Host[]>(ns('list_hosts'))
 export const createHost = (input: HostInput) => invoke<Host>(ns('create_host'), { input })
 export const updateHost = (id: string, input: HostInput) =>
@@ -69,6 +96,14 @@ export const createSnippet = (input: SnippetInput) => invoke<Snippet>(ns('create
 export const updateSnippet = (id: string, input: SnippetInput) =>
   invoke<Snippet>(ns('update_snippet'), { id, input })
 export const deleteSnippet = (id: string) => invoke<void>(ns('delete_snippet'), { id })
+
+// --- Port forwards ---
+
+export const listForwards = () => invoke<ForwardStatus[]>(ns('list_forwards'))
+export const createForward = (input: ForwardInput) => invoke<Forward>(ns('create_forward'), { input })
+export const deleteForward = (id: string) => invoke<void>(ns('delete_forward'), { id })
+export const startForward = (id: string) => invoke<void>(ns('start_forward'), { id })
+export const stopForward = (id: string) => invoke<void>(ns('stop_forward'), { id })
 
 // --- Sessions ---
 

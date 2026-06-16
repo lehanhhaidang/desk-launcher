@@ -18,4 +18,9 @@ permissions = [
     "allow-create-snippet",
     "allow-update-snippet",
     "allow-delete-snippet",
+    "allow-list-forwards",
+    "allow-create-forward",
+    "allow-delete-forward",
+    "allow-start-forward",
+    "allow-stop-forward",
 ]

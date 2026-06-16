@@ -307,6 +307,18 @@
           "markdownDescription": "Denies the close_session command without any pre-configured scope."
         },
         {
+          "description": "Enables the create_forward command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-create-forward",
+          "markdownDescription": "Enables the create_forward command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the create_forward command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-create-forward",
+          "markdownDescription": "Denies the create_forward command without any pre-configured scope."
+        },
+        {
           "description": "Enables the create_group command without any pre-configured scope.",
           "type": "string",
           "const": "allow-create-group",
@@ -343,6 +355,18 @@
           "markdownDescription": "Denies the create_snippet command without any pre-configured scope."
         },
         {
+          "description": "Enables the delete_forward command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-delete-forward",
+          "markdownDescription": "Enables the delete_forward command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the delete_forward command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-delete-forward",
+          "markdownDescription": "Denies the delete_forward command without any pre-configured scope."
+        },
+        {
           "description": "Enables the delete_group command without any pre-configured scope.",
           "type": "string",
           "const": "allow-delete-group",
@@ -377,6 +401,18 @@
           "type": "string",
           "const": "deny-delete-snippet",
           "markdownDescription": "Denies the delete_snippet command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the list_forwards command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-list-forwards",
+          "markdownDescription": "Enables the list_forwards command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the list_forwards command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-list-forwards",
+          "markdownDescription": "Denies the list_forwards command without any pre-configured scope."
         },
         {
           "description": "Enables the list_groups command without any pre-configured scope.",
@@ -451,6 +487,30 @@
           "markdownDescription": "Denies the send_input command without any pre-configured scope."
         },
         {
+          "description": "Enables the start_forward command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-start-forward",
+          "markdownDescription": "Enables the start_forward command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the start_forward command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-start-forward",
+          "markdownDescription": "Denies the start_forward command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the stop_forward command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-stop-forward",
+          "markdownDescription": "Enables the stop_forward command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the stop_forward command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-stop-forward",
+          "markdownDescription": "Denies the stop_forward command without any pre-configured scope."
+        },
+        {
           "description": "Enables the update_host command without any pre-configured scope.",
           "type": "string",
           "const": "allow-update-host",
@@ -475,10 +535,10 @@
           "markdownDescription": "Denies the update_snippet command without any pre-configured scope."
         },
         {
-          "description": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`\n- `allow-open-session`\n- `allow-send-input`\n- `allow-resize-session`\n- `allow-close-session`\n- `allow-list-snippets`\n- `allow-create-snippet`\n- `allow-update-snippet`\n- `allow-delete-snippet`",
+          "description": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`\n- `allow-open-session`\n- `allow-send-input`\n- `allow-resize-session`\n- `allow-close-session`\n- `allow-list-snippets`\n- `allow-create-snippet`\n- `allow-update-snippet`\n- `allow-delete-snippet`\n- `allow-list-forwards`\n- `allow-create-forward`\n- `allow-delete-forward`\n- `allow-start-forward`\n- `allow-stop-forward`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`\n- `allow-open-session`\n- `allow-send-input`\n- `allow-resize-session`\n- `allow-close-session`\n- `allow-list-snippets`\n- `allow-create-snippet`\n- `allow-update-snippet`\n- `allow-delete-snippet`"
+          "markdownDescription": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`\n- `allow-open-session`\n- `allow-send-input`\n- `allow-resize-session`\n- `allow-close-session`\n- `allow-list-snippets`\n- `allow-create-snippet`\n- `allow-update-snippet`\n- `allow-delete-snippet`\n- `allow-list-forwards`\n- `allow-create-forward`\n- `allow-delete-forward`\n- `allow-start-forward`\n- `allow-stop-forward`"
         }
       ]
     }

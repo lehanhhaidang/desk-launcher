@@ -1,9 +1,10 @@
 //! All `russh` usage is isolated here. The rest of the crate talks to SSH
-//! sessions only through `open()` and the `SessionRequest` channel it returns.
+//! sessions only through `open()` / `connect_authenticated()` and the
+//! `SessionRequest` channel `open()` returns.
 
 use crate::error::{AppError, AppResult};
 use rusqlite::Connection;
-use russh::client;
+use russh::client::{self, Handle};
 use russh::keys::{ssh_key, PrivateKeyWithHashAlg};
 use russh::ChannelMsg;
 use std::sync::Arc;
@@ -19,6 +20,7 @@ pub enum SessionRequest {
 
 /// Everything needed to dial a host, already resolved (secret pulled from the
 /// keyring by the caller).
+#[derive(Clone)]
 pub struct ConnectParams {
     pub host: String,
     pub port: u16,
@@ -31,7 +33,7 @@ pub struct ConnectParams {
 /// Client handler. Its only job is trust-on-first-use host-key verification:
 /// an unknown (host, port) is recorded and accepted; a changed key is rejected
 /// (possible MITM) until the stored entry is cleared.
-struct ClientHandler {
+pub(crate) struct ClientHandler {
     db: Arc<Mutex<Connection>>,
     host: String,
     port: u16,
@@ -66,21 +68,15 @@ impl client::Handler for ClientHandler {
     }
 }
 
-/// Connect, authenticate, open an interactive shell, and spawn the driver task.
-/// Returns the sender used to push input/resize/close to that task. Output is
-/// emitted to the frontend as `myssh://data/<session_id>` (raw bytes) and the
-/// session end as `myssh://exit/<session_id>`.
-pub async fn open(
-    app: AppHandle,
+/// Connect + authenticate, returning the live session handle. Shared by the
+/// interactive terminal and by port forwarding.
+pub(crate) async fn connect_authenticated(
     db: Arc<Mutex<Connection>>,
-    session_id: String,
-    params: ConnectParams,
-    cols: u32,
-    rows: u32,
-) -> AppResult<mpsc::Sender<SessionRequest>> {
+    params: &ConnectParams,
+) -> AppResult<Handle<ClientHandler>> {
     let config = Arc::new(client::Config::default());
     let handler = ClientHandler {
-        db: db.clone(),
+        db,
         host: params.host.clone(),
         port: params.port,
     };
@@ -124,6 +120,23 @@ pub async fn open(
     if !authenticated {
         return Err(AppError::Ssh("authentication failed".into()));
     }
+
+    Ok(handle)
+}
+
+/// Open an interactive shell and spawn the driver task. Returns the sender used
+/// to push input/resize/close to that task. Output is emitted to the frontend
+/// as `myssh://data/<session_id>` (raw bytes) and the session end as
+/// `myssh://exit/<session_id>`.
+pub async fn open(
+    app: AppHandle,
+    db: Arc<Mutex<Connection>>,
+    session_id: String,
+    params: ConnectParams,
+    cols: u32,
+    rows: u32,
+) -> AppResult<mpsc::Sender<SessionRequest>> {
+    let handle = connect_authenticated(db, &params).await?;
 
     let channel = handle
         .channel_open_session()

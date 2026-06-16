@@ -19,6 +19,11 @@ Allows every MySSH plugin command.
 - `allow-create-snippet`
 - `allow-update-snippet`
 - `allow-delete-snippet`
+- `allow-list-forwards`
+- `allow-create-forward`
+- `allow-delete-forward`
+- `allow-start-forward`
+- `allow-stop-forward`
 
 ## Permission Table
 
@@ -51,6 +56,32 @@ Enables the close_session command without any pre-configured scope.
 <td>
 
 Denies the close_session command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:allow-create-forward`
+
+</td>
+<td>
+
+Enables the create_forward command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-create-forward`
+
+</td>
+<td>
+
+Denies the create_forward command without any pre-configured scope.
 
 </td>
 </tr>
@@ -136,6 +167,32 @@ Denies the create_snippet command without any pre-configured scope.
 <tr>
 <td>
 
+`myssh:allow-delete-forward`
+
+</td>
+<td>
+
+Enables the delete_forward command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-delete-forward`
+
+</td>
+<td>
+
+Denies the delete_forward command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
 `myssh:allow-delete-group`
 
 </td>
@@ -207,6 +264,32 @@ Enables the delete_snippet command without any pre-configured scope.
 <td>
 
 Denies the delete_snippet command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:allow-list-forwards`
+
+</td>
+<td>
+
+Enables the list_forwards command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-list-forwards`
+
+</td>
+<td>
+
+Denies the list_forwards command without any pre-configured scope.
 
 </td>
 </tr>
@@ -363,6 +446,58 @@ Enables the send_input command without any pre-configured scope.
 <td>
 
 Denies the send_input command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:allow-start-forward`
+
+</td>
+<td>
+
+Enables the start_forward command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-start-forward`
+
+</td>
+<td>
+
+Denies the start_forward command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:allow-stop-forward`
+
+</td>
+<td>
+
+Enables the stop_forward command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-stop-forward`
+
+</td>
+<td>
+
+Denies the stop_forward command without any pre-configured scope.
 
 </td>
 </tr>
