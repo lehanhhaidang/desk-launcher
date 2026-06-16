@@ -1,7 +1,7 @@
 # MODULE: SHARED PACKAGES & INFRASTRUCTURE
 
 ## OVERVIEW
-This is **not a business domain** — it is the cross-cutting foundation that every business module (Port Killer, Open Sesame, Comtor, Video Downloader, MD Converter) builds on. It comprises the shared React UI primitives (`packages/ui`), the Tauri/HTTP bridge helper (`packages/tauri-bridge`), the `launcher-paths` Rust crate that hands each module its own isolated data directory under `%APPDATA%\io.desklauncher\`, and the build/sidecar tooling (`scripts/ensure-sidecars.mjs`, workspace wiring in root `package.json` / `Cargo.toml` / `vite.config.ts`). It is the concrete realization of the README rule: *"Modules never talk to each other. Shared code goes in `packages/` (frontend) or `crates/` (Rust)."*
+This is **not a business domain** — it is the cross-cutting foundation that every business module (MySSH, Open Sesame, Comtor, Video Downloader, MD Converter) builds on. It comprises the shared React UI primitives (`packages/ui`), the Tauri/HTTP bridge helper (`packages/tauri-bridge`), the `launcher-paths` Rust crate that hands each module its own isolated data directory under `%APPDATA%\io.desklauncher\`, and the build/sidecar tooling (`scripts/ensure-sidecars.mjs`, workspace wiring in root `package.json` / `Cargo.toml` / `vite.config.ts`). It is the concrete realization of the README rule: *"Modules never talk to each other. Shared code goes in `packages/` (frontend) or `crates/` (Rust)."*
 
 ---
 
@@ -80,7 +80,7 @@ Each binary is skipped if it already exists and is non-empty (`hasFile`). Settin
 
 | Shared piece | Consumers |
 |---|---|
-| `launcher-paths` crate | **All Rust crates that persist state**: launcher host (`apps/launcher/src-tauri`), Comtor (`audio.rs`, `db.rs`, `settings.rs`), Open Sesame (`utils/paths.rs`), Video Downloader (`paths.rs`). Port Killer and MD Converter do **not** depend on it (no on-disk state). |
+| `launcher-paths` crate | **All Rust crates that persist state**: launcher host (`apps/launcher/src-tauri`), Comtor (`audio.rs`, `db.rs`, `settings.rs`), Open Sesame (`utils/paths.rs`), Video Downloader (`paths.rs`), MySSH (`db/mod.rs`). MD Converter does **not** depend on it (no on-disk state). |
 | `@desk-launcher/ui` | All module frontends + the launcher dashboard. Verified imports: launcher `Dashboard.tsx` / `ModuleCard.tsx`, MD Converter `MdConverter.tsx` / `SingleTab.tsx` / `BatchTab.tsx`. Other module frontends consume it via the same alias. |
 | `@desk-launcher/tauri-bridge` | Module frontends that call a local HTTP backend (wired via the Vite alias). |
 | Sidecars (`yt-dlp`, `ffmpeg`) | **Video Downloader** only — it is the only module that shells out to these CLI binaries. |
@@ -115,7 +115,7 @@ Each binary is skipped if it already exists and is non-empty (`hasFile`). Settin
 
 ## RELATED MODULES
 - [01-launcher-host](./01-launcher-host.md) — consumes shared packages & registers modules
-- [02-port-killer](./02-port-killer.md), [03-open-sesame](./03-open-sesame.md), [04-comtor](./04-comtor.md), [05-video-downloader](./05-video-downloader.md), [06-md-converter](./06-md-converter.md) — all consume this shared layer
+- [02-myssh](./02-myssh.md), [03-open-sesame](./03-open-sesame.md), [04-comtor](./04-comtor.md), [05-video-downloader](./05-video-downloader.md), [06-md-converter](./06-md-converter.md) — all consume this shared layer
 
 ---
 _Last updated: 2026-06-05 · Synced: desk-launcher@acbb5c5 · Format: v1_

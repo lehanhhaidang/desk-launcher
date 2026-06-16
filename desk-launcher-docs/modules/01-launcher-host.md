@@ -35,19 +35,19 @@ Registered modules (Rust spec ↔ TS descriptor):
 
 | id | Rust title | initial_url | Size (W×H, min) | TS displayName / health |
 |---|---|---|---|---|
-| `port-killer` | 🔌 Port Killer | `modules-pages/port-killer/index.html` | 1100×720, min 800×500 | Port Killer / ready |
+| `myssh` | 🖥️ MySSH | `modules-pages/myssh/index.html` | 1280×820, min 1000×640 | MySSH / beta |
 | `open-sesame` | 📚 Open Sesame | `modules-pages/open-sesame/index.html` | 1280×800, min 960×600 | Open Sesame / ready |
 | `comtor` | Virtual Comtor | `modules-pages/comtor/index.html` | 1280×800, min 960×600 | Virtual Comtor / ready |
 | `video-downloader` | Media Toolbox | `modules-pages/video-downloader/index.html` | 1100×760, min 800×500 | Media Toolbox / beta |
 | `md-converter` | 📝 Markdown Converter | `modules-pages/md-converter/index.html` | 1200×800, min 900×600 | Markdown Converter / beta |
 
 ### Capabilities
-Each capability file binds permissions to a window **label** (the same string as the module `id`; the host window's label is `launcher`). Plugin permissions like `port-killer:default` resolve because each module crate registers its runtime plugin name via `Builder::new("<id>")` (verified in each `modules/<id>/rust/src/lib.rs`), and the crate is named `tauri-plugin-<id>` so Tauri strips the prefix.
+Each capability file binds permissions to a window **label** (the same string as the module `id`; the host window's label is `launcher`). Plugin permissions like `myssh:default` resolve because each module crate registers its runtime plugin name via `Builder::new("<id>")` (verified in each `modules/<id>/rust/src/lib.rs`), and the crate is named `tauri-plugin-<id>` so Tauri strips the prefix.
 
 | File | Window | Notable permissions |
 |---|---|---|
 | `capabilities/launcher.json` | `launcher` | `core:default`, `opener:default`, `log:default`, `dialog:default` — dashboard only; no fs/shell. |
-| `capabilities/port-killer.json` | `port-killer` | `core`, `dialog`, `log`, `port-killer:default` (all port list/kill/tunnel logic lives in the plugin). |
+| `capabilities/myssh.json` | `myssh` | `core`, `dialog`, `log`, `myssh:default` (host/session/snippet/forward commands live in the plugin). |
 | `capabilities/open-sesame.json` | `open-sesame` | `fs:default` + scoped `fs:allow-read-file`/`allow-write-file` on `$HOME/.open-sesame/**` (read also `$HOME/**`), `shell:allow-open`, `opener:allow-open-url` scoped to `github.com`/`api.github.com`, `open-sesame:default`. |
 | `capabilities/comtor.json` | `comtor` | `dialog:default` + `dialog:allow-save` (xlsx export), `log`, `comtor:default`; Soniox/OpenAI network is gated by CSP, not capabilities. |
 | `capabilities/video-downloader.json` | `video-downloader` | `dialog:allow-save`, `fs:allow-write-file` on `$HOME/**` + `$DOWNLOAD/**`, `shell:allow-execute` scoped to sidecars `binaries/yt-dlp` & `binaries/ffmpeg`, `video-downloader:default`. |
@@ -93,7 +93,7 @@ Registered in `lib.rs::run()` via `tauri::generate_handler![...]`.
 ### Per-module HTML shims
 Each is a minimal HTML page with a `#root` div and a `<script type="module" src="./main.tsx">`; the `main.tsx` shim owns the window's React root and mounts the real module component from `modules/<id>/frontend/src/` via an alias. (`apps/launcher/modules-pages/<id>/index.html` + `main.tsx`)
 
-- `modules-pages/port-killer/index.html` + `main.tsx` — mounts `@modules/port-killer/frontend/src/PortKiller`.
+- `modules-pages/myssh/index.html` + `main.tsx` — mounts `@modules/myssh/frontend/src/MySSH`.
 - `modules-pages/open-sesame/main.tsx` — mounts `@os/App` + sonner `<Toaster/>` + `@os/index.css`.
 - `modules-pages/comtor/main.tsx` — mounts `@cmt/App`; loads Quicksand fontsource subsets (Vietnamese/latin) + `@cmt/index.css`.
 - `modules-pages/video-downloader/main.tsx` — mounts `@vid/VideoDownloader`; imports shared `packages/ui/src/theme.css` + module styles.
@@ -108,7 +108,7 @@ Multi-page Rollup inputs (`vite.config.ts` `build.rollupOptions.input`) — one 
 | input key | HTML file |
 |---|---|
 | `launcher` | `index.html` |
-| `port-killer` | `modules-pages/port-killer/index.html` |
+| `myssh` | `modules-pages/myssh/index.html` |
 | `open-sesame` | `modules-pages/open-sesame/index.html` |
 | `comtor` | `modules-pages/comtor/index.html` |
 | `video-downloader` | `modules-pages/video-downloader/index.html` |
@@ -126,7 +126,7 @@ Path aliases (Vite `resolve.alias`, mirrored in `tsconfig.json` `paths`):
 | `@cmt` | `modules/comtor/frontend/src` |
 | `@vid` | `modules/video-downloader/frontend/src` |
 | `@mdc` | `modules/md-converter/frontend/src` |
-| `@pk` | `modules/port-killer/frontend/src` |
+| `@myssh` | `modules/myssh/frontend/src` |
 
 Dev server: port `5180`, `strictPort`, host `127.0.0.1`, `server.fs.allow` raised to the monorepo root (`../..`) so Vite can serve module + shared-package code that lives above `apps/launcher`. Build target `esnext`, `esbuild` minify. The per-module short aliases (`@os`/`@cmt`/etc.) exist so each module's pre-existing `@/` imports can be mechanically rewritten to a unique prefix without colliding with the launcher's own `@/`.
 
@@ -153,7 +153,7 @@ Dev server: port `5180`, `strictPort`, host `127.0.0.1`, `server.fs.allow` raise
 
 ### Outbound (what this host sets off)
 - `open_module` spawns a child `WebviewWindow`, which loads a module HTML entry and boots that module's frontend — and, at the OS/IPC level, exposes that module's Rust plugin commands to the new window.
-- At startup, `lib.rs::run()` registers every module plugin (`tauri_plugin_port_killer::init()`, `_open_sesame`, `_comtor`, `_video_downloader`, `_md_converter`) — so all module commands are live in the process even before any module window opens; capabilities are what gate which window may call them.
+- At startup, `lib.rs::run()` registers every module plugin (`tauri_plugin_myssh::init()`, `_open_sesame`, `_comtor`, `_video_downloader`, `_md_converter`) — so all module commands are live in the process even before any module window opens; capabilities are what gate which window may call them.
 - `.setup()` logs the resolved `app_data_dir()` at boot.
 
 ---
@@ -170,7 +170,7 @@ Dev server: port `5180`, `strictPort`, host `127.0.0.1`, `server.fs.allow` raise
 ---
 
 ## RELATED MODULES
-- [02-port-killer](./02-port-killer.md), [03-open-sesame](./03-open-sesame.md), [04-comtor](./04-comtor.md), [05-video-downloader](./05-video-downloader.md), [06-md-converter](./06-md-converter.md), [07-shared-infra](./07-shared-infra.md) — all module windows are spawned by this host
+- [02-myssh](./02-myssh.md), [03-open-sesame](./03-open-sesame.md), [04-comtor](./04-comtor.md), [05-video-downloader](./05-video-downloader.md), [06-md-converter](./06-md-converter.md), [07-shared-infra](./07-shared-infra.md) — all module windows are spawned by this host
 
 ---
 _Last updated: 2026-06-05 · Synced: desk-launcher@acbb5c5 · Format: v1_
