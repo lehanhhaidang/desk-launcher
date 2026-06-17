@@ -499,6 +499,18 @@
           "markdownDescription": "Denies the resize_session command without any pre-configured scope."
         },
         {
+          "description": "Enables the respond_host_key command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-respond-host-key",
+          "markdownDescription": "Enables the respond_host_key command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the respond_host_key command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-respond-host-key",
+          "markdownDescription": "Denies the respond_host_key command without any pre-configured scope."
+        },
+        {
           "description": "Enables the send_input command without any pre-configured scope.",
           "type": "string",
           "const": "allow-send-input",
@@ -655,10 +667,10 @@
           "markdownDescription": "Denies the update_snippet command without any pre-configured scope."
         },
         {
-          "description": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`\n- `allow-open-session`\n- `allow-send-input`\n- `allow-resize-session`\n- `allow-close-session`\n- `allow-list-snippets`\n- `allow-create-snippet`\n- `allow-update-snippet`\n- `allow-delete-snippet`\n- `allow-list-forwards`\n- `allow-create-forward`\n- `allow-delete-forward`\n- `allow-start-forward`\n- `allow-stop-forward`\n- `allow-sftp-open`\n- `allow-sftp-list`\n- `allow-sftp-download`\n- `allow-sftp-upload`\n- `allow-sftp-mkdir`\n- `allow-sftp-remove`\n- `allow-sftp-rename`\n- `allow-sftp-close`\n- `allow-list-known-hosts`\n- `allow-remove-known-host`",
+          "description": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`\n- `allow-open-session`\n- `allow-send-input`\n- `allow-resize-session`\n- `allow-close-session`\n- `allow-list-snippets`\n- `allow-create-snippet`\n- `allow-update-snippet`\n- `allow-delete-snippet`\n- `allow-list-forwards`\n- `allow-create-forward`\n- `allow-delete-forward`\n- `allow-start-forward`\n- `allow-stop-forward`\n- `allow-sftp-open`\n- `allow-sftp-list`\n- `allow-sftp-download`\n- `allow-sftp-upload`\n- `allow-sftp-mkdir`\n- `allow-sftp-remove`\n- `allow-sftp-rename`\n- `allow-sftp-close`\n- `allow-list-known-hosts`\n- `allow-remove-known-host`\n- `allow-respond-host-key`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`\n- `allow-open-session`\n- `allow-send-input`\n- `allow-resize-session`\n- `allow-close-session`\n- `allow-list-snippets`\n- `allow-create-snippet`\n- `allow-update-snippet`\n- `allow-delete-snippet`\n- `allow-list-forwards`\n- `allow-create-forward`\n- `allow-delete-forward`\n- `allow-start-forward`\n- `allow-stop-forward`\n- `allow-sftp-open`\n- `allow-sftp-list`\n- `allow-sftp-download`\n- `allow-sftp-upload`\n- `allow-sftp-mkdir`\n- `allow-sftp-remove`\n- `allow-sftp-rename`\n- `allow-sftp-close`\n- `allow-list-known-hosts`\n- `allow-remove-known-host`"
+          "markdownDescription": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`\n- `allow-open-session`\n- `allow-send-input`\n- `allow-resize-session`\n- `allow-close-session`\n- `allow-list-snippets`\n- `allow-create-snippet`\n- `allow-update-snippet`\n- `allow-delete-snippet`\n- `allow-list-forwards`\n- `allow-create-forward`\n- `allow-delete-forward`\n- `allow-start-forward`\n- `allow-stop-forward`\n- `allow-sftp-open`\n- `allow-sftp-list`\n- `allow-sftp-download`\n- `allow-sftp-upload`\n- `allow-sftp-mkdir`\n- `allow-sftp-remove`\n- `allow-sftp-rename`\n- `allow-sftp-close`\n- `allow-list-known-hosts`\n- `allow-remove-known-host`\n- `allow-respond-host-key`"
         }
       ]
     }

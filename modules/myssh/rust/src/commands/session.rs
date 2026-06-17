@@ -15,15 +15,7 @@ pub async fn open_session(
     let params = ssh_client::resolve_params(state.db.clone(), &host_id).await?;
 
     let session_id = uuid::Uuid::new_v4().to_string();
-    let tx = ssh_client::open(
-        app,
-        state.db.clone(),
-        session_id.clone(),
-        params,
-        cols.max(1),
-        rows.max(1),
-    )
-    .await?;
+    let tx = ssh_client::open(app, session_id.clone(), params, cols.max(1), rows.max(1)).await?;
 
     state.sessions.lock().await.insert(session_id.clone(), tx);
 

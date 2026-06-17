@@ -3,12 +3,16 @@ use crate::models::sftp::{SftpEntry, SftpOpened};
 use crate::services::sftp;
 use crate::services::ssh_client;
 use crate::state::AppState;
-use tauri::State;
+use tauri::{AppHandle, State};
 
 #[tauri::command]
-pub async fn sftp_open(state: State<'_, AppState>, host_id: String) -> AppResult<SftpOpened> {
+pub async fn sftp_open(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    host_id: String,
+) -> AppResult<SftpOpened> {
     let params = ssh_client::resolve_params(state.db.clone(), &host_id).await?;
-    let (handle, home) = sftp::open(state.db.clone(), &params).await?;
+    let (handle, home) = sftp::open(app, &params).await?;
     let sftp_id = uuid::Uuid::new_v4().to_string();
     state.sftp.lock().await.insert(sftp_id.clone(), handle);
     Ok(SftpOpened { sftp_id, home })

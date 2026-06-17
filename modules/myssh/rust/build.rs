@@ -32,6 +32,7 @@ const COMMANDS: &[&str] = &[
     "sftp_close",
     "list_known_hosts",
     "remove_known_host",
+    "respond_host_key",
 ];
 
 fn main() {

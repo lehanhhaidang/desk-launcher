@@ -34,6 +34,7 @@ Allows every MySSH plugin command.
 - `allow-sftp-close`
 - `allow-list-known-hosts`
 - `allow-remove-known-host`
+- `allow-respond-host-key`
 
 ## Permission Table
 
@@ -482,6 +483,32 @@ Enables the resize_session command without any pre-configured scope.
 <td>
 
 Denies the resize_session command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:allow-respond-host-key`
+
+</td>
+<td>
+
+Enables the respond_host_key command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-respond-host-key`
+
+</td>
+<td>
+
+Denies the respond_host_key command without any pre-configured scope.
 
 </td>
 </tr>

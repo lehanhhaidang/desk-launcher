@@ -5,12 +5,11 @@
 use crate::error::{AppError, AppResult};
 use crate::models::forward::Forward;
 use crate::services::ssh_client::{connect_authenticated, ClientHandler, ConnectParams};
-use rusqlite::Connection;
 use russh::client::Handle;
 use std::sync::Arc;
+use tauri::AppHandle;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
-use tokio::sync::Mutex;
 
 /// Handle to a running forward — aborting the task drops the listener and the
 /// dedicated SSH connection.
@@ -27,7 +26,7 @@ impl ForwardHandle {
 /// Bind `bind_addr:bind_port` locally and tunnel each connection to
 /// `dest_host:dest_port` over a fresh authenticated SSH session.
 pub async fn start_local(
-    db: Arc<Mutex<Connection>>,
+    app: AppHandle,
     params: ConnectParams,
     def: Forward,
 ) -> AppResult<ForwardHandle> {
@@ -36,7 +35,7 @@ pub async fn start_local(
         .await
         .map_err(|e| AppError::Ssh(format!("bind {bind}: {e}")))?;
 
-    let (h, jumps) = connect_authenticated(db, &params, None).await?;
+    let (h, jumps) = connect_authenticated(app, &params, None).await?;
     let handle = Arc::new(h);
 
     let task = tokio::spawn(async move {
@@ -76,12 +75,12 @@ pub async fn start_local(
 /// the client handler pumps each incoming connection to `dest_host:dest_port`
 /// on this machine. Keeps the SSH connection alive until stopped.
 pub async fn start_remote(
-    db: Arc<Mutex<Connection>>,
+    app: AppHandle,
     params: ConnectParams,
     def: Forward,
 ) -> AppResult<ForwardHandle> {
     let (handle, jumps) =
-        connect_authenticated(db, &params, Some((def.dest_host.clone(), def.dest_port))).await?;
+        connect_authenticated(app, &params, Some((def.dest_host.clone(), def.dest_port))).await?;
     handle
         .tcpip_forward(def.bind_addr.clone(), def.bind_port as u32)
         .await
@@ -100,7 +99,7 @@ pub async fn start_remote(
 /// Dynamic (`-D`) forward: run a local SOCKS5 proxy; each CONNECT is tunnelled
 /// to its target through a `direct-tcpip` channel.
 pub async fn start_dynamic(
-    db: Arc<Mutex<Connection>>,
+    app: AppHandle,
     params: ConnectParams,
     def: Forward,
 ) -> AppResult<ForwardHandle> {
@@ -108,7 +107,7 @@ pub async fn start_dynamic(
     let listener = TcpListener::bind(&bind)
         .await
         .map_err(|e| AppError::Ssh(format!("bind {bind}: {e}")))?;
-    let (h, jumps) = connect_authenticated(db, &params, None).await?;
+    let (h, jumps) = connect_authenticated(app, &params, None).await?;
     let handle = Arc::new(h);
 
     let task = tokio::spawn(async move {

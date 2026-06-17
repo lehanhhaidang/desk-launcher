@@ -3,13 +3,27 @@
 //! `SessionRequest` channel `open()` returns.
 
 use crate::error::{AppError, AppResult};
+use crate::state::AppState;
 use rusqlite::Connection;
 use russh::client::{self, Handle, Msg, Session};
 use russh::keys::{ssh_key, PrivateKeyWithHashAlg};
 use russh::{Channel, ChannelMsg};
 use std::sync::Arc;
-use tauri::{AppHandle, Emitter};
-use tokio::sync::{mpsc, Mutex};
+use tauri::{AppHandle, Emitter, Manager};
+use tokio::sync::{mpsc, oneshot, Mutex};
+
+/// Emitted to the frontend when a server's host key needs an interactive
+/// decision (unknown on first connect, or changed since last time).
+#[derive(Clone, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct HostKeyPrompt {
+    request_id: String,
+    host: String,
+    port: u16,
+    key_type: String,
+    fingerprint: String,
+    changed: bool,
+}
 
 /// Messages the UI sends to a live session's driver task.
 pub enum SessionRequest {
@@ -76,7 +90,7 @@ async fn resolve_params_inner(
 /// an unknown (host, port) is recorded and accepted; a changed key is rejected
 /// (possible MITM) until the stored entry is cleared.
 pub(crate) struct ClientHandler {
-    db: Arc<Mutex<Connection>>,
+    app: AppHandle,
     host: String,
     port: u16,
     /// For remote (`-R`) forwards: the local destination that incoming
@@ -95,21 +109,56 @@ impl client::Handler for ClientHandler {
             .fingerprint(ssh_key::HashAlg::Sha256)
             .to_string();
         let key_type = server_public_key.algorithm().to_string();
-        let conn = self.db.lock().await;
-        match crate::db::known_hosts_repo::get(&conn, &self.host, self.port) {
-            Ok(Some(existing)) => Ok(existing == fingerprint),
-            Ok(None) => {
-                let _ = crate::db::known_hosts_repo::insert(
-                    &conn,
-                    &self.host,
-                    self.port,
-                    &key_type,
-                    &fingerprint,
-                );
-                Ok(true)
-            }
-            Err(_) => Ok(false),
+
+        let (db, prompts) = match self.app.try_state::<AppState>() {
+            Some(state) => (state.db.clone(), state.host_key_prompts.clone()),
+            None => return Ok(false),
+        };
+
+        let stored = {
+            let conn = db.lock().await;
+            crate::db::known_hosts_repo::get(&conn, &self.host, self.port).unwrap_or(None)
+        };
+        let changed = match &stored {
+            // Known and unchanged → accept silently.
+            Some(existing) if *existing == fingerprint => return Ok(true),
+            Some(_) => true,
+            None => false,
+        };
+
+        // Ask the user to accept (unknown host) or re-trust (changed key).
+        let request_id = uuid::Uuid::new_v4().to_string();
+        let (tx, rx) = oneshot::channel::<bool>();
+        prompts.lock().await.insert(request_id.clone(), tx);
+        let _ = self.app.emit(
+            "myssh://hostkey-prompt",
+            HostKeyPrompt {
+                request_id: request_id.clone(),
+                host: self.host.clone(),
+                port: self.port,
+                key_type: key_type.clone(),
+                fingerprint: fingerprint.clone(),
+                changed,
+            },
+        );
+
+        let accepted = matches!(
+            tokio::time::timeout(std::time::Duration::from_secs(120), rx).await,
+            Ok(Ok(true))
+        );
+        prompts.lock().await.remove(&request_id);
+
+        if accepted {
+            let conn = db.lock().await;
+            let _ = crate::db::known_hosts_repo::insert(
+                &conn,
+                &self.host,
+                self.port,
+                &key_type,
+                &fingerprint,
+            );
         }
+        Ok(accepted)
     }
 
     /// A connection hit a server-side forwarded port (remote `-R` forward):
@@ -160,7 +209,7 @@ async fn connect_ssh_agent(
 /// Connect + authenticate, returning the live session handle. Shared by the
 /// interactive terminal and by port forwarding.
 pub(crate) async fn connect_authenticated(
-    db: Arc<Mutex<Connection>>,
+    app: AppHandle,
     params: &ConnectParams,
     remote_dest: Option<(String, u16)>,
 ) -> AppResult<(Handle<ClientHandler>, Vec<Handle<ClientHandler>>)> {
@@ -170,7 +219,7 @@ pub(crate) async fn connect_authenticated(
     config.keepalive_interval = Some(std::time::Duration::from_secs(30));
     let config = Arc::new(config);
     let handler = ClientHandler {
-        db: db.clone(),
+        app: app.clone(),
         host: params.host.clone(),
         port: params.port,
         remote_dest,
@@ -181,7 +230,7 @@ pub(crate) async fn connect_authenticated(
     let (mut handle, jumps) = match &params.jump {
         Some(jump) => {
             let (jump_handle, mut prior) =
-                Box::pin(connect_authenticated(db.clone(), jump, None)).await?;
+                Box::pin(connect_authenticated(app.clone(), jump, None)).await?;
             let channel = jump_handle
                 .channel_open_direct_tcpip(params.host.clone(), params.port as u32, "127.0.0.1", 0)
                 .await
@@ -269,13 +318,12 @@ pub(crate) async fn connect_authenticated(
 /// `myssh://exit/<session_id>`.
 pub async fn open(
     app: AppHandle,
-    db: Arc<Mutex<Connection>>,
     session_id: String,
     params: ConnectParams,
     cols: u32,
     rows: u32,
 ) -> AppResult<mpsc::Sender<SessionRequest>> {
-    let (handle, jumps) = connect_authenticated(db, &params, None).await?;
+    let (handle, jumps) = connect_authenticated(app.clone(), &params, None).await?;
 
     let channel = handle
         .channel_open_session()

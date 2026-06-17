@@ -136,6 +136,22 @@ export const listKnownHosts = () => invoke<KnownHost[]>(ns('list_known_hosts'))
 export const removeKnownHost = (host: string, port: number) =>
   invoke<void>(ns('remove_known_host'), { host, port })
 
+export interface HostKeyPrompt {
+  requestId: string
+  host: string
+  port: number
+  keyType: string
+  fingerprint: string
+  changed: boolean
+}
+
+export const respondHostKey = (requestId: string, accept: boolean) =>
+  invoke<void>(ns('respond_host_key'), { requestId, accept })
+
+/** Subscribe to interactive host-key accept/reject prompts. */
+export const onHostKeyPrompt = (cb: (prompt: HostKeyPrompt) => void): Promise<UnlistenFn> =>
+  listen<HostKeyPrompt>('myssh://hostkey-prompt', (e) => cb(e.payload))
+
 // --- SFTP ---
 
 export const sftpOpen = (hostId: string) => invoke<SftpOpened>(ns('sftp_open'), { hostId })

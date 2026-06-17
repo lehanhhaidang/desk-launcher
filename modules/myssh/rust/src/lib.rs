@@ -52,6 +52,7 @@ pub fn init() -> TauriPlugin<Wry> {
             commands::sftp::sftp_close,
             commands::known_hosts::list_known_hosts,
             commands::known_hosts::remove_known_host,
+            commands::known_hosts::respond_host_key,
         ])
         .on_window_ready(|window| {
             // The plugin's state outlives the module window, so if the MySSH
@@ -68,12 +69,15 @@ pub fn init() -> TauriPlugin<Wry> {
                         let sessions = state.sessions.clone();
                         let forwards = state.forwards.clone();
                         let sftp = state.sftp.clone();
+                        let prompts = state.host_key_prompts.clone();
                         tauri::async_runtime::spawn(async move {
                             // Dropping the senders makes each session task see a
                             // closed channel and shut its russh handle down.
                             sessions.lock().await.clear();
                             // Dropping the SFTP handles closes their SSH connections.
                             sftp.lock().await.clear();
+                            // Drop any pending host-key prompt waiters.
+                            prompts.lock().await.clear();
                             let mut fwd = forwards.lock().await;
                             for (_, handle) in fwd.drain() {
                                 handle.stop();

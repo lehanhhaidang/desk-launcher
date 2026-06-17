@@ -33,4 +33,5 @@ permissions = [
     "allow-sftp-close",
     "allow-list-known-hosts",
     "allow-remove-known-host",
+    "allow-respond-host-key",
 ]

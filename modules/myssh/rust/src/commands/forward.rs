@@ -4,7 +4,7 @@ use crate::models::forward::{Forward, ForwardInput, ForwardStatus};
 use crate::services::forward;
 use crate::services::ssh_client;
 use crate::state::AppState;
-use tauri::State;
+use tauri::{AppHandle, State};
 
 #[tauri::command]
 pub async fn list_forwards(state: State<'_, AppState>) -> AppResult<Vec<ForwardStatus>> {
@@ -41,7 +41,11 @@ pub async fn delete_forward(state: State<'_, AppState>, id: String) -> AppResult
 }
 
 #[tauri::command]
-pub async fn start_forward(state: State<'_, AppState>, id: String) -> AppResult<()> {
+pub async fn start_forward(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    id: String,
+) -> AppResult<()> {
     if state.forwards.lock().await.contains_key(&id) {
         return Ok(());
     }
@@ -54,9 +58,9 @@ pub async fn start_forward(state: State<'_, AppState>, id: String) -> AppResult<
 
     let kind = def.kind.clone();
     let handle = match kind.as_str() {
-        "remote" => forward::start_remote(state.db.clone(), params, def).await?,
-        "dynamic" => forward::start_dynamic(state.db.clone(), params, def).await?,
-        _ => forward::start_local(state.db.clone(), params, def).await?,
+        "remote" => forward::start_remote(app, params, def).await?,
+        "dynamic" => forward::start_dynamic(app, params, def).await?,
+        _ => forward::start_local(app, params, def).await?,
     };
     state.forwards.lock().await.insert(id, handle);
     Ok(())

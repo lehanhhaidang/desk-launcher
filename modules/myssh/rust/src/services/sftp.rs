@@ -4,11 +4,9 @@
 use crate::error::{AppError, AppResult};
 use crate::models::sftp::SftpEntry;
 use crate::services::ssh_client::{connect_authenticated, ClientHandler, ConnectParams};
-use rusqlite::Connection;
 use russh::client::Handle;
 use russh_sftp::client::SftpSession;
-use std::sync::Arc;
-use tokio::sync::Mutex;
+use tauri::AppHandle;
 
 /// A live SFTP session. The russh `Handle` is held so the underlying SSH
 /// connection stays open for the session's lifetime.
@@ -20,10 +18,10 @@ pub struct SftpHandle {
 
 /// Connect, request the `sftp` subsystem, and return the session + home dir.
 pub async fn open(
-    db: Arc<Mutex<Connection>>,
+    app: AppHandle,
     params: &ConnectParams,
 ) -> AppResult<(SftpHandle, String)> {
-    let (ssh, jumps) = connect_authenticated(db, params, None).await?;
+    let (ssh, jumps) = connect_authenticated(app, params, None).await?;
     let channel = ssh
         .channel_open_session()
         .await

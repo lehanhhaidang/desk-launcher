@@ -4,7 +4,7 @@ use crate::services::ssh_client::SessionRequest;
 use rusqlite::Connection;
 use std::collections::HashMap;
 use std::sync::Arc;
-use tokio::sync::{mpsc, Mutex};
+use tokio::sync::{mpsc, oneshot, Mutex};
 
 /// Plugin-scoped managed state.
 ///
@@ -19,6 +19,9 @@ pub struct AppState {
     pub sessions: Arc<Mutex<HashMap<String, mpsc::Sender<SessionRequest>>>>,
     pub forwards: Arc<Mutex<HashMap<String, ForwardHandle>>>,
     pub sftp: Arc<Mutex<HashMap<String, SftpHandle>>>,
+    /// Pending interactive host-key decisions, keyed by request id; the value
+    /// is fulfilled by the `respond_host_key` command.
+    pub host_key_prompts: Arc<Mutex<HashMap<String, oneshot::Sender<bool>>>>,
 }
 
 impl AppState {
@@ -28,6 +31,7 @@ impl AppState {
             sessions: Arc::new(Mutex::new(HashMap::new())),
             forwards: Arc::new(Mutex::new(HashMap::new())),
             sftp: Arc::new(Mutex::new(HashMap::new())),
+            host_key_prompts: Arc::new(Mutex::new(HashMap::new())),
         }
     }
 }

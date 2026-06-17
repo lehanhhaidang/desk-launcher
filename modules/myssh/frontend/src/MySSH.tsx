@@ -20,6 +20,7 @@ import { SnippetsPanel } from './components/SnippetsPanel'
 import { ForwardsPanel } from './components/ForwardsPanel'
 import { SftpPanel } from './components/SftpPanel'
 import { KnownHostsPanel } from './components/KnownHostsPanel'
+import { HostKeyModal } from './components/HostKeyModal'
 import { TerminalWorkspace, type SessionTab } from './terminal/TerminalWorkspace'
 import {
   createGroup,
@@ -358,6 +359,8 @@ export default function MySSH() {
       <SftpPanel open={!!sftpHost} host={sftpHost} onClose={() => setSftpHost(null)} />
 
       <KnownHostsPanel open={knownHostsOpen} onClose={() => setKnownHostsOpen(false)} />
+
+      <HostKeyModal />
     </div>
   )
 }
