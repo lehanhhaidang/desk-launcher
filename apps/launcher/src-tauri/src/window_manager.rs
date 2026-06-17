@@ -38,6 +38,13 @@ pub async fn open_module(app: AppHandle, id: String) -> Result<(), WindowError> 
             .resizable(true)
             .center();
 
+    // MySSH's file manager uses in-webview HTML5 drag-and-drop between panes;
+    // Tauri's OS-level drag-drop handler would otherwise swallow those events
+    // on WebView2, so disable it for this window.
+    if spec.id == "myssh" {
+        builder = builder.disable_drag_drop_handler();
+    }
+
     if let (Some(min_w), Some(min_h)) = (spec.min_width, spec.min_height) {
         builder = builder.min_inner_size(min_w, min_h);
     }
