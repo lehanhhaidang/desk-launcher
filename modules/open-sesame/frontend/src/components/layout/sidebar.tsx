@@ -5,6 +5,7 @@ import { useAuthStore } from '@os/stores/auth-store';
 import { useAuth } from '@os/features/auth/hooks/use-auth';
 import { HelpModal } from '@os/features/help/components/help-modal';
 import { BookOpen, Building2, Folder, GitBranch, LogOut, Plus, Settings, UserRound, Users } from 'lucide-react';
+import { AppearanceButton } from '@desk-launcher/theme';
 
 export function Sidebar({ className }: { className?: string }) {
     const { workspaces, activeWorkspaceId, setActiveWorkspace, fetchWorkspaces, createWorkspace } =
@@ -69,6 +70,11 @@ export function Sidebar({ className }: { className?: string }) {
                 >
                     <BookOpen className="h-5 w-5" />
                 </button>
+
+                <AppearanceButton
+                    title="Appearance"
+                    className="flex h-10 w-10 items-center justify-center rounded-lg text-[color-mix(in_srgb,var(--on-surface-variant)_62%,transparent)] transition-all duration-200 hover:bg-[rgba(255,255,255,0.06)] hover:text-[var(--primary)]"
+                />
 
                 <button
                     className="flex h-10 w-10 items-center justify-center rounded-lg text-[color-mix(in_srgb,var(--on-surface-variant)_62%,transparent)] transition-all duration-200 hover:bg-[rgba(255,255,255,0.06)] hover:text-[var(--primary)]"

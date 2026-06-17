@@ -7,10 +7,13 @@
 @source "../../../../packages/ui/src";
 
 :root {
+  font-family: var(--font-sans, "Quicksand", ui-sans-serif, system-ui, sans-serif);
+  color: var(--text);
+  background: var(--bg);
+}
+
+html.dark {
   color-scheme: dark;
-  font-family: "Quicksand", ui-sans-serif, system-ui, sans-serif;
-  color: #edf3f7;
-  background: #0d0f14;
 }
 
 html,
@@ -26,16 +29,16 @@ body {
 
 .myssh-bg {
   background:
-    radial-gradient(circle at 14% 8%, rgba(124, 238, 230, 0.10), transparent 34%),
-    radial-gradient(circle at 88% 0%, rgba(155, 231, 255, 0.08), transparent 30%),
-    linear-gradient(135deg, #0d0f14 0%, #0f151d 48%, #0d1016 100%);
+    radial-gradient(circle at 14% 8%, color-mix(in oklch, var(--brand) 10%, transparent), transparent 34%),
+    radial-gradient(circle at 88% 0%, color-mix(in oklch, var(--brand-2) 8%, transparent), transparent 30%),
+    linear-gradient(135deg, var(--bg) 0%, var(--surface) 48%, var(--bg) 100%);
 }
 
 .myssh-panel {
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015)),
-    rgba(16, 18, 26, 0.78);
-  border-color: rgba(158, 170, 190, 0.16);
+    linear-gradient(145deg, color-mix(in oklch, var(--text) 5%, transparent), color-mix(in oklch, var(--text) 1.5%, transparent)),
+    var(--panel);
+  border-color: var(--line);
   backdrop-filter: blur(16px);
 }
 

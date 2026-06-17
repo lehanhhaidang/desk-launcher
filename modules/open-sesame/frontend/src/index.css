@@ -1,6 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap');
-@import "tailwindcss";
-@import "tw-animate-css";
+/* Shared brand/surface/text/line tokens driven by the packages/theme engine
+   (--brand / --brand-2 / --bg / --surface / --panel / --panel-2 / --text /
+   --text-muted / --text-faint / --line / --radius / --font-sans). The shadcn
+   theme (.dark switch) comes from here too. The launcher shim only imports
+   this module's index.css, so we pull the shared theme.css in directly. It
+   also brings in tailwindcss, tw-animate-css and the Quicksand fonts, so those
+   are not re-imported here (re-importing tailwindcss would duplicate layers). */
+@import "../../../../packages/ui/src/theme.css";
 @import "highlight.js/styles/github-dark.css";
 
 /* Vite's project root is apps/launcher/. Module source files live OUTSIDE
@@ -15,72 +20,80 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  color-scheme: dark;
-  font-family: "Quicksand", ui-sans-serif, system-ui, sans-serif;
-  color: #edf3f7;
-  background: #101015;
+  font-family: var(--font-sans, "Quicksand", ui-sans-serif, system-ui, sans-serif);
+  color: var(--text);
+  background: var(--bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --background: #101015;
-  --surface: rgba(18, 19, 27, 0.82);
-  --surface-lowest: rgba(10, 11, 16, 0.82);
-  --surface-low: rgba(21, 23, 33, 0.74);
-  --surface-container: rgba(28, 31, 44, 0.68);
-  --surface-high: rgba(36, 39, 55, 0.7);
-  --surface-highest: rgba(45, 49, 68, 0.72);
-  --surface-bright: rgba(60, 65, 88, 0.8);
-  --primary: #7ceee6;
-  --primary-container: #5dd9d0;
+  /* Module-local M3-style aliases repointed at the shared engine tokens so
+     the whole module recolors with the chosen accent / light-dark mode.
+     Brand → --brand, secondary brand → --brand-2, surfaces → --panel*/--bg,
+     text → --text*, lines → --line. Dark mode stays visually identical. */
+  --background: var(--bg);
+  --surface: var(--panel);
+  --surface-lowest: var(--surface);
+  --surface-low: var(--panel);
+  --surface-container: var(--panel);
+  --surface-high: var(--panel-2);
+  --surface-highest: var(--panel-2);
+  --surface-bright: var(--panel-2);
+  --primary: var(--brand);
+  --primary-container: var(--brand);
   --on-primary: #003734;
-  --purple: #b79cff;
-  --purple-soft: rgba(183, 156, 255, 0.16);
-  --pink-soft: rgba(239, 137, 214, 0.12);
+  --purple: var(--brand-2);
+  --purple-soft: color-mix(in oklch, var(--brand-2) 16%, transparent);
+  --pink-soft: color-mix(in oklch, var(--brand-2) 12%, transparent);
   --tertiary: #ffbc86;
   --error: #ffb4ab;
   --error-container: #93000a;
-  --outline: rgba(178, 190, 206, 0.58);
-  --outline-variant: rgba(158, 170, 190, 0.16);
-  --on-surface: #edf3f7;
-  --on-surface-variant: #aeb8c7;
-  --secondary: #cdd3ea;
+  --outline: color-mix(in oklch, var(--text) 40%, transparent);
+  --outline-variant: var(--line);
+  --on-surface: var(--text);
+  --on-surface-variant: var(--text-muted);
+  --secondary: var(--text-muted);
   --shadow-soft: 0 18px 50px rgba(0, 0, 0, 0.28);
-  --shadow-glow: 0 0 34px rgba(124, 238, 230, 0.08), 0 0 44px rgba(183, 156, 255, 0.08);
-  --foreground: #edf3f7;
-  --card: rgba(36, 39, 55, 0.7);
-  --card-foreground: #edf3f7;
-  --popover: rgba(21, 23, 33, 0.92);
-  --popover-foreground: #edf3f7;
+  --shadow-glow:
+    0 0 34px color-mix(in oklch, var(--brand) 8%, transparent),
+    0 0 44px color-mix(in oklch, var(--brand-2) 8%, transparent);
+  --foreground: var(--text);
+  --card: var(--panel-2);
+  --card-foreground: var(--text);
+  --popover: var(--panel);
+  --popover-foreground: var(--text);
   --primary-foreground: #071413;
-  --secondary-foreground: #101015;
-  --muted: rgba(28, 31, 44, 0.68);
-  --muted-foreground: #aeb8c7;
-  --accent: rgba(183, 156, 255, 0.16);
-  --accent-foreground: #edf3f7;
+  --secondary-foreground: var(--bg);
+  --muted: var(--panel);
+  --muted-foreground: var(--text-muted);
+  --accent: color-mix(in oklch, var(--brand-2) 16%, transparent);
+  --accent-foreground: var(--text);
   --destructive: #ffb4ab;
-  --border: rgba(158, 170, 190, 0.16);
-  --input: rgba(255, 255, 255, 0.08);
-  --ring: rgba(183, 156, 255, 0.55);
-  --chart-1: #7ceee6;
-  --chart-2: #b79cff;
+  --border: var(--line);
+  --input: color-mix(in oklch, var(--text) 8%, transparent);
+  --ring: color-mix(in oklch, var(--brand-2) 55%, transparent);
+  --chart-1: var(--brand);
+  --chart-2: var(--brand-2);
   --chart-3: #ffbc86;
   --chart-4: #9be7ff;
   --chart-5: #ef89d6;
-  --radius: 0.625rem;
-  --sidebar: rgba(10, 11, 16, 0.82);
-  --sidebar-foreground: #edf3f7;
-  --sidebar-primary: #7ceee6;
+  --sidebar: var(--panel);
+  --sidebar-foreground: var(--text);
+  --sidebar-primary: var(--brand);
   --sidebar-primary-foreground: #071413;
-  --sidebar-accent: rgba(183, 156, 255, 0.16);
-  --sidebar-accent-foreground: #edf3f7;
-  --sidebar-border: rgba(158, 170, 190, 0.16);
-  --sidebar-ring: rgba(183, 156, 255, 0.55);
+  --sidebar-accent: color-mix(in oklch, var(--brand-2) 16%, transparent);
+  --sidebar-accent-foreground: var(--text);
+  --sidebar-border: var(--line);
+  --sidebar-ring: color-mix(in oklch, var(--brand-2) 55%, transparent);
 }
 
 * {
   box-sizing: border-box;
+}
+
+html.dark {
+  color-scheme: dark;
 }
 
 html,
@@ -90,9 +103,9 @@ body,
   margin: 0;
   overflow: hidden;
   background:
-    radial-gradient(circle at 16% 10%, rgba(183, 156, 255, 0.14), transparent 34%),
-    radial-gradient(circle at 84% 0%, rgba(124, 238, 230, 0.11), transparent 32%),
-    linear-gradient(135deg, #101015 0%, #111722 44%, #12111c 100%);
+    radial-gradient(circle at 16% 10%, color-mix(in oklch, var(--brand-2) 13%, transparent), transparent 34%),
+    radial-gradient(circle at 84% 0%, color-mix(in oklch, var(--brand) 10%, transparent), transparent 32%),
+    linear-gradient(135deg, var(--bg) 0%, var(--surface) 44%, var(--bg) 100%);
 }
 
 button,
@@ -108,14 +121,14 @@ button {
 
 .app-bg {
   background:
-    radial-gradient(circle at 18% 12%, rgba(183, 156, 255, 0.12), transparent 30%),
-    radial-gradient(circle at 92% 16%, rgba(124, 238, 230, 0.09), transparent 28%),
-    linear-gradient(135deg, #101015 0%, #111722 50%, #12111c 100%);
+    radial-gradient(circle at 18% 12%, color-mix(in oklch, var(--brand-2) 12%, transparent), transparent 30%),
+    radial-gradient(circle at 92% 16%, color-mix(in oklch, var(--brand) 9%, transparent), transparent 28%),
+    linear-gradient(135deg, var(--bg) 0%, var(--surface) 50%, var(--bg) 100%);
 }
 
 .soft-panel {
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018)),
+    linear-gradient(145deg, color-mix(in oklch, var(--text) 4.5%, transparent), color-mix(in oklch, var(--text) 1.8%, transparent)),
     var(--surface-container);
   border-color: var(--outline-variant);
   box-shadow: var(--shadow-soft);
@@ -124,7 +137,7 @@ button {
 
 .soft-card {
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02)),
+    linear-gradient(145deg, color-mix(in oklch, var(--text) 5.5%, transparent), color-mix(in oklch, var(--text) 2%, transparent)),
     var(--surface-high);
   border-color: var(--outline-variant);
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
@@ -132,17 +145,17 @@ button {
 }
 
 .soft-card:hover {
-  border-color: rgba(183, 156, 255, 0.34);
+  border-color: color-mix(in oklch, var(--brand-2) 34%, transparent);
   box-shadow: var(--shadow-glow), 0 14px 34px rgba(0, 0, 0, 0.22);
   transform: translateY(-1px);
 }
 
 .lux-gradient {
-  background: linear-gradient(135deg, var(--primary) 0%, #9be7ff 42%, var(--purple) 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, color-mix(in oklch, var(--brand) 40%, var(--brand-2)) 42%, var(--purple) 100%);
 }
 
 .lux-text {
-  background: linear-gradient(135deg, var(--primary) 0%, #d7c8ff 72%, var(--purple) 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, color-mix(in oklch, var(--brand-2) 70%, var(--text)) 72%, var(--purple) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -160,7 +173,7 @@ button {
   width: 240px;
   height: 240px;
   pointer-events: none;
-  background: radial-gradient(circle, rgba(183, 156, 255, 0.14), transparent 64%);
+  background: radial-gradient(circle, color-mix(in oklch, var(--brand-2) 14%, transparent), transparent 64%);
 }
 
 @keyframes open-sesame-modal-in {
@@ -226,7 +239,7 @@ button {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  background: linear-gradient(90deg, transparent, color-mix(in oklch, var(--text) 8%, transparent), transparent);
   animation: open-sesame-shimmer 1.5s infinite;
 }
 

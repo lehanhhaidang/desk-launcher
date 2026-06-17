@@ -6,23 +6,29 @@
 @source "../../../../packages/ui/src";
 
 :root {
-  color-scheme: dark;
-  font-family: "Quicksand", ui-sans-serif, system-ui, sans-serif;
-  color: #edf3f7;
-  background: #101015;
+  font-family: var(--font-sans, "Quicksand", ui-sans-serif, system-ui, sans-serif);
+  color: var(--text);
+  background: var(--bg);
 
-  --background: #101015;
-  --surface: rgba(18, 19, 27, 0.82);
-  --surface-lowest: rgba(10, 11, 16, 0.82);
-  --surface-container: rgba(28, 31, 44, 0.68);
-  --surface-high: rgba(36, 39, 55, 0.7);
-  --primary: #7ceee6;
-  --purple: #b79cff;
-  --purple-soft: rgba(183, 156, 255, 0.16);
-  --outline-variant: rgba(158, 170, 190, 0.16);
-  --on-surface: #edf3f7;
-  --on-surface-variant: #aeb8c7;
+  /* Repoint the module's legacy aliases at the engine brand tokens so accent
+     and mode changes recolor the chrome. The surface/text/line aliases below
+     follow the engine's mode-driven tokens (dark values identical to before). */
+  --background: var(--bg);
+  --surface: var(--panel);
+  --surface-lowest: var(--surface);
+  --surface-container: var(--panel-2);
+  --surface-high: var(--panel-2);
+  --primary: var(--brand);
+  --purple: var(--brand-2);
+  --purple-soft: color-mix(in oklch, var(--brand-2) 16%, transparent);
+  --outline-variant: var(--line);
+  --on-surface: var(--text);
+  --on-surface-variant: var(--text-muted);
   --error: #ffb4ab;
+}
+
+html.dark {
+  color-scheme: dark;
 }
 
 html,
@@ -38,48 +44,43 @@ body {
 
 .mdc-bg {
   background:
-    radial-gradient(circle at 16% 10%, rgba(183, 156, 255, 0.14), transparent 34%),
-    radial-gradient(circle at 84% 0%, rgba(124, 238, 230, 0.11), transparent 32%),
-    linear-gradient(135deg, #101015 0%, #111722 44%, #12111c 100%);
+    radial-gradient(circle at 16% 10%, color-mix(in oklch, var(--brand-2) 14%, transparent), transparent 34%),
+    radial-gradient(circle at 84% 0%, color-mix(in oklch, var(--brand) 11%, transparent), transparent 32%),
+    linear-gradient(135deg, var(--bg) 0%, var(--surface) 48%, var(--bg) 100%);
 }
 
 .mdc-panel {
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)),
-    rgba(18, 19, 27, 0.76);
-  border-color: rgba(158, 170, 190, 0.16);
+    linear-gradient(145deg, color-mix(in oklch, var(--text) 5.5%, transparent), color-mix(in oklch, var(--text) 1.8%, transparent)),
+    var(--panel);
+  border-color: var(--line);
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
   backdrop-filter: blur(18px);
 }
 
 .mdc-lux-text {
-  background: linear-gradient(135deg, #7ceee6 0%, #d7c8ff 72%, #b79cff 100%);
+  background: linear-gradient(135deg, var(--brand) 0%, color-mix(in oklch, var(--brand) 40%, var(--brand-2)) 72%, var(--brand-2) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 .mdc-primary-button {
-  background: linear-gradient(135deg, #7ceee6 0%, #9be7ff 42%, #b79cff 100%);
+  background: linear-gradient(135deg, var(--brand) 0%, color-mix(in oklch, var(--brand) 45%, var(--brand-2)) 42%, var(--brand-2) 100%);
   color: #071413;
 }
 
-.mdc-panel,
-.mdc-panel * {
-  color-scheme: dark;
-}
-
 .mdc-panel {
-  color: var(--on-surface);
+  color: var(--text);
 }
 
 .mdc-editor {
-  color: var(--on-surface);
-  caret-color: var(--primary);
+  color: var(--text);
+  caret-color: var(--brand);
 }
 
 .mdc-editor::placeholder {
-  color: rgba(174, 184, 199, 0.68);
+  color: var(--text-faint);
 }
 
 /* Markdown code blocks: the <pre> wrapper owns the box; drop highlight.js's own

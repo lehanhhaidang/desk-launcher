@@ -8,6 +8,7 @@ import {
   Code2,
   FolderOpen,
   FolderPlus,
+  Palette,
   Pencil,
   Plus,
   Search,
@@ -17,7 +18,8 @@ import {
   Trash2,
   Unplug,
 } from 'lucide-react'
-import { Button } from '@desk-launcher/ui'
+import { Button, buttonVariants } from '@desk-launcher/ui'
+import { AppearanceButton } from '@desk-launcher/theme'
 import { HostDialog } from './components/HostDialog'
 import { SnippetsPanel } from './components/SnippetsPanel'
 import { ForwardsPanel } from './components/ForwardsPanel'
@@ -262,6 +264,9 @@ export default function MySSH() {
             <span className="text-sm font-semibold tracking-wide">MySSH</span>
           </div>
           <div className="flex gap-1">
+            <AppearanceButton className={buttonVariants({ variant: 'ghost', size: 'icon-sm' })}>
+              <Palette className="size-4" />
+            </AppearanceButton>
             <Button size="icon-sm" variant="ghost" title="Port forwarding" onClick={() => setForwardsOpen(true)}>
               <ArrowRightLeft className="size-4" />
             </Button>
