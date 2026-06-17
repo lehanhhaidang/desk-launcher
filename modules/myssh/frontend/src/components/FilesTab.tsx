@@ -52,6 +52,11 @@ export function FilesTab({ hostId, hostLabel, onPreview }: Props) {
   const remoteCwdRef = useRef('/')
   const localCwdRef = useRef('')
 
+  // Remember the last directory per host (remote) and globally (local) so you
+  // don't have to navigate back every time.
+  const remoteKey = `myssh.lastpath.remote.${hostId}`
+  const localKey = 'myssh.lastpath.local'
+
   useEffect(() => {
     let cancelled = false
     let openedId: string | null = null
@@ -64,11 +69,15 @@ export function FilesTab({ hostId, hostLabel, onPreview }: Props) {
         openedId = id
         sftpIdRef.current = id
         setSftpId(id)
-        await reloadRemote(id, home)
+        const saved = localStorage.getItem(remoteKey)
+        if (!saved || !(await reloadRemote(id, saved))) await reloadRemote(id, home)
       })
       .catch((e) => setRemoteError(errMessage(e)))
     localHome()
-      .then((h) => reloadLocal(h))
+      .then(async (home) => {
+        const saved = localStorage.getItem(localKey)
+        if (!saved || !(await reloadLocal(saved))) await reloadLocal(home)
+      })
       .catch((e) => setLocalError(errMessage(e)))
     return () => {
       cancelled = true
@@ -77,7 +86,7 @@ export function FilesTab({ hostId, hostLabel, onPreview }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hostId])
 
-  const reloadRemote = async (id: string, path: string) => {
+  const reloadRemote = async (id: string, path: string): Promise<boolean> => {
     setRemoteLoading(true)
     try {
       const list = await sftpList(id, path)
@@ -86,13 +95,16 @@ export function FilesTab({ hostId, hostLabel, onPreview }: Props) {
       remoteCwdRef.current = path
       setRemoteSel(null)
       setRemoteError(null)
+      localStorage.setItem(remoteKey, path)
+      return true
     } catch (e) {
       setRemoteError(errMessage(e))
+      return false
     } finally {
       setRemoteLoading(false)
     }
   }
-  const reloadLocal = async (path: string) => {
+  const reloadLocal = async (path: string): Promise<boolean> => {
     setLocalLoading(true)
     try {
       const list = await localList(path)
@@ -101,8 +113,11 @@ export function FilesTab({ hostId, hostLabel, onPreview }: Props) {
       localCwdRef.current = path
       setLocalSel(null)
       setLocalError(null)
+      localStorage.setItem(localKey, path)
+      return true
     } catch (e) {
       setLocalError(errMessage(e))
+      return false
     } finally {
       setLocalLoading(false)
     }
