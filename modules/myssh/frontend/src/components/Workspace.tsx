@@ -1,11 +1,20 @@
 import { useState } from 'react'
-import { FolderOpen, TerminalSquare, X } from 'lucide-react'
+import { FileText, FolderOpen, TerminalSquare, X } from 'lucide-react'
 import { TerminalView } from '../terminal/TerminalView'
 import { FilesTab } from './FilesTab'
+import { PreviewTab } from './PreviewTab'
 
 export type WorkspaceTab =
   | { kind: 'terminal'; key: string; hostId: string; label: string }
   | { kind: 'files'; key: string; hostId: string; label: string }
+  | {
+      kind: 'preview'
+      key: string
+      label: string
+      origin: 'local' | 'remote'
+      path: string
+      sftpId?: string
+    }
 
 interface Props {
   tabs: WorkspaceTab[]
@@ -55,6 +64,8 @@ export function Workspace({
           >
             {tab.kind === 'files' ? (
               <FolderOpen className="size-3.5 shrink-0" />
+            ) : tab.kind === 'preview' ? (
+              <FileText className="size-3.5 shrink-0" />
             ) : (
               <TerminalSquare className="size-3.5 shrink-0" />
             )}
@@ -118,12 +129,19 @@ export function Workspace({
                     onSession={(sid) => onSessionForTab?.(tab.key, sid)}
                   />
                 </div>
-              ) : (
+              ) : tab.kind === 'files' ? (
                 <FilesTab
                   hostId={tab.hostId}
                   hostLabel={tab.label}
                   active={visible}
                   onPreview={onPreview}
+                />
+              ) : (
+                <PreviewTab
+                  origin={tab.origin}
+                  path={tab.path}
+                  name={tab.label}
+                  sftpId={tab.sftpId}
                 />
               )}
             </div>

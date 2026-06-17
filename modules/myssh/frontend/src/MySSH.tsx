@@ -184,6 +184,20 @@ export default function MySSH() {
     setHeaderCollapsed(true)
   }
 
+  const openPreview = (file: {
+    origin: 'local' | 'remote'
+    path: string
+    name: string
+    sftpId?: string
+  }) => {
+    const key = crypto.randomUUID()
+    setTabs((t) => [
+      ...t,
+      { kind: 'preview', key, label: file.name, origin: file.origin, path: file.path, sftpId: file.sftpId },
+    ])
+    setActiveTab(key)
+  }
+
   const closeTab = (key: string) => {
     setTabs((prev) => {
       const next = prev.filter((t) => t.key !== key)
@@ -366,6 +380,7 @@ export default function MySSH() {
                 onClose={closeTab}
                 onRename={renameTab}
                 onSessionForTab={registerSession}
+                onPreview={openPreview}
               />
             </div>
           </>
