@@ -4,9 +4,9 @@
 
 use crate::error::{AppError, AppResult};
 use rusqlite::Connection;
-use russh::client::{self, Handle};
+use russh::client::{self, Handle, Msg, Session};
 use russh::keys::{ssh_key, PrivateKeyWithHashAlg};
-use russh::ChannelMsg;
+use russh::{Channel, ChannelMsg};
 use std::sync::Arc;
 use tauri::{AppHandle, Emitter};
 use tokio::sync::{mpsc, Mutex};
@@ -37,6 +37,9 @@ pub(crate) struct ClientHandler {
     db: Arc<Mutex<Connection>>,
     host: String,
     port: u16,
+    /// For remote (`-R`) forwards: the local destination that incoming
+    /// server-forwarded connections are pumped to.
+    remote_dest: Option<(String, u16)>,
 }
 
 impl client::Handler for ClientHandler {
@@ -66,6 +69,31 @@ impl client::Handler for ClientHandler {
             Err(_) => Ok(false),
         }
     }
+
+    /// A connection hit a server-side forwarded port (remote `-R` forward):
+    /// dial the configured local destination and pump bytes both ways.
+    async fn server_channel_open_forwarded_tcpip(
+        &mut self,
+        channel: Channel<Msg>,
+        _connected_address: &str,
+        _connected_port: u32,
+        _originator_address: &str,
+        _originator_port: u32,
+        _session: &mut Session,
+    ) -> Result<(), Self::Error> {
+        if let Some((host, port)) = self.remote_dest.clone() {
+            tokio::spawn(async move {
+                match tokio::net::TcpStream::connect((host.as_str(), port)).await {
+                    Ok(mut tcp) => {
+                        let mut stream = channel.into_stream();
+                        let _ = tokio::io::copy_bidirectional(&mut tcp, &mut stream).await;
+                    }
+                    Err(e) => log::warn!("myssh remote forward: dial local dest failed: {e}"),
+                }
+            });
+        }
+        Ok(())
+    }
 }
 
 /// Connect + authenticate, returning the live session handle. Shared by the
@@ -73,6 +101,7 @@ impl client::Handler for ClientHandler {
 pub(crate) async fn connect_authenticated(
     db: Arc<Mutex<Connection>>,
     params: &ConnectParams,
+    remote_dest: Option<(String, u16)>,
 ) -> AppResult<Handle<ClientHandler>> {
     let mut config = client::Config::default();
     // Send a keepalive every 30s so idle sessions aren't dropped by the server
@@ -83,6 +112,7 @@ pub(crate) async fn connect_authenticated(
         db,
         host: params.host.clone(),
         port: params.port,
+        remote_dest,
     };
 
     let mut handle = client::connect(config, (params.host.as_str(), params.port), handler)
@@ -140,7 +170,7 @@ pub async fn open(
     cols: u32,
     rows: u32,
 ) -> AppResult<mpsc::Sender<SessionRequest>> {
-    let handle = connect_authenticated(db, &params).await?;
+    let handle = connect_authenticated(db, &params, None).await?;
 
     let channel = handle
         .channel_open_session()

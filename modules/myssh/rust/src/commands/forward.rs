@@ -69,7 +69,12 @@ pub async fn start_forward(state: State<'_, AppState>, id: String) -> AppResult<
         secret,
     };
 
-    let handle = forward::start_local(state.db.clone(), params, def).await?;
+    let kind = def.kind.clone();
+    let handle = match kind.as_str() {
+        "remote" => forward::start_remote(state.db.clone(), params, def).await?,
+        "dynamic" => forward::start_dynamic(state.db.clone(), params, def).await?,
+        _ => forward::start_local(state.db.clone(), params, def).await?,
+    };
     state.forwards.lock().await.insert(id, handle);
     Ok(())
 }

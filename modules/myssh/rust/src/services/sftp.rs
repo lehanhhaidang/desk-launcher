@@ -22,7 +22,7 @@ pub async fn open(
     db: Arc<Mutex<Connection>>,
     params: &ConnectParams,
 ) -> AppResult<(SftpHandle, String)> {
-    let ssh = connect_authenticated(db, params).await?;
+    let ssh = connect_authenticated(db, params, None).await?;
     let channel = ssh
         .channel_open_session()
         .await

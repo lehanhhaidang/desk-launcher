@@ -8,6 +8,7 @@ import {
   listForwards,
   startForward,
   stopForward,
+  type Forward,
   type ForwardStatus,
   type Host,
 } from '../api/myssh-api'
@@ -31,6 +32,7 @@ export function ForwardsPanel({ open, onClose, hosts }: Props) {
   const [destHost, setDestHost] = useState('127.0.0.1')
   const [destPort, setDestPort] = useState('')
   const [autoStart, setAutoStart] = useState(false)
+  const [kind, setKind] = useState<'local' | 'remote' | 'dynamic'>('local')
 
   const refresh = () => {
     listForwards()
@@ -49,18 +51,21 @@ export function ForwardsPanel({ open, onClose, hosts }: Props) {
   const add = async () => {
     const bp = Number(bindPort)
     const dp = Number(destPort)
+    const isDynamic = kind === 'dynamic'
     if (!hostId) return toast.error('Pick a host')
-    if (!Number.isInteger(bp) || bp < 1 || bp > 65535) return toast.error('Local port must be 1–65535')
-    if (!destHost.trim()) return toast.error('Destination host is required')
-    if (!Number.isInteger(dp) || dp < 1 || dp > 65535) return toast.error('Destination port must be 1–65535')
+    if (!Number.isInteger(bp) || bp < 1 || bp > 65535) return toast.error('Bind port must be 1–65535')
+    if (!isDynamic) {
+      if (!destHost.trim()) return toast.error('Destination host is required')
+      if (!Number.isInteger(dp) || dp < 1 || dp > 65535) return toast.error('Destination port must be 1–65535')
+    }
     try {
       await createForward({
         hostId,
-        kind: 'local',
+        kind,
         bindAddr: bindAddr.trim() || '127.0.0.1',
         bindPort: bp,
-        destHost: destHost.trim(),
-        destPort: dp,
+        destHost: isDynamic ? '' : destHost.trim(),
+        destPort: isDynamic ? 0 : dp,
         label: label.trim(),
         autoStart,
       })
@@ -126,7 +131,7 @@ export function ForwardsPanel({ open, onClose, hosts }: Props) {
                     )}
                   </div>
                   <div className="truncate font-mono text-xs text-[#7c8797]">
-                    {f.bindAddr}:{f.bindPort} → {f.destHost}:{f.destPort} · {hostName(f.hostId)}
+                    {routeText(f)} · {hostName(f.hostId)}
                   </div>
                 </div>
                 <button
@@ -161,25 +166,39 @@ export function ForwardsPanel({ open, onClose, hosts }: Props) {
             </select>
           </div>
           <div className="col-span-2">
+            <label className={labelClass}>Type</label>
+            <select className={inputClass} value={kind} onChange={(e) => setKind(e.target.value as typeof kind)}>
+              <option value="local">Local (-L) — local port → destination via host</option>
+              <option value="remote">Remote (-R) — host port → destination here</option>
+              <option value="dynamic">Dynamic (-D) — local SOCKS5 proxy</option>
+            </select>
+          </div>
+          <div className="col-span-2">
             <label className={labelClass}>Label (optional)</label>
             <input className={inputClass} value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Remote Postgres" />
           </div>
           <div>
-            <label className={labelClass}>Local bind address</label>
+            <label className={labelClass}>{kind === 'remote' ? 'Remote bind address' : 'Bind address'}</label>
             <input className={inputClass} value={bindAddr} onChange={(e) => setBindAddr(e.target.value)} />
           </div>
           <div>
-            <label className={labelClass}>Local port</label>
-            <input className={inputClass} value={bindPort} onChange={(e) => setBindPort(e.target.value)} inputMode="numeric" placeholder="5433" />
+            <label className={labelClass}>
+              {kind === 'dynamic' ? 'SOCKS port' : kind === 'remote' ? 'Remote port' : 'Local port'}
+            </label>
+            <input className={inputClass} value={bindPort} onChange={(e) => setBindPort(e.target.value)} inputMode="numeric" placeholder={kind === 'dynamic' ? '1080' : '5433'} />
           </div>
-          <div>
-            <label className={labelClass}>Destination host</label>
-            <input className={inputClass} value={destHost} onChange={(e) => setDestHost(e.target.value)} />
-          </div>
-          <div>
-            <label className={labelClass}>Destination port</label>
-            <input className={inputClass} value={destPort} onChange={(e) => setDestPort(e.target.value)} inputMode="numeric" placeholder="5432" />
-          </div>
+          {kind !== 'dynamic' && (
+            <>
+              <div>
+                <label className={labelClass}>Destination host</label>
+                <input className={inputClass} value={destHost} onChange={(e) => setDestHost(e.target.value)} />
+              </div>
+              <div>
+                <label className={labelClass}>Destination port</label>
+                <input className={inputClass} value={destPort} onChange={(e) => setDestPort(e.target.value)} inputMode="numeric" placeholder="5432" />
+              </div>
+            </>
+          )}
           <label className="col-span-2 flex cursor-pointer items-center gap-2 text-sm text-[#9aa6b6]">
             <input type="checkbox" checked={autoStart} onChange={(e) => setAutoStart(e.target.checked)} />
             Auto-start this forward when MySSH opens
@@ -194,6 +213,12 @@ export function ForwardsPanel({ open, onClose, hosts }: Props) {
       </div>
     </div>
   )
+}
+
+function routeText(f: Forward): string {
+  if (f.kind === 'dynamic') return `SOCKS ${f.bindAddr}:${f.bindPort}`
+  if (f.kind === 'remote') return `remote ${f.bindAddr}:${f.bindPort} → ${f.destHost}:${f.destPort}`
+  return `${f.bindAddr}:${f.bindPort} → ${f.destHost}:${f.destPort}`
 }
 
 function errMessage(e: unknown): string {

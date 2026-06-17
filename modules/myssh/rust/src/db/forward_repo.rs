@@ -40,11 +40,17 @@ pub fn create(conn: &Connection, input: ForwardInput) -> AppResult<Forward> {
     if input.host_id.trim().is_empty() {
         return Err(AppError::Validation("a host is required".into()));
     }
-    if input.dest_host.trim().is_empty() {
-        return Err(AppError::Validation("destination host is required".into()));
+    if input.bind_port == 0 {
+        return Err(AppError::Validation("the bind/local port must be non-zero".into()));
     }
-    if input.bind_port == 0 || input.dest_port == 0 {
-        return Err(AppError::Validation("ports must be non-zero".into()));
+    // Dynamic (SOCKS) forwards pick their destination per-connection.
+    if input.kind != "dynamic" {
+        if input.dest_host.trim().is_empty() {
+            return Err(AppError::Validation("destination host is required".into()));
+        }
+        if input.dest_port == 0 {
+            return Err(AppError::Validation("destination port must be non-zero".into()));
+        }
     }
     let id = uuid::Uuid::new_v4().to_string();
     let bind_addr = if input.bind_addr.trim().is_empty() {
