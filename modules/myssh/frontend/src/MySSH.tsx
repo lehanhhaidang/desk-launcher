@@ -3,6 +3,8 @@ import { confirm } from '@tauri-apps/plugin-dialog'
 import { toast } from 'sonner'
 import {
   ArrowRightLeft,
+  ChevronDown,
+  ChevronUp,
   Code2,
   FolderOpen,
   FolderPlus,
@@ -18,10 +20,9 @@ import { Button } from '@desk-launcher/ui'
 import { HostDialog } from './components/HostDialog'
 import { SnippetsPanel } from './components/SnippetsPanel'
 import { ForwardsPanel } from './components/ForwardsPanel'
-import { SftpPanel } from './components/SftpPanel'
 import { KnownHostsPanel } from './components/KnownHostsPanel'
 import { HostKeyModal } from './components/HostKeyModal'
-import { TerminalWorkspace, type SessionTab } from './terminal/TerminalWorkspace'
+import { Workspace, type WorkspaceTab } from './components/Workspace'
 import {
   createGroup,
   deleteGroup,
@@ -46,11 +47,11 @@ export default function MySSH() {
   const [editing, setEditing] = useState<Host | null>(null)
   const [newGroupOpen, setNewGroupOpen] = useState(false)
   const [newGroupName, setNewGroupName] = useState('')
-  const [tabs, setTabs] = useState<SessionTab[]>([])
+  const [tabs, setTabs] = useState<WorkspaceTab[]>([])
   const [activeTab, setActiveTab] = useState<string | null>(null)
+  const [headerCollapsed, setHeaderCollapsed] = useState(false)
   const [snippetsOpen, setSnippetsOpen] = useState(false)
   const [forwardsOpen, setForwardsOpen] = useState(false)
-  const [sftpHost, setSftpHost] = useState<Host | null>(null)
   const [knownHostsOpen, setKnownHostsOpen] = useState(false)
   const sessionMap = useRef<Map<string, string>>(new Map())
 
@@ -171,8 +172,16 @@ export default function MySSH() {
 
   const connect = (host: Host) => {
     const key = crypto.randomUUID()
-    setTabs((t) => [...t, { key, hostId: host.id, label: host.label }])
+    setTabs((t) => [...t, { kind: 'terminal', key, hostId: host.id, label: host.label }])
     setActiveTab(key)
+    setHeaderCollapsed(true)
+  }
+
+  const openFiles = (host: Host) => {
+    const key = crypto.randomUUID()
+    setTabs((t) => [...t, { kind: 'files', key, hostId: host.id, label: host.label }])
+    setActiveTab(key)
+    setHeaderCollapsed(true)
   }
 
   const closeTab = (key: string) => {
@@ -187,7 +196,10 @@ export default function MySSH() {
     setTabs((prev) => prev.map((t) => (t.key === key ? { ...t, label } : t)))
   }
 
-  const connectedHostIds = useMemo(() => new Set(tabs.map((t) => t.hostId)), [tabs])
+  const connectedHostIds = useMemo(
+    () => new Set(tabs.filter((t) => t.kind === 'terminal').map((t) => t.hostId)),
+    [tabs],
+  )
 
   return (
     <div className="myssh-bg flex h-screen w-screen text-[#edf3f7]">
@@ -284,14 +296,79 @@ export default function MySSH() {
       {/* Main */}
       <main className="flex flex-1 flex-col">
         {tabs.length > 0 ? (
-          <TerminalWorkspace
-            tabs={tabs}
-            activeKey={activeTab}
-            onActivate={setActiveTab}
-            onClose={closeTab}
-            onRename={renameTab}
-            onSessionForTab={registerSession}
-          />
+          <>
+            {headerCollapsed ? (
+              <div className="flex items-center gap-2 border-b border-white/10 px-4 py-1.5">
+                <button
+                  className="text-[#9aa6b6] hover:text-cyan-300"
+                  title="Show host details"
+                  onClick={() => setHeaderCollapsed(false)}
+                >
+                  <ChevronDown className="size-4" />
+                </button>
+                <span className="text-sm font-medium">{selected ? selected.label : 'No host selected'}</span>
+                {selected && (
+                  <span className="font-mono text-xs text-[#7c8797]">
+                    {selected.username}@{selected.hostname}
+                  </span>
+                )}
+                {selected && (
+                  <div className="ml-auto flex gap-1">
+                    <Button size="sm" variant="ghost" onClick={() => connect(selected)}>
+                      <TerminalSquare className="size-4" /> Connect
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => openFiles(selected)}>
+                      <FolderOpen className="size-4" /> Files
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="border-b border-white/10 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h1 className="truncate text-lg font-semibold">
+                      {selected ? selected.label : 'No host selected'}
+                    </h1>
+                    {selected && (
+                      <p className="mt-0.5 truncate font-mono text-xs text-[#9aa6b6]">
+                        {selected.username}@{selected.hostname}:{selected.port}
+                        {selected.tags.length > 0 && <span className="ml-2">· {selected.tags.join(', ')}</span>}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1">
+                    {selected && (
+                      <>
+                        <Button variant="ghost" size="sm" onClick={() => connect(selected)}>
+                          <TerminalSquare className="size-4" /> Connect
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => openFiles(selected)}>
+                          <FolderOpen className="size-4" /> Files
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => openEdit(selected)}>
+                          <Pencil className="size-4" /> Edit
+                        </Button>
+                      </>
+                    )}
+                    <Button size="icon-sm" variant="ghost" title="Collapse" onClick={() => setHeaderCollapsed(true)}>
+                      <ChevronUp className="size-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div className="min-h-0 flex-1">
+              <Workspace
+                tabs={tabs}
+                activeKey={activeTab}
+                onActivate={setActiveTab}
+                onClose={closeTab}
+                onRename={renameTab}
+                onSessionForTab={registerSession}
+              />
+            </div>
+          </>
         ) : selected ? (
           <div className="flex h-full flex-col p-8">
             <div className="myssh-panel rounded-xl border p-6">
@@ -303,7 +380,7 @@ export default function MySSH() {
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => setSftpHost(selected)}>
+                  <Button variant="outline" size="sm" onClick={() => openFiles(selected)}>
                     <FolderOpen className="size-4" /> Files
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => openEdit(selected)}>
@@ -355,8 +432,6 @@ export default function MySSH() {
       />
 
       <ForwardsPanel open={forwardsOpen} onClose={() => setForwardsOpen(false)} hosts={hosts} />
-
-      <SftpPanel open={!!sftpHost} host={sftpHost} onClose={() => setSftpHost(null)} />
 
       <KnownHostsPanel open={knownHostsOpen} onClose={() => setKnownHostsOpen(false)} />
 

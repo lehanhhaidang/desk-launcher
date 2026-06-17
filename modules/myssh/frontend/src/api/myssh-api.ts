@@ -168,6 +168,22 @@ export const sftpRemove = (sftpId: string, path: string, isDir: boolean) =>
 export const sftpRename = (sftpId: string, from: string, to: string) =>
   invoke<void>(ns('sftp_rename'), { sftpId, from, to })
 export const sftpClose = (sftpId: string) => invoke<void>(ns('sftp_close'), { sftpId })
+export const sftpReadText = (sftpId: string, path: string) =>
+  invoke<FilePreview>(ns('sftp_read_text'), { sftpId, path })
+
+export interface FilePreview {
+  content: string | null
+  isBinary: boolean
+  tooLarge: boolean
+  size: number
+}
+
+// --- Local filesystem (for the dual-pane file manager) ---
+
+export const localHome = () => invoke<string>(ns('local_home'))
+export const localRoots = () => invoke<string[]>(ns('local_roots'))
+export const localList = (path: string) => invoke<SftpEntry[]>(ns('local_list'), { path })
+export const localReadText = (path: string) => invoke<FilePreview>(ns('local_read_text'), { path })
 
 // --- Sessions ---
 
