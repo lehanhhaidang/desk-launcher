@@ -42,6 +42,14 @@ pub fn init() -> TauriPlugin<Wry> {
             commands::forward::delete_forward,
             commands::forward::start_forward,
             commands::forward::stop_forward,
+            commands::sftp::sftp_open,
+            commands::sftp::sftp_list,
+            commands::sftp::sftp_download,
+            commands::sftp::sftp_upload,
+            commands::sftp::sftp_mkdir,
+            commands::sftp::sftp_remove,
+            commands::sftp::sftp_rename,
+            commands::sftp::sftp_close,
         ])
         .on_window_ready(|window| {
             // The plugin's state outlives the module window, so if the MySSH
@@ -57,15 +65,18 @@ pub fn init() -> TauriPlugin<Wry> {
                     if let Some(state) = app.try_state::<AppState>() {
                         let sessions = state.sessions.clone();
                         let forwards = state.forwards.clone();
+                        let sftp = state.sftp.clone();
                         tauri::async_runtime::spawn(async move {
                             // Dropping the senders makes each session task see a
                             // closed channel and shut its russh handle down.
                             sessions.lock().await.clear();
+                            // Dropping the SFTP handles closes their SSH connections.
+                            sftp.lock().await.clear();
                             let mut fwd = forwards.lock().await;
                             for (_, handle) in fwd.drain() {
                                 handle.stop();
                             }
-                            log::info!("myssh: tore down sessions + forwards on window close");
+                            log::info!("myssh: tore down sessions + forwards + sftp on window close");
                         });
                     }
                 }

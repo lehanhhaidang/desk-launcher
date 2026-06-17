@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import {
   ArrowRightLeft,
   Code2,
+  FolderOpen,
   FolderPlus,
   Pencil,
   Plus,
@@ -16,6 +17,7 @@ import { Button } from '@desk-launcher/ui'
 import { HostDialog } from './components/HostDialog'
 import { SnippetsPanel } from './components/SnippetsPanel'
 import { ForwardsPanel } from './components/ForwardsPanel'
+import { SftpPanel } from './components/SftpPanel'
 import { TerminalWorkspace, type SessionTab } from './terminal/TerminalWorkspace'
 import {
   createGroup,
@@ -43,6 +45,7 @@ export default function MySSH() {
   const [activeTab, setActiveTab] = useState<string | null>(null)
   const [snippetsOpen, setSnippetsOpen] = useState(false)
   const [forwardsOpen, setForwardsOpen] = useState(false)
+  const [sftpHost, setSftpHost] = useState<Host | null>(null)
   const sessionMap = useRef<Map<string, string>>(new Map())
 
   const registerSession = useCallback((tabKey: string, sessionId: string | null) => {
@@ -283,6 +286,9 @@ export default function MySSH() {
                   </p>
                 </div>
                 <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setSftpHost(selected)}>
+                    <FolderOpen className="size-4" /> Files
+                  </Button>
                   <Button variant="outline" size="sm" onClick={() => openEdit(selected)}>
                     <Pencil className="size-4" /> Edit
                   </Button>
@@ -331,6 +337,8 @@ export default function MySSH() {
       />
 
       <ForwardsPanel open={forwardsOpen} onClose={() => setForwardsOpen(false)} hosts={hosts} />
+
+      <SftpPanel open={!!sftpHost} host={sftpHost} onClose={() => setSftpHost(null)} />
     </div>
   )
 }

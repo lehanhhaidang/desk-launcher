@@ -487,6 +487,102 @@
           "markdownDescription": "Denies the send_input command without any pre-configured scope."
         },
         {
+          "description": "Enables the sftp_close command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-sftp-close",
+          "markdownDescription": "Enables the sftp_close command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the sftp_close command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-sftp-close",
+          "markdownDescription": "Denies the sftp_close command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the sftp_download command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-sftp-download",
+          "markdownDescription": "Enables the sftp_download command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the sftp_download command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-sftp-download",
+          "markdownDescription": "Denies the sftp_download command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the sftp_list command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-sftp-list",
+          "markdownDescription": "Enables the sftp_list command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the sftp_list command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-sftp-list",
+          "markdownDescription": "Denies the sftp_list command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the sftp_mkdir command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-sftp-mkdir",
+          "markdownDescription": "Enables the sftp_mkdir command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the sftp_mkdir command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-sftp-mkdir",
+          "markdownDescription": "Denies the sftp_mkdir command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the sftp_open command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-sftp-open",
+          "markdownDescription": "Enables the sftp_open command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the sftp_open command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-sftp-open",
+          "markdownDescription": "Denies the sftp_open command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the sftp_remove command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-sftp-remove",
+          "markdownDescription": "Enables the sftp_remove command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the sftp_remove command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-sftp-remove",
+          "markdownDescription": "Denies the sftp_remove command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the sftp_rename command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-sftp-rename",
+          "markdownDescription": "Enables the sftp_rename command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the sftp_rename command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-sftp-rename",
+          "markdownDescription": "Denies the sftp_rename command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the sftp_upload command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-sftp-upload",
+          "markdownDescription": "Enables the sftp_upload command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the sftp_upload command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-sftp-upload",
+          "markdownDescription": "Denies the sftp_upload command without any pre-configured scope."
+        },
+        {
           "description": "Enables the start_forward command without any pre-configured scope.",
           "type": "string",
           "const": "allow-start-forward",
@@ -535,10 +631,10 @@
           "markdownDescription": "Denies the update_snippet command without any pre-configured scope."
         },
         {
-          "description": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`\n- `allow-open-session`\n- `allow-send-input`\n- `allow-resize-session`\n- `allow-close-session`\n- `allow-list-snippets`\n- `allow-create-snippet`\n- `allow-update-snippet`\n- `allow-delete-snippet`\n- `allow-list-forwards`\n- `allow-create-forward`\n- `allow-delete-forward`\n- `allow-start-forward`\n- `allow-stop-forward`",
+          "description": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`\n- `allow-open-session`\n- `allow-send-input`\n- `allow-resize-session`\n- `allow-close-session`\n- `allow-list-snippets`\n- `allow-create-snippet`\n- `allow-update-snippet`\n- `allow-delete-snippet`\n- `allow-list-forwards`\n- `allow-create-forward`\n- `allow-delete-forward`\n- `allow-start-forward`\n- `allow-stop-forward`\n- `allow-sftp-open`\n- `allow-sftp-list`\n- `allow-sftp-download`\n- `allow-sftp-upload`\n- `allow-sftp-mkdir`\n- `allow-sftp-remove`\n- `allow-sftp-rename`\n- `allow-sftp-close`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`\n- `allow-open-session`\n- `allow-send-input`\n- `allow-resize-session`\n- `allow-close-session`\n- `allow-list-snippets`\n- `allow-create-snippet`\n- `allow-update-snippet`\n- `allow-delete-snippet`\n- `allow-list-forwards`\n- `allow-create-forward`\n- `allow-delete-forward`\n- `allow-start-forward`\n- `allow-stop-forward`"
+          "markdownDescription": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`\n- `allow-open-session`\n- `allow-send-input`\n- `allow-resize-session`\n- `allow-close-session`\n- `allow-list-snippets`\n- `allow-create-snippet`\n- `allow-update-snippet`\n- `allow-delete-snippet`\n- `allow-list-forwards`\n- `allow-create-forward`\n- `allow-delete-forward`\n- `allow-start-forward`\n- `allow-stop-forward`\n- `allow-sftp-open`\n- `allow-sftp-list`\n- `allow-sftp-download`\n- `allow-sftp-upload`\n- `allow-sftp-mkdir`\n- `allow-sftp-remove`\n- `allow-sftp-rename`\n- `allow-sftp-close`"
         }
       ]
     }

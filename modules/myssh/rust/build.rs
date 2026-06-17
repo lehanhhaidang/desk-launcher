@@ -22,6 +22,14 @@ const COMMANDS: &[&str] = &[
     "delete_forward",
     "start_forward",
     "stop_forward",
+    "sftp_open",
+    "sftp_list",
+    "sftp_download",
+    "sftp_upload",
+    "sftp_mkdir",
+    "sftp_remove",
+    "sftp_rename",
+    "sftp_close",
 ];
 
 fn main() {

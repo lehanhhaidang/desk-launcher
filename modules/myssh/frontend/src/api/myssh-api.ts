@@ -79,6 +79,20 @@ export interface ForwardStatus {
   running: boolean
 }
 
+export interface SftpEntry {
+  name: string
+  path: string
+  isDir: boolean
+  isSymlink: boolean
+  size: number
+  modified: number | null
+}
+
+export interface SftpOpened {
+  sftpId: string
+  home: string
+}
+
 export const listHosts = () => invoke<Host[]>(ns('list_hosts'))
 export const createHost = (input: HostInput) => invoke<Host>(ns('create_host'), { input })
 export const updateHost = (id: string, input: HostInput) =>
@@ -104,6 +118,23 @@ export const createForward = (input: ForwardInput) => invoke<Forward>(ns('create
 export const deleteForward = (id: string) => invoke<void>(ns('delete_forward'), { id })
 export const startForward = (id: string) => invoke<void>(ns('start_forward'), { id })
 export const stopForward = (id: string) => invoke<void>(ns('stop_forward'), { id })
+
+// --- SFTP ---
+
+export const sftpOpen = (hostId: string) => invoke<SftpOpened>(ns('sftp_open'), { hostId })
+export const sftpList = (sftpId: string, path: string) =>
+  invoke<SftpEntry[]>(ns('sftp_list'), { sftpId, path })
+export const sftpDownload = (sftpId: string, remotePath: string, localPath: string) =>
+  invoke<void>(ns('sftp_download'), { sftpId, remotePath, localPath })
+export const sftpUpload = (sftpId: string, localPath: string, remotePath: string) =>
+  invoke<void>(ns('sftp_upload'), { sftpId, localPath, remotePath })
+export const sftpMkdir = (sftpId: string, path: string) =>
+  invoke<void>(ns('sftp_mkdir'), { sftpId, path })
+export const sftpRemove = (sftpId: string, path: string, isDir: boolean) =>
+  invoke<void>(ns('sftp_remove'), { sftpId, path, isDir })
+export const sftpRename = (sftpId: string, from: string, to: string) =>
+  invoke<void>(ns('sftp_rename'), { sftpId, from, to })
+export const sftpClose = (sftpId: string) => invoke<void>(ns('sftp_close'), { sftpId })
 
 // --- Sessions ---
 

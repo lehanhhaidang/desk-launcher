@@ -1,4 +1,5 @@
 use crate::services::forward::ForwardHandle;
+use crate::services::sftp::SftpHandle;
 use crate::services::ssh_client::SessionRequest;
 use rusqlite::Connection;
 use std::collections::HashMap;
@@ -12,10 +13,12 @@ use tokio::sync::{mpsc, Mutex};
 ///   channel task (input, resize, close). The task itself owns the russh
 ///   handle + channel.
 /// - `forwards` maps a running forward id to its task handle.
+/// - `sftp` maps an open SFTP browser session id to its handle.
 pub struct AppState {
     pub db: Arc<Mutex<Connection>>,
     pub sessions: Arc<Mutex<HashMap<String, mpsc::Sender<SessionRequest>>>>,
     pub forwards: Arc<Mutex<HashMap<String, ForwardHandle>>>,
+    pub sftp: Arc<Mutex<HashMap<String, SftpHandle>>>,
 }
 
 impl AppState {
@@ -24,6 +27,7 @@ impl AppState {
             db: Arc::new(Mutex::new(conn)),
             sessions: Arc::new(Mutex::new(HashMap::new())),
             forwards: Arc::new(Mutex::new(HashMap::new())),
+            sftp: Arc::new(Mutex::new(HashMap::new())),
         }
     }
 }

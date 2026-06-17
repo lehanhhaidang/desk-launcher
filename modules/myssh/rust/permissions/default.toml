@@ -23,4 +23,12 @@ permissions = [
     "allow-delete-forward",
     "allow-start-forward",
     "allow-stop-forward",
+    "allow-sftp-open",
+    "allow-sftp-list",
+    "allow-sftp-download",
+    "allow-sftp-upload",
+    "allow-sftp-mkdir",
+    "allow-sftp-remove",
+    "allow-sftp-rename",
+    "allow-sftp-close",
 ]

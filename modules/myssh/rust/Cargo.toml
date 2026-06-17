@@ -28,6 +28,7 @@ launcher-paths = { path = "../../../crates/launcher-paths" }
 # Use the `ring` crypto backend instead of the default `aws-lc-rs`, which pulls
 # `aws-lc-sys` and requires NASM to assemble on Windows (not available in CI).
 russh = { version = "0.61.2", default-features = false, features = ["ring", "flate2", "rsa"] }
+russh-sftp = "2.3.0"
 
 [dev-dependencies]
 tempfile = "3"

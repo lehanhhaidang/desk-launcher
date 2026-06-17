@@ -24,6 +24,14 @@ Allows every MySSH plugin command.
 - `allow-delete-forward`
 - `allow-start-forward`
 - `allow-stop-forward`
+- `allow-sftp-open`
+- `allow-sftp-list`
+- `allow-sftp-download`
+- `allow-sftp-upload`
+- `allow-sftp-mkdir`
+- `allow-sftp-remove`
+- `allow-sftp-rename`
+- `allow-sftp-close`
 
 ## Permission Table
 
@@ -446,6 +454,214 @@ Enables the send_input command without any pre-configured scope.
 <td>
 
 Denies the send_input command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:allow-sftp-close`
+
+</td>
+<td>
+
+Enables the sftp_close command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-sftp-close`
+
+</td>
+<td>
+
+Denies the sftp_close command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:allow-sftp-download`
+
+</td>
+<td>
+
+Enables the sftp_download command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-sftp-download`
+
+</td>
+<td>
+
+Denies the sftp_download command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:allow-sftp-list`
+
+</td>
+<td>
+
+Enables the sftp_list command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-sftp-list`
+
+</td>
+<td>
+
+Denies the sftp_list command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:allow-sftp-mkdir`
+
+</td>
+<td>
+
+Enables the sftp_mkdir command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-sftp-mkdir`
+
+</td>
+<td>
+
+Denies the sftp_mkdir command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:allow-sftp-open`
+
+</td>
+<td>
+
+Enables the sftp_open command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-sftp-open`
+
+</td>
+<td>
+
+Denies the sftp_open command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:allow-sftp-remove`
+
+</td>
+<td>
+
+Enables the sftp_remove command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-sftp-remove`
+
+</td>
+<td>
+
+Denies the sftp_remove command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:allow-sftp-rename`
+
+</td>
+<td>
+
+Enables the sftp_rename command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-sftp-rename`
+
+</td>
+<td>
+
+Denies the sftp_rename command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:allow-sftp-upload`
+
+</td>
+<td>
+
+Enables the sftp_upload command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-sftp-upload`
+
+</td>
+<td>
+
+Denies the sftp_upload command without any pre-configured scope.
 
 </td>
 </tr>
