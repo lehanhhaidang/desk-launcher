@@ -6,7 +6,9 @@ import { FilePane } from './FilePane'
 import {
   localHome,
   localList,
+  localMkdir,
   localRemove,
+  localRename,
   sftpClose,
   sftpDownload,
   sftpDownloadDir,
@@ -14,6 +16,7 @@ import {
   sftpMkdir,
   sftpOpen,
   sftpRemove,
+  sftpRename,
   sftpUpload,
   sftpUploadDir,
   type SftpEntry,
@@ -45,6 +48,8 @@ export function FilesTab({ hostId, hostLabel, onPreview }: Props) {
   const [splitPct, setSplitPct] = useState(50)
   const [newFolder, setNewFolder] = useState('')
   const [newFolderOpen, setNewFolderOpen] = useState(false)
+  const [localNewFolder, setLocalNewFolder] = useState('')
+  const [localNewFolderOpen, setLocalNewFolderOpen] = useState(false)
 
   const containerRef = useRef<HTMLDivElement>(null)
   const drag = useRef<DragPayload | null>(null)
@@ -175,6 +180,40 @@ export function FilesTab({ hostId, hostLabel, onPreview }: Props) {
     }
   }
 
+  const renameRemote = async (entry: SftpEntry, newName: string) => {
+    const id = sftpIdRef.current
+    if (!id) return
+    try {
+      await sftpRename(id, entry.path, joinRemote(remoteCwdRef.current, newName))
+      refreshRemote()
+    } catch (e) {
+      toast.error(`Rename failed: ${errMessage(e)}`)
+    }
+  }
+  const renameLocal = async (entry: SftpEntry, newName: string) => {
+    try {
+      await localRename(entry.path, joinLocal(localCwdRef.current, newName))
+      refreshLocal()
+    } catch (e) {
+      toast.error(`Rename failed: ${errMessage(e)}`)
+    }
+  }
+  const submitLocalNewFolder = async () => {
+    const name = localNewFolder.trim()
+    if (!name) {
+      setLocalNewFolderOpen(false)
+      return
+    }
+    try {
+      await localMkdir(joinLocal(localCwdRef.current, name))
+      setLocalNewFolder('')
+      setLocalNewFolderOpen(false)
+      refreshLocal()
+    } catch (e) {
+      toast.error(`Create folder failed: ${errMessage(e)}`)
+    }
+  }
+
   const submitNewFolder = async () => {
     const id = sftpIdRef.current
     const name = newFolder.trim()
@@ -231,41 +270,62 @@ export function FilesTab({ hostId, hostLabel, onPreview }: Props) {
 
   return (
     <div ref={containerRef} className="flex h-full w-full">
-      <div style={{ width: `${splitPct}%` }} className="min-w-0">
-        <FilePane
-          title="Local"
-          cwd={localCwd}
-          entries={localEntries}
-          loading={localLoading}
-          error={localError}
-          selectedPath={localSel}
-          onSelect={(e) => setLocalSel(e.path)}
-          onOpen={(e) => (e.isDir ? reloadLocal(e.path) : onPreview?.({ origin: 'local', path: e.path, name: e.name }))}
-          onNavigatePath={reloadLocal}
-          onUp={() => reloadLocal(parentLocal(localCwd))}
-          onRefresh={refreshLocal}
-          onDelete={deleteLocal}
-          rowDraggable
-          onRowDragStart={dragStart('local')}
-          onPaneDrop={(e) => {
-            e.preventDefault()
-            onDrop('local')
-          }}
-          rowAction={(e) => (
-            <>
-              <button
-                className="text-[#9aa6b6] hover:text-cyan-300"
-                title="Upload to remote →"
-                onClick={() => upload(asPayload('local', e))}
-              >
-                <ArrowRight className="size-3.5" />
-              </button>
-              <button className="text-[#9aa6b6] hover:text-[#ffb4ab]" title="Delete" onClick={() => deleteLocal(e)}>
-                <Trash2 className="size-3.5" />
-              </button>
-            </>
-          )}
-        />
+      <div style={{ width: `${splitPct}%` }} className="flex min-w-0 flex-col">
+        {localNewFolderOpen && (
+          <input
+            autoFocus
+            className="border-b border-cyan-300/30 bg-white/[0.05] px-3 py-1.5 text-sm outline-none"
+            placeholder="Folder name, Enter to create"
+            value={localNewFolder}
+            onChange={(e) => setLocalNewFolder(e.target.value)}
+            onBlur={submitLocalNewFolder}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') submitLocalNewFolder()
+              if (e.key === 'Escape') {
+                setLocalNewFolder('')
+                setLocalNewFolderOpen(false)
+              }
+            }}
+          />
+        )}
+        <div className="min-h-0 flex-1">
+          <FilePane
+            title="Local"
+            cwd={localCwd}
+            entries={localEntries}
+            loading={localLoading}
+            error={localError}
+            selectedPath={localSel}
+            onSelect={(e) => setLocalSel(e.path)}
+            onOpen={(e) => (e.isDir ? reloadLocal(e.path) : onPreview?.({ origin: 'local', path: e.path, name: e.name }))}
+            onNavigatePath={reloadLocal}
+            onUp={() => reloadLocal(parentLocal(localCwd))}
+            onRefresh={refreshLocal}
+            onNewFolder={() => setLocalNewFolderOpen(true)}
+            onDelete={deleteLocal}
+            onRename={renameLocal}
+            rowDraggable
+            onRowDragStart={dragStart('local')}
+            onPaneDrop={(e) => {
+              e.preventDefault()
+              onDrop('local')
+            }}
+            rowAction={(e) => (
+              <>
+                <button
+                  className="text-[#9aa6b6] hover:text-cyan-300"
+                  title="Upload to remote →"
+                  onClick={() => upload(asPayload('local', e))}
+                >
+                  <ArrowRight className="size-3.5" />
+                </button>
+                <button className="text-[#9aa6b6] hover:text-[#ffb4ab]" title="Delete" onClick={() => deleteLocal(e)}>
+                  <Trash2 className="size-3.5" />
+                </button>
+              </>
+            )}
+          />
+        </div>
       </div>
 
       <div
@@ -310,6 +370,7 @@ export function FilesTab({ hostId, hostLabel, onPreview }: Props) {
             onRefresh={refreshRemote}
             onNewFolder={() => setNewFolderOpen(true)}
             onDelete={deleteRemote}
+            onRename={renameRemote}
             rowDraggable
             onRowDragStart={dragStart('remote')}
             onPaneDrop={(e) => {

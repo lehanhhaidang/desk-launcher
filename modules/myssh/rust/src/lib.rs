@@ -61,6 +61,8 @@ pub fn init() -> TauriPlugin<Wry> {
             commands::local::local_list,
             commands::local::local_read_text,
             commands::local::local_remove,
+            commands::local::local_mkdir,
+            commands::local::local_rename,
         ])
         .on_window_ready(|window| {
             // The plugin's state outlives the module window, so if the MySSH

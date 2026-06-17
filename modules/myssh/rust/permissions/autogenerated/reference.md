@@ -43,6 +43,8 @@ Allows every MySSH plugin command.
 - `allow-local-list`
 - `allow-local-read-text`
 - `allow-local-remove`
+- `allow-local-mkdir`
+- `allow-local-rename`
 
 ## Permission Table
 
@@ -472,6 +474,32 @@ Denies the local_list command without any pre-configured scope.
 <tr>
 <td>
 
+`myssh:allow-local-mkdir`
+
+</td>
+<td>
+
+Enables the local_mkdir command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-local-mkdir`
+
+</td>
+<td>
+
+Denies the local_mkdir command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
 `myssh:allow-local-read-text`
 
 </td>
@@ -517,6 +545,32 @@ Enables the local_remove command without any pre-configured scope.
 <td>
 
 Denies the local_remove command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:allow-local-rename`
+
+</td>
+<td>
+
+Enables the local_rename command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-local-rename`
+
+</td>
+<td>
+
+Denies the local_rename command without any pre-configured scope.
 
 </td>
 </tr>

@@ -487,6 +487,18 @@
           "markdownDescription": "Denies the local_list command without any pre-configured scope."
         },
         {
+          "description": "Enables the local_mkdir command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-local-mkdir",
+          "markdownDescription": "Enables the local_mkdir command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the local_mkdir command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-local-mkdir",
+          "markdownDescription": "Denies the local_mkdir command without any pre-configured scope."
+        },
+        {
           "description": "Enables the local_read_text command without any pre-configured scope.",
           "type": "string",
           "const": "allow-local-read-text",
@@ -509,6 +521,18 @@
           "type": "string",
           "const": "deny-local-remove",
           "markdownDescription": "Denies the local_remove command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the local_rename command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-local-rename",
+          "markdownDescription": "Enables the local_rename command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the local_rename command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-local-rename",
+          "markdownDescription": "Denies the local_rename command without any pre-configured scope."
         },
         {
           "description": "Enables the local_roots command without any pre-configured scope.",
@@ -763,10 +787,10 @@
           "markdownDescription": "Denies the update_snippet command without any pre-configured scope."
         },
         {
-          "description": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`\n- `allow-open-session`\n- `allow-send-input`\n- `allow-resize-session`\n- `allow-close-session`\n- `allow-list-snippets`\n- `allow-create-snippet`\n- `allow-update-snippet`\n- `allow-delete-snippet`\n- `allow-list-forwards`\n- `allow-create-forward`\n- `allow-delete-forward`\n- `allow-start-forward`\n- `allow-stop-forward`\n- `allow-sftp-open`\n- `allow-sftp-list`\n- `allow-sftp-download`\n- `allow-sftp-upload`\n- `allow-sftp-mkdir`\n- `allow-sftp-remove`\n- `allow-sftp-rename`\n- `allow-sftp-close`\n- `allow-list-known-hosts`\n- `allow-remove-known-host`\n- `allow-respond-host-key`\n- `allow-sftp-read-text`\n- `allow-sftp-upload-dir`\n- `allow-sftp-download-dir`\n- `allow-local-home`\n- `allow-local-roots`\n- `allow-local-list`\n- `allow-local-read-text`\n- `allow-local-remove`",
+          "description": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`\n- `allow-open-session`\n- `allow-send-input`\n- `allow-resize-session`\n- `allow-close-session`\n- `allow-list-snippets`\n- `allow-create-snippet`\n- `allow-update-snippet`\n- `allow-delete-snippet`\n- `allow-list-forwards`\n- `allow-create-forward`\n- `allow-delete-forward`\n- `allow-start-forward`\n- `allow-stop-forward`\n- `allow-sftp-open`\n- `allow-sftp-list`\n- `allow-sftp-download`\n- `allow-sftp-upload`\n- `allow-sftp-mkdir`\n- `allow-sftp-remove`\n- `allow-sftp-rename`\n- `allow-sftp-close`\n- `allow-list-known-hosts`\n- `allow-remove-known-host`\n- `allow-respond-host-key`\n- `allow-sftp-read-text`\n- `allow-sftp-upload-dir`\n- `allow-sftp-download-dir`\n- `allow-local-home`\n- `allow-local-roots`\n- `allow-local-list`\n- `allow-local-read-text`\n- `allow-local-remove`\n- `allow-local-mkdir`\n- `allow-local-rename`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`\n- `allow-open-session`\n- `allow-send-input`\n- `allow-resize-session`\n- `allow-close-session`\n- `allow-list-snippets`\n- `allow-create-snippet`\n- `allow-update-snippet`\n- `allow-delete-snippet`\n- `allow-list-forwards`\n- `allow-create-forward`\n- `allow-delete-forward`\n- `allow-start-forward`\n- `allow-stop-forward`\n- `allow-sftp-open`\n- `allow-sftp-list`\n- `allow-sftp-download`\n- `allow-sftp-upload`\n- `allow-sftp-mkdir`\n- `allow-sftp-remove`\n- `allow-sftp-rename`\n- `allow-sftp-close`\n- `allow-list-known-hosts`\n- `allow-remove-known-host`\n- `allow-respond-host-key`\n- `allow-sftp-read-text`\n- `allow-sftp-upload-dir`\n- `allow-sftp-download-dir`\n- `allow-local-home`\n- `allow-local-roots`\n- `allow-local-list`\n- `allow-local-read-text`\n- `allow-local-remove`"
+          "markdownDescription": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`\n- `allow-open-session`\n- `allow-send-input`\n- `allow-resize-session`\n- `allow-close-session`\n- `allow-list-snippets`\n- `allow-create-snippet`\n- `allow-update-snippet`\n- `allow-delete-snippet`\n- `allow-list-forwards`\n- `allow-create-forward`\n- `allow-delete-forward`\n- `allow-start-forward`\n- `allow-stop-forward`\n- `allow-sftp-open`\n- `allow-sftp-list`\n- `allow-sftp-download`\n- `allow-sftp-upload`\n- `allow-sftp-mkdir`\n- `allow-sftp-remove`\n- `allow-sftp-rename`\n- `allow-sftp-close`\n- `allow-list-known-hosts`\n- `allow-remove-known-host`\n- `allow-respond-host-key`\n- `allow-sftp-read-text`\n- `allow-sftp-upload-dir`\n- `allow-sftp-download-dir`\n- `allow-local-home`\n- `allow-local-roots`\n- `allow-local-list`\n- `allow-local-read-text`\n- `allow-local-remove`\n- `allow-local-mkdir`\n- `allow-local-rename`"
         }
       ]
     }

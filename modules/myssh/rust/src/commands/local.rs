@@ -58,6 +58,18 @@ pub fn local_list(path: String) -> AppResult<Vec<SftpEntry>> {
 }
 
 #[tauri::command]
+pub fn local_mkdir(path: String) -> AppResult<()> {
+    std::fs::create_dir(&path)?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn local_rename(from: String, to: String) -> AppResult<()> {
+    std::fs::rename(&from, &to)?;
+    Ok(())
+}
+
+#[tauri::command]
 pub fn local_remove(path: String, is_dir: bool) -> AppResult<()> {
     if is_dir {
         std::fs::remove_dir_all(&path)?;

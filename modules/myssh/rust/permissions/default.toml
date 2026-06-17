@@ -42,4 +42,6 @@ permissions = [
     "allow-local-list",
     "allow-local-read-text",
     "allow-local-remove",
+    "allow-local-mkdir",
+    "allow-local-rename",
 ]

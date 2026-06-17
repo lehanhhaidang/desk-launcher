@@ -41,6 +41,8 @@ const COMMANDS: &[&str] = &[
     "local_list",
     "local_read_text",
     "local_remove",
+    "local_mkdir",
+    "local_rename",
 ];
 
 fn main() {

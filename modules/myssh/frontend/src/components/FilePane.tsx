@@ -1,5 +1,5 @@
 import { useRef, useState, type ReactNode } from 'react'
-import { ArrowUp, File as FileIcon, Folder, FolderPlus, RefreshCw } from 'lucide-react'
+import { ArrowUp, File as FileIcon, Folder, FolderPlus, Pencil, RefreshCw } from 'lucide-react'
 import type { SftpEntry } from '../api/myssh-api'
 
 interface Props {
@@ -20,6 +20,8 @@ interface Props {
   onNewFolder?: () => void
   /** Delete key removes the selected entry. */
   onDelete?: (entry: SftpEntry) => void
+  /** Rename (F2 or the pencil button). */
+  onRename?: (entry: SftpEntry, newName: string) => void
   /** Per-row action buttons (transfer …). */
   rowAction?: (entry: SftpEntry) => ReactNode
   rowDraggable?: boolean
@@ -41,6 +43,7 @@ export function FilePane({
   onRefresh,
   onNewFolder,
   onDelete,
+  onRename,
   rowAction,
   rowDraggable,
   onRowDragStart,
@@ -49,6 +52,18 @@ export function FilePane({
   const listRef = useRef<HTMLDivElement>(null)
   const [editingPath, setEditingPath] = useState(false)
   const [pathDraft, setPathDraft] = useState('')
+  const [renamingPath, setRenamingPath] = useState<string | null>(null)
+  const [renameDraft, setRenameDraft] = useState('')
+
+  const startRename = (entry: SftpEntry) => {
+    setRenamingPath(entry.path)
+    setRenameDraft(entry.name)
+  }
+  const commitRename = (entry: SftpEntry) => {
+    const name = renameDraft.trim()
+    setRenamingPath(null)
+    if (name && name !== entry.name) onRename?.(entry, name)
+  }
 
   return (
     <div
@@ -105,10 +120,9 @@ export function FilePane({
         tabIndex={0}
         className="flex-1 overflow-y-auto outline-none"
         onKeyDown={(e) => {
-          if (e.key === 'Delete' && selectedPath && onDelete) {
-            const sel = entries.find((x) => x.path === selectedPath)
-            if (sel) onDelete(sel)
-          }
+          const sel = selectedPath ? entries.find((x) => x.path === selectedPath) : undefined
+          if (e.key === 'Delete' && sel && onDelete) onDelete(sel)
+          if (e.key === 'F2' && sel && onRename) startRename(sel)
         }}
       >
         {error ? (
@@ -137,22 +151,48 @@ export function FilePane({
               ) : (
                 <FileIcon className="size-4 shrink-0 text-[#7c8797]" />
               )}
-              <span
-                className={`min-w-0 flex-1 truncate text-sm ${entry.isDir ? 'text-cyan-100' : 'text-[#e6edf3]'}`}
-                title={entry.name}
-              >
-                {entry.name}
-              </span>
+              {renamingPath === entry.path ? (
+                <input
+                  autoFocus
+                  className="min-w-0 flex-1 rounded bg-black/30 px-1 text-sm text-[#edf3f7] outline-none"
+                  value={renameDraft}
+                  onChange={(e) => setRenameDraft(e.target.value)}
+                  onClick={(e) => e.stopPropagation()}
+                  onDoubleClick={(e) => e.stopPropagation()}
+                  onBlur={() => commitRename(entry)}
+                  onKeyDown={(e) => {
+                    e.stopPropagation()
+                    if (e.key === 'Enter') commitRename(entry)
+                    if (e.key === 'Escape') setRenamingPath(null)
+                  }}
+                />
+              ) : (
+                <span
+                  className={`min-w-0 flex-1 truncate text-sm ${entry.isDir ? 'text-cyan-100' : 'text-[#e6edf3]'}`}
+                  title={entry.name}
+                >
+                  {entry.name}
+                </span>
+              )}
               <span className="w-16 shrink-0 text-right font-mono text-[11px] text-[#7c8797]">
                 {entry.isDir ? '' : formatSize(entry.size)}
               </span>
-              {rowAction && (
+              {(rowAction || onRename) && (
                 <span
                   className="flex shrink-0 items-center gap-1 opacity-0 transition group-hover:opacity-100"
                   onClick={(e) => e.stopPropagation()}
                   onDoubleClick={(e) => e.stopPropagation()}
                 >
-                  {rowAction(entry)}
+                  {rowAction?.(entry)}
+                  {onRename && (
+                    <button
+                      className="text-[#9aa6b6] hover:text-[#edf3f7]"
+                      title="Rename (F2)"
+                      onClick={() => startRename(entry)}
+                    >
+                      <Pencil className="size-3.5" />
+                    </button>
+                  )}
                 </span>
               )}
             </div>

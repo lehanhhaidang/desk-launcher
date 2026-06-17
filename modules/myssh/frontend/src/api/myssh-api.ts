@@ -190,6 +190,9 @@ export const localList = (path: string) => invoke<SftpEntry[]>(ns('local_list'),
 export const localReadText = (path: string) => invoke<FilePreview>(ns('local_read_text'), { path })
 export const localRemove = (path: string, isDir: boolean) =>
   invoke<void>(ns('local_remove'), { path, isDir })
+export const localMkdir = (path: string) => invoke<void>(ns('local_mkdir'), { path })
+export const localRename = (from: string, to: string) =>
+  invoke<void>(ns('local_rename'), { from, to })
 
 // --- Sessions ---
 
