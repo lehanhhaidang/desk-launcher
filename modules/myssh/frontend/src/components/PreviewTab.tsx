@@ -55,7 +55,7 @@ export function PreviewTab({ origin, path, name, sftpId }: Props) {
     const local = await saveDialog({ defaultPath: name })
     if (!local) return
     try {
-      await sftpDownload(sftpId, path, local)
+      await sftpDownload(sftpId, crypto.randomUUID(), name, path, local, false)
       toast.success(`Downloaded ${name}`)
     } catch (e) {
       toast.error(`Download failed: ${errMessage(e)}`)

@@ -36,8 +36,6 @@ permissions = [
     "allow-respond-host-key",
     "allow-respond-keyboard-interactive",
     "allow-sftp-read-text",
-    "allow-sftp-upload-dir",
-    "allow-sftp-download-dir",
     "allow-local-home",
     "allow-local-roots",
     "allow-local-list",

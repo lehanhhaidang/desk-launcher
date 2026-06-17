@@ -24,6 +24,7 @@ import { ForwardsPanel } from './components/ForwardsPanel'
 import { KnownHostsPanel } from './components/KnownHostsPanel'
 import { HostKeyModal } from './components/HostKeyModal'
 import { KbiModal } from './components/KbiModal'
+import { TransfersOverlay } from './components/TransfersOverlay'
 import { Workspace, type WorkspaceTab } from './components/Workspace'
 import type { ConnStatus } from './terminal/TerminalView'
 import {
@@ -503,6 +504,8 @@ export default function MySSH() {
       <HostKeyModal />
 
       <KbiModal />
+
+      <TransfersOverlay />
     </div>
   )
 }

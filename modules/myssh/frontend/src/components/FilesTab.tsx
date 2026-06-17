@@ -11,14 +11,12 @@ import {
   localRename,
   sftpClose,
   sftpDownload,
-  sftpDownloadDir,
   sftpList,
   sftpMkdir,
   sftpOpen,
   sftpRemove,
   sftpRename,
   sftpUpload,
-  sftpUploadDir,
   type SftpEntry,
 } from '../api/myssh-api'
 
@@ -133,11 +131,8 @@ export function FilesTab({ hostId, hostLabel, onPreview }: Props) {
   const upload = async (p: DragPayload) => {
     const id = sftpIdRef.current
     if (!id) return
-    const remotePath = joinRemote(remoteCwdRef.current, p.name)
     try {
-      if (p.isDir) await sftpUploadDir(id, p.path, remotePath)
-      else await sftpUpload(id, p.path, remotePath)
-      toast.success(`Uploaded ${p.name}`)
+      await sftpUpload(id, crypto.randomUUID(), p.name, p.path, joinRemote(remoteCwdRef.current, p.name), p.isDir)
       refreshRemote()
     } catch (e) {
       toast.error(`Upload failed: ${errMessage(e)}`)
@@ -146,11 +141,8 @@ export function FilesTab({ hostId, hostLabel, onPreview }: Props) {
   const download = async (p: DragPayload) => {
     const id = sftpIdRef.current
     if (!id) return
-    const localPath = joinLocal(localCwdRef.current, p.name)
     try {
-      if (p.isDir) await sftpDownloadDir(id, p.path, localPath)
-      else await sftpDownload(id, p.path, localPath)
-      toast.success(`Downloaded ${p.name}`)
+      await sftpDownload(id, crypto.randomUUID(), p.name, p.path, joinLocal(localCwdRef.current, p.name), p.isDir)
       refreshLocal()
     } catch (e) {
       toast.error(`Download failed: ${errMessage(e)}`)

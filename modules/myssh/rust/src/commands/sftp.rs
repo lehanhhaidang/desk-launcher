@@ -59,66 +59,47 @@ pub async fn sftp_read_text(
 }
 
 #[tauri::command]
+#[allow(clippy::too_many_arguments)]
 pub async fn sftp_download(
+    app: AppHandle,
     state: State<'_, AppState>,
     sftp_id: String,
+    transfer_id: String,
+    name: String,
     remote_path: String,
     local_path: String,
+    is_dir: bool,
 ) -> AppResult<()> {
-    let map = state.sftp.lock().await;
-    let handle = map
-        .get(&sftp_id)
-        .ok_or_else(|| AppError::NotFound(format!("sftp session {sftp_id}")))?;
-    let data = handle
-        .sftp
-        .read(remote_path)
-        .await
-        .map_err(|e| AppError::Ssh(format!("download: {e}")))?;
-    std::fs::write(&local_path, data)?;
-    Ok(())
+    let sftp = {
+        let map = state.sftp.lock().await;
+        map.get(&sftp_id)
+            .ok_or_else(|| AppError::NotFound(format!("sftp session {sftp_id}")))?
+            .sftp
+            .clone()
+    };
+    sftp::download_progress(app, transfer_id, name, &sftp, remote_path, local_path, is_dir).await
 }
 
 #[tauri::command]
+#[allow(clippy::too_many_arguments)]
 pub async fn sftp_upload(
+    app: AppHandle,
     state: State<'_, AppState>,
     sftp_id: String,
+    transfer_id: String,
+    name: String,
     local_path: String,
     remote_path: String,
+    is_dir: bool,
 ) -> AppResult<()> {
-    let data = std::fs::read(&local_path)?;
-    let map = state.sftp.lock().await;
-    let handle = map
-        .get(&sftp_id)
-        .ok_or_else(|| AppError::NotFound(format!("sftp session {sftp_id}")))?;
-    sftp::write_file(&handle.sftp, remote_path, &data).await
-}
-
-#[tauri::command]
-pub async fn sftp_upload_dir(
-    state: State<'_, AppState>,
-    sftp_id: String,
-    local_dir: String,
-    remote_dir: String,
-) -> AppResult<()> {
-    let map = state.sftp.lock().await;
-    let handle = map
-        .get(&sftp_id)
-        .ok_or_else(|| AppError::NotFound(format!("sftp session {sftp_id}")))?;
-    sftp::upload_dir(&handle.sftp, &local_dir, &remote_dir).await
-}
-
-#[tauri::command]
-pub async fn sftp_download_dir(
-    state: State<'_, AppState>,
-    sftp_id: String,
-    remote_dir: String,
-    local_dir: String,
-) -> AppResult<()> {
-    let map = state.sftp.lock().await;
-    let handle = map
-        .get(&sftp_id)
-        .ok_or_else(|| AppError::NotFound(format!("sftp session {sftp_id}")))?;
-    sftp::download_dir(&handle.sftp, &remote_dir, &local_dir).await
+    let sftp = {
+        let map = state.sftp.lock().await;
+        map.get(&sftp_id)
+            .ok_or_else(|| AppError::NotFound(format!("sftp session {sftp_id}")))?
+            .sftp
+            .clone()
+    };
+    sftp::upload_progress(app, transfer_id, name, &sftp, local_path, remote_path, is_dir).await
 }
 
 #[tauri::command]

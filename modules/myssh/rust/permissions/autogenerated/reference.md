@@ -37,8 +37,6 @@ Allows every MySSH plugin command.
 - `allow-respond-host-key`
 - `allow-respond-keyboard-interactive`
 - `allow-sftp-read-text`
-- `allow-sftp-upload-dir`
-- `allow-sftp-download-dir`
 - `allow-local-home`
 - `allow-local-roots`
 - `allow-local-list`
@@ -813,32 +811,6 @@ Denies the sftp_download command without any pre-configured scope.
 <tr>
 <td>
 
-`myssh:allow-sftp-download-dir`
-
-</td>
-<td>
-
-Enables the sftp_download_dir command without any pre-configured scope.
-
-</td>
-</tr>
-
-<tr>
-<td>
-
-`myssh:deny-sftp-download-dir`
-
-</td>
-<td>
-
-Denies the sftp_download_dir command without any pre-configured scope.
-
-</td>
-</tr>
-
-<tr>
-<td>
-
 `myssh:allow-sftp-list`
 
 </td>
@@ -1014,32 +986,6 @@ Enables the sftp_upload command without any pre-configured scope.
 <td>
 
 Denies the sftp_upload command without any pre-configured scope.
-
-</td>
-</tr>
-
-<tr>
-<td>
-
-`myssh:allow-sftp-upload-dir`
-
-</td>
-<td>
-
-Enables the sftp_upload_dir command without any pre-configured scope.
-
-</td>
-</tr>
-
-<tr>
-<td>
-
-`myssh:deny-sftp-upload-dir`
-
-</td>
-<td>
-
-Denies the sftp_upload_dir command without any pre-configured scope.
 
 </td>
 </tr>

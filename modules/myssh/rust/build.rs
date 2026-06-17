@@ -35,8 +35,6 @@ const COMMANDS: &[&str] = &[
     "respond_host_key",
     "respond_keyboard_interactive",
     "sftp_read_text",
-    "sftp_upload_dir",
-    "sftp_download_dir",
     "local_home",
     "local_roots",
     "local_list",

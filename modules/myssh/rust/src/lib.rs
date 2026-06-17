@@ -55,8 +55,6 @@ pub fn init() -> TauriPlugin<Wry> {
             commands::known_hosts::respond_host_key,
             commands::known_hosts::respond_keyboard_interactive,
             commands::sftp::sftp_read_text,
-            commands::sftp::sftp_upload_dir,
-            commands::sftp::sftp_download_dir,
             commands::local::local_home,
             commands::local::local_roots,
             commands::local::local_list,

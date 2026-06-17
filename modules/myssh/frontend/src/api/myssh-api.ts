@@ -171,10 +171,35 @@ export const onKbiPrompt = (cb: (prompt: KbiPrompt) => void): Promise<UnlistenFn
 export const sftpOpen = (hostId: string) => invoke<SftpOpened>(ns('sftp_open'), { hostId })
 export const sftpList = (sftpId: string, path: string) =>
   invoke<SftpEntry[]>(ns('sftp_list'), { sftpId, path })
-export const sftpDownload = (sftpId: string, remotePath: string, localPath: string) =>
-  invoke<void>(ns('sftp_download'), { sftpId, remotePath, localPath })
-export const sftpUpload = (sftpId: string, localPath: string, remotePath: string) =>
-  invoke<void>(ns('sftp_upload'), { sftpId, localPath, remotePath })
+export const sftpDownload = (
+  sftpId: string,
+  transferId: string,
+  name: string,
+  remotePath: string,
+  localPath: string,
+  isDir: boolean,
+) => invoke<void>(ns('sftp_download'), { sftpId, transferId, name, remotePath, localPath, isDir })
+export const sftpUpload = (
+  sftpId: string,
+  transferId: string,
+  name: string,
+  localPath: string,
+  remotePath: string,
+  isDir: boolean,
+) => invoke<void>(ns('sftp_upload'), { sftpId, transferId, name, localPath, remotePath, isDir })
+
+export interface TransferProgress {
+  id: string
+  name: string
+  transferred: number
+  total: number
+  done: boolean
+  error: string | null
+}
+
+/** Subscribe to file-transfer progress events. */
+export const onTransfer = (cb: (t: TransferProgress) => void): Promise<UnlistenFn> =>
+  listen<TransferProgress>('myssh://transfer', (e) => cb(e.payload))
 export const sftpMkdir = (sftpId: string, path: string) =>
   invoke<void>(ns('sftp_mkdir'), { sftpId, path })
 export const sftpRemove = (sftpId: string, path: string, isDir: boolean) =>
@@ -182,10 +207,6 @@ export const sftpRemove = (sftpId: string, path: string, isDir: boolean) =>
 export const sftpRename = (sftpId: string, from: string, to: string) =>
   invoke<void>(ns('sftp_rename'), { sftpId, from, to })
 export const sftpClose = (sftpId: string) => invoke<void>(ns('sftp_close'), { sftpId })
-export const sftpUploadDir = (sftpId: string, localDir: string, remoteDir: string) =>
-  invoke<void>(ns('sftp_upload_dir'), { sftpId, localDir, remoteDir })
-export const sftpDownloadDir = (sftpId: string, remoteDir: string, localDir: string) =>
-  invoke<void>(ns('sftp_download_dir'), { sftpId, remoteDir, localDir })
 export const sftpReadText = (sftpId: string, path: string) =>
   invoke<FilePreview>(ns('sftp_read_text'), { sftpId, path })
 

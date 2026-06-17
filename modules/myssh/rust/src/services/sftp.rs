@@ -6,22 +6,184 @@ use crate::models::sftp::SftpEntry;
 use crate::services::ssh_client::{connect_authenticated, ClientHandler, ConnectParams};
 use russh::client::Handle;
 use russh_sftp::client::SftpSession;
-use tauri::AppHandle;
-use tokio::io::AsyncWriteExt;
+use std::sync::Arc;
+use tauri::{AppHandle, Emitter};
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
-/// Write a file to the remote, creating/truncating it. `SftpSession::write`
-/// opens with WRITE only (no CREATE), so it fails on new files — use `create`.
-pub async fn write_file(sftp: &SftpSession, remote_path: String, data: &[u8]) -> AppResult<()> {
-    let mut file = sftp
-        .create(remote_path)
+const CHUNK: usize = 256 * 1024;
+
+#[derive(Clone, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct TransferEvent {
+    id: String,
+    name: String,
+    transferred: u64,
+    total: u64,
+    done: bool,
+    error: Option<String>,
+}
+
+fn emit_transfer(
+    app: &AppHandle,
+    id: &str,
+    name: &str,
+    transferred: u64,
+    total: u64,
+    done: bool,
+    error: Option<String>,
+) {
+    let _ = app.emit(
+        "myssh://transfer",
+        TransferEvent { id: id.into(), name: name.into(), transferred, total, done, error },
+    );
+}
+
+fn local_dir_size(path: &str) -> AppResult<u64> {
+    let mut total = 0u64;
+    for entry in std::fs::read_dir(path)?.flatten() {
+        let meta = match entry.metadata() {
+            Ok(m) => m,
+            Err(_) => continue,
+        };
+        if meta.is_dir() {
+            total += local_dir_size(&entry.path().to_string_lossy())?;
+        } else {
+            total += meta.len();
+        }
+    }
+    Ok(total)
+}
+
+async fn remote_dir_size(sftp: &SftpSession, path: &str) -> AppResult<u64> {
+    let mut total = 0u64;
+    let rd = sftp
+        .read_dir(path.to_string())
         .await
-        .map_err(|e| AppError::Ssh(format!("create: {e}")))?;
-    file.write_all(data)
-        .await
-        .map_err(|e| AppError::Ssh(format!("write: {e}")))?;
-    file.flush().await.ok();
-    file.shutdown().await.ok();
+        .map_err(|e| AppError::Ssh(format!("read dir: {e}")))?;
+    for entry in rd {
+        if entry.file_type().is_dir() {
+            total += Box::pin(remote_dir_size(sftp, &join_remote(path, &entry.file_name()))).await?;
+        } else {
+            total += entry.metadata().size.unwrap_or(0);
+        }
+    }
+    Ok(total)
+}
+
+#[allow(clippy::too_many_arguments)]
+async fn upload_file_p(app: &AppHandle, id: &str, name: &str, sftp: &SftpSession, local_path: &str, remote_path: String, total: u64, sent: &mut u64) -> AppResult<()> {
+    let mut local = tokio::fs::File::open(local_path).await?;
+    // russh-sftp's `write` opens WRITE-only (no CREATE); `create` truncates+creates.
+    let mut remote = sftp.create(remote_path).await.map_err(|e| AppError::Ssh(format!("create: {e}")))?;
+    let mut buf = vec![0u8; CHUNK];
+    loop {
+        let n = local.read(&mut buf).await?;
+        if n == 0 {
+            break;
+        }
+        remote.write_all(&buf[..n]).await.map_err(|e| AppError::Ssh(format!("write: {e}")))?;
+        *sent += n as u64;
+        emit_transfer(app, id, name, *sent, total, false, None);
+    }
+    remote.flush().await.ok();
+    remote.shutdown().await.ok();
     Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
+async fn upload_tree_p(app: &AppHandle, id: &str, name: &str, sftp: &SftpSession, local_dir: &str, remote_dir: &str, total: u64, sent: &mut u64) -> AppResult<()> {
+    let _ = sftp.create_dir(remote_dir.to_string()).await;
+    for entry in std::fs::read_dir(local_dir)?.flatten() {
+        let fname = entry.file_name().to_string_lossy().into_owned();
+        let lp = entry.path().to_string_lossy().into_owned();
+        let rp = join_remote(remote_dir, &fname);
+        let meta = match entry.metadata() {
+            Ok(m) => m,
+            Err(_) => continue,
+        };
+        if meta.is_dir() {
+            Box::pin(upload_tree_p(app, id, name, sftp, &lp, &rp, total, sent)).await?;
+        } else {
+            upload_file_p(app, id, name, sftp, &lp, rp, total, sent).await?;
+        }
+    }
+    Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
+async fn download_file_p(app: &AppHandle, id: &str, name: &str, sftp: &SftpSession, remote_path: String, local_path: &str, total: u64, sent: &mut u64) -> AppResult<()> {
+    let mut remote = sftp.open(remote_path).await.map_err(|e| AppError::Ssh(format!("open: {e}")))?;
+    let mut local = tokio::fs::File::create(local_path).await?;
+    let mut buf = vec![0u8; CHUNK];
+    loop {
+        let n = remote.read(&mut buf).await?;
+        if n == 0 {
+            break;
+        }
+        local.write_all(&buf[..n]).await?;
+        *sent += n as u64;
+        emit_transfer(app, id, name, *sent, total, false, None);
+    }
+    local.flush().await.ok();
+    Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
+async fn download_tree_p(app: &AppHandle, id: &str, name: &str, sftp: &SftpSession, remote_dir: &str, local_dir: &str, total: u64, sent: &mut u64) -> AppResult<()> {
+    std::fs::create_dir_all(local_dir)?;
+    let rd = sftp.read_dir(remote_dir.to_string()).await.map_err(|e| AppError::Ssh(format!("read dir: {e}")))?;
+    for entry in rd {
+        let fname = entry.file_name();
+        let rp = join_remote(remote_dir, &fname);
+        let lp = join_local(local_dir, &fname);
+        if entry.file_type().is_dir() {
+            Box::pin(download_tree_p(app, id, name, sftp, &rp, &lp, total, sent)).await?;
+        } else {
+            download_file_p(app, id, name, sftp, rp, &lp, total, sent).await?;
+        }
+    }
+    Ok(())
+}
+
+/// Upload a file or directory, streaming in chunks and emitting progress on
+/// `myssh://transfer`.
+pub async fn upload_progress(app: AppHandle, id: String, name: String, sftp: &SftpSession, local_path: String, remote_path: String, is_dir: bool) -> AppResult<()> {
+    let total = if is_dir {
+        local_dir_size(&local_path)?
+    } else {
+        std::fs::metadata(&local_path)?.len()
+    };
+    let mut sent = 0u64;
+    emit_transfer(&app, &id, &name, 0, total, false, None);
+    let result = if is_dir {
+        upload_tree_p(&app, &id, &name, sftp, &local_path, &remote_path, total, &mut sent).await
+    } else {
+        upload_file_p(&app, &id, &name, sftp, &local_path, remote_path, total, &mut sent).await
+    };
+    emit_transfer(&app, &id, &name, sent, total, true, result.as_ref().err().map(|e| e.to_string()));
+    result
+}
+
+/// Download a file or directory, streaming in chunks and emitting progress.
+pub async fn download_progress(app: AppHandle, id: String, name: String, sftp: &SftpSession, remote_path: String, local_path: String, is_dir: bool) -> AppResult<()> {
+    let total = if is_dir {
+        remote_dir_size(sftp, &remote_path).await?
+    } else {
+        sftp.metadata(remote_path.clone())
+            .await
+            .map_err(|e| AppError::Ssh(format!("stat: {e}")))?
+            .size
+            .unwrap_or(0)
+    };
+    let mut sent = 0u64;
+    emit_transfer(&app, &id, &name, 0, total, false, None);
+    let result = if is_dir {
+        download_tree_p(&app, &id, &name, sftp, &remote_path, &local_path, total, &mut sent).await
+    } else {
+        download_file_p(&app, &id, &name, sftp, remote_path, &local_path, total, &mut sent).await
+    };
+    emit_transfer(&app, &id, &name, sent, total, true, result.as_ref().err().map(|e| e.to_string()));
+    result
 }
 
 /// A live SFTP session. The russh `Handle` is held so the underlying SSH
@@ -29,7 +191,9 @@ pub async fn write_file(sftp: &SftpSession, remote_path: String, data: &[u8]) ->
 pub struct SftpHandle {
     _ssh: Handle<ClientHandler>,
     _jumps: Vec<Handle<ClientHandler>>,
-    pub sftp: SftpSession,
+    /// `Arc` so a transfer can clone it and release the sessions-map lock,
+    /// letting browsing continue while a large transfer runs.
+    pub sftp: Arc<SftpSession>,
 }
 
 /// Connect, request the `sftp` subsystem, and return the session + home dir.
@@ -50,52 +214,7 @@ pub async fn open(
         .await
         .map_err(|e| AppError::Ssh(format!("sftp init: {e}")))?;
     let home = sftp.canonicalize(".").await.unwrap_or_else(|_| "/".to_string());
-    Ok((SftpHandle { _ssh: ssh, _jumps: jumps, sftp }, home))
-}
-
-/// Recursively upload a local directory tree to `remote_dir`.
-pub async fn upload_dir(sftp: &SftpSession, local_dir: &str, remote_dir: &str) -> AppResult<()> {
-    let _ = sftp.create_dir(remote_dir.to_string()).await; // ignore "already exists"
-    for entry in std::fs::read_dir(local_dir)?.flatten() {
-        let name = entry.file_name().to_string_lossy().into_owned();
-        let local_path = entry.path().to_string_lossy().into_owned();
-        let remote_path = join_remote(remote_dir, &name);
-        let meta = match entry.metadata() {
-            Ok(m) => m,
-            Err(_) => continue,
-        };
-        if meta.is_dir() {
-            Box::pin(upload_dir(sftp, &local_path, &remote_path)).await?;
-        } else {
-            let data = std::fs::read(&local_path)?;
-            write_file(sftp, remote_path, &data).await?;
-        }
-    }
-    Ok(())
-}
-
-/// Recursively download a remote directory tree to `local_dir`.
-pub async fn download_dir(sftp: &SftpSession, remote_dir: &str, local_dir: &str) -> AppResult<()> {
-    std::fs::create_dir_all(local_dir)?;
-    let read_dir = sftp
-        .read_dir(remote_dir.to_string())
-        .await
-        .map_err(|e| AppError::Ssh(format!("read dir: {e}")))?;
-    for entry in read_dir {
-        let name = entry.file_name();
-        let remote_path = join_remote(remote_dir, &name);
-        let local_path = join_local(local_dir, &name);
-        if entry.file_type().is_dir() {
-            Box::pin(download_dir(sftp, &remote_path, &local_path)).await?;
-        } else {
-            let data = sftp
-                .read(remote_path)
-                .await
-                .map_err(|e| AppError::Ssh(format!("download {name}: {e}")))?;
-            std::fs::write(&local_path, data)?;
-        }
-    }
-    Ok(())
+    Ok((SftpHandle { _ssh: ssh, _jumps: jumps, sftp: Arc::new(sftp) }, home))
 }
 
 fn join_remote(dir: &str, name: &str) -> String {
