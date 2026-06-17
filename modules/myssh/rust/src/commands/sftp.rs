@@ -90,12 +90,7 @@ pub async fn sftp_upload(
     let handle = map
         .get(&sftp_id)
         .ok_or_else(|| AppError::NotFound(format!("sftp session {sftp_id}")))?;
-    handle
-        .sftp
-        .write(remote_path, &data)
-        .await
-        .map_err(|e| AppError::Ssh(format!("upload: {e}")))?;
-    Ok(())
+    sftp::write_file(&handle.sftp, remote_path, &data).await
 }
 
 #[tauri::command]

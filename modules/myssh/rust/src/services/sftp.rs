@@ -7,6 +7,22 @@ use crate::services::ssh_client::{connect_authenticated, ClientHandler, ConnectP
 use russh::client::Handle;
 use russh_sftp::client::SftpSession;
 use tauri::AppHandle;
+use tokio::io::AsyncWriteExt;
+
+/// Write a file to the remote, creating/truncating it. `SftpSession::write`
+/// opens with WRITE only (no CREATE), so it fails on new files — use `create`.
+pub async fn write_file(sftp: &SftpSession, remote_path: String, data: &[u8]) -> AppResult<()> {
+    let mut file = sftp
+        .create(remote_path)
+        .await
+        .map_err(|e| AppError::Ssh(format!("create: {e}")))?;
+    file.write_all(data)
+        .await
+        .map_err(|e| AppError::Ssh(format!("write: {e}")))?;
+    file.flush().await.ok();
+    file.shutdown().await.ok();
+    Ok(())
+}
 
 /// A live SFTP session. The russh `Handle` is held so the underlying SSH
 /// connection stays open for the session's lifetime.
@@ -52,9 +68,7 @@ pub async fn upload_dir(sftp: &SftpSession, local_dir: &str, remote_dir: &str) -
             Box::pin(upload_dir(sftp, &local_path, &remote_path)).await?;
         } else {
             let data = std::fs::read(&local_path)?;
-            sftp.write(remote_path, &data)
-                .await
-                .map_err(|e| AppError::Ssh(format!("upload {name}: {e}")))?;
+            write_file(sftp, remote_path, &data).await?;
         }
     }
     Ok(())
