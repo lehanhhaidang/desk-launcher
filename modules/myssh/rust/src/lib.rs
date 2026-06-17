@@ -43,6 +43,34 @@ pub fn init() -> TauriPlugin<Wry> {
             commands::forward::start_forward,
             commands::forward::stop_forward,
         ])
+        .on_window_ready(|window| {
+            // The plugin's state outlives the module window, so if the MySSH
+            // window is closed with live sessions/forwards their SSH connections
+            // and listening sockets would keep running in the launcher process.
+            // Tear them down when the window is destroyed.
+            if window.label() != "myssh" {
+                return;
+            }
+            let app = window.app_handle().clone();
+            window.on_window_event(move |event| {
+                if matches!(event, tauri::WindowEvent::Destroyed) {
+                    if let Some(state) = app.try_state::<AppState>() {
+                        let sessions = state.sessions.clone();
+                        let forwards = state.forwards.clone();
+                        tauri::async_runtime::spawn(async move {
+                            // Dropping the senders makes each session task see a
+                            // closed channel and shut its russh handle down.
+                            sessions.lock().await.clear();
+                            let mut fwd = forwards.lock().await;
+                            for (_, handle) in fwd.drain() {
+                                handle.stop();
+                            }
+                            log::info!("myssh: tore down sessions + forwards on window close");
+                        });
+                    }
+                }
+            });
+        })
         .setup(|app, _api| {
             log::info!("myssh plugin: initializing");
             let conn = db::open().map_err(|e| format!("myssh: open db: {e}"))?;
