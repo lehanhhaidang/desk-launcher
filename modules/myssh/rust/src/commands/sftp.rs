@@ -99,6 +99,34 @@ pub async fn sftp_upload(
 }
 
 #[tauri::command]
+pub async fn sftp_upload_dir(
+    state: State<'_, AppState>,
+    sftp_id: String,
+    local_dir: String,
+    remote_dir: String,
+) -> AppResult<()> {
+    let map = state.sftp.lock().await;
+    let handle = map
+        .get(&sftp_id)
+        .ok_or_else(|| AppError::NotFound(format!("sftp session {sftp_id}")))?;
+    sftp::upload_dir(&handle.sftp, &local_dir, &remote_dir).await
+}
+
+#[tauri::command]
+pub async fn sftp_download_dir(
+    state: State<'_, AppState>,
+    sftp_id: String,
+    remote_dir: String,
+    local_dir: String,
+) -> AppResult<()> {
+    let map = state.sftp.lock().await;
+    let handle = map
+        .get(&sftp_id)
+        .ok_or_else(|| AppError::NotFound(format!("sftp session {sftp_id}")))?;
+    sftp::download_dir(&handle.sftp, &remote_dir, &local_dir).await
+}
+
+#[tauri::command]
 pub async fn sftp_mkdir(
     state: State<'_, AppState>,
     sftp_id: String,

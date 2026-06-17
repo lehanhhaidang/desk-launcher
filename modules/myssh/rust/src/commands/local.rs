@@ -58,6 +58,16 @@ pub fn local_list(path: String) -> AppResult<Vec<SftpEntry>> {
 }
 
 #[tauri::command]
+pub fn local_remove(path: String, is_dir: bool) -> AppResult<()> {
+    if is_dir {
+        std::fs::remove_dir_all(&path)?;
+    } else {
+        std::fs::remove_file(&path)?;
+    }
+    Ok(())
+}
+
+#[tauri::command]
 pub fn local_read_text(path: String) -> AppResult<FilePreview> {
     let meta = std::fs::metadata(&path)?;
     let size = meta.len();

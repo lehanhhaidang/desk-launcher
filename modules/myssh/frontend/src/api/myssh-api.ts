@@ -168,6 +168,10 @@ export const sftpRemove = (sftpId: string, path: string, isDir: boolean) =>
 export const sftpRename = (sftpId: string, from: string, to: string) =>
   invoke<void>(ns('sftp_rename'), { sftpId, from, to })
 export const sftpClose = (sftpId: string) => invoke<void>(ns('sftp_close'), { sftpId })
+export const sftpUploadDir = (sftpId: string, localDir: string, remoteDir: string) =>
+  invoke<void>(ns('sftp_upload_dir'), { sftpId, localDir, remoteDir })
+export const sftpDownloadDir = (sftpId: string, remoteDir: string, localDir: string) =>
+  invoke<void>(ns('sftp_download_dir'), { sftpId, remoteDir, localDir })
 export const sftpReadText = (sftpId: string, path: string) =>
   invoke<FilePreview>(ns('sftp_read_text'), { sftpId, path })
 
@@ -184,6 +188,8 @@ export const localHome = () => invoke<string>(ns('local_home'))
 export const localRoots = () => invoke<string[]>(ns('local_roots'))
 export const localList = (path: string) => invoke<SftpEntry[]>(ns('local_list'), { path })
 export const localReadText = (path: string) => invoke<FilePreview>(ns('local_read_text'), { path })
+export const localRemove = (path: string, isDir: boolean) =>
+  invoke<void>(ns('local_remove'), { path, isDir })
 
 // --- Sessions ---
 

@@ -35,8 +35,11 @@ permissions = [
     "allow-remove-known-host",
     "allow-respond-host-key",
     "allow-sftp-read-text",
+    "allow-sftp-upload-dir",
+    "allow-sftp-download-dir",
     "allow-local-home",
     "allow-local-roots",
     "allow-local-list",
     "allow-local-read-text",
+    "allow-local-remove",
 ]

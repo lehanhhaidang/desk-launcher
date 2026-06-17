@@ -34,10 +34,13 @@ const COMMANDS: &[&str] = &[
     "remove_known_host",
     "respond_host_key",
     "sftp_read_text",
+    "sftp_upload_dir",
+    "sftp_download_dir",
     "local_home",
     "local_roots",
     "local_list",
     "local_read_text",
+    "local_remove",
 ];
 
 fn main() {

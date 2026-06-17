@@ -37,6 +37,64 @@ pub async fn open(
     Ok((SftpHandle { _ssh: ssh, _jumps: jumps, sftp }, home))
 }
 
+/// Recursively upload a local directory tree to `remote_dir`.
+pub async fn upload_dir(sftp: &SftpSession, local_dir: &str, remote_dir: &str) -> AppResult<()> {
+    let _ = sftp.create_dir(remote_dir.to_string()).await; // ignore "already exists"
+    for entry in std::fs::read_dir(local_dir)?.flatten() {
+        let name = entry.file_name().to_string_lossy().into_owned();
+        let local_path = entry.path().to_string_lossy().into_owned();
+        let remote_path = join_remote(remote_dir, &name);
+        let meta = match entry.metadata() {
+            Ok(m) => m,
+            Err(_) => continue,
+        };
+        if meta.is_dir() {
+            Box::pin(upload_dir(sftp, &local_path, &remote_path)).await?;
+        } else {
+            let data = std::fs::read(&local_path)?;
+            sftp.write(remote_path, &data)
+                .await
+                .map_err(|e| AppError::Ssh(format!("upload {name}: {e}")))?;
+        }
+    }
+    Ok(())
+}
+
+/// Recursively download a remote directory tree to `local_dir`.
+pub async fn download_dir(sftp: &SftpSession, remote_dir: &str, local_dir: &str) -> AppResult<()> {
+    std::fs::create_dir_all(local_dir)?;
+    let read_dir = sftp
+        .read_dir(remote_dir.to_string())
+        .await
+        .map_err(|e| AppError::Ssh(format!("read dir: {e}")))?;
+    for entry in read_dir {
+        let name = entry.file_name();
+        let remote_path = join_remote(remote_dir, &name);
+        let local_path = join_local(local_dir, &name);
+        if entry.file_type().is_dir() {
+            Box::pin(download_dir(sftp, &remote_path, &local_path)).await?;
+        } else {
+            let data = sftp
+                .read(remote_path)
+                .await
+                .map_err(|e| AppError::Ssh(format!("download {name}: {e}")))?;
+            std::fs::write(&local_path, data)?;
+        }
+    }
+    Ok(())
+}
+
+fn join_remote(dir: &str, name: &str) -> String {
+    if dir.ends_with('/') {
+        format!("{dir}{name}")
+    } else {
+        format!("{dir}/{name}")
+    }
+}
+fn join_local(dir: &str, name: &str) -> String {
+    format!("{}\\{}", dir.trim_end_matches(['\\', '/']), name)
+}
+
 /// List a remote directory, directories first then case-insensitive by name.
 pub async fn list(sftp: &SftpSession, path: &str) -> AppResult<Vec<SftpEntry>> {
     let read_dir = sftp

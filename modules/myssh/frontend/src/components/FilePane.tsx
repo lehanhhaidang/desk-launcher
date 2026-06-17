@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useRef, type ReactNode } from 'react'
 import { ArrowUp, File as FileIcon, Folder, FolderPlus, RefreshCw } from 'lucide-react'
 import type { SftpEntry } from '../api/myssh-api'
 
@@ -8,14 +8,18 @@ interface Props {
   entries: SftpEntry[]
   loading: boolean
   error: string | null
-  onNavigate: (path: string) => void
+  selectedPath: string | null
+  /** Single-click selects a row. */
+  onSelect: (entry: SftpEntry) => void
+  /** Double-click opens it (enter folder / preview file). */
+  onOpen: (entry: SftpEntry) => void
   onUp: () => void
   onRefresh: () => void
   onNewFolder?: () => void
-  onFileOpen?: (entry: SftpEntry) => void
-  /** Direction-specific row actions (upload / download / delete …). */
+  /** Delete key removes the selected entry. */
+  onDelete?: (entry: SftpEntry) => void
+  /** Per-row action buttons (transfer …). */
   rowAction?: (entry: SftpEntry) => ReactNode
-  /** Drag source/target wiring for the WinSCP-style transfer (added later). */
   rowDraggable?: boolean
   onRowDragStart?: (entry: SftpEntry, e: React.DragEvent) => void
   onPaneDrop?: (e: React.DragEvent) => void
@@ -27,16 +31,20 @@ export function FilePane({
   entries,
   loading,
   error,
-  onNavigate,
+  selectedPath,
+  onSelect,
+  onOpen,
   onUp,
   onRefresh,
   onNewFolder,
-  onFileOpen,
+  onDelete,
   rowAction,
   rowDraggable,
   onRowDragStart,
   onPaneDrop,
 }: Props) {
+  const listRef = useRef<HTMLDivElement>(null)
+
   return (
     <div
       className="flex h-full min-w-0 flex-col"
@@ -63,7 +71,17 @@ export function FilePane({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div
+        ref={listRef}
+        tabIndex={0}
+        className="flex-1 overflow-y-auto outline-none"
+        onKeyDown={(e) => {
+          if (e.key === 'Delete' && selectedPath && onDelete) {
+            const sel = entries.find((x) => x.path === selectedPath)
+            if (sel) onDelete(sel)
+          }
+        }}
+      >
         {error ? (
           <p className="px-3 py-6 text-center text-sm text-[#ffb4ab]">{error}</p>
         ) : loading ? (
@@ -74,28 +92,40 @@ export function FilePane({
           entries.map((entry) => (
             <div
               key={entry.path}
-              className="group flex items-center gap-2 px-2 py-1 hover:bg-white/[0.03]"
-              draggable={rowDraggable && !entry.isDir}
+              className={`group flex select-none items-center gap-2 px-2 py-1 ${
+                selectedPath === entry.path ? 'bg-cyan-300/15' : 'hover:bg-white/[0.03]'
+              }`}
+              draggable={rowDraggable}
               onDragStart={onRowDragStart ? (e) => onRowDragStart(entry, e) : undefined}
+              onClick={() => {
+                onSelect(entry)
+                listRef.current?.focus()
+              }}
+              onDoubleClick={() => onOpen(entry)}
             >
               {entry.isDir ? (
                 <Folder className="size-4 shrink-0 text-cyan-300/80" />
               ) : (
                 <FileIcon className="size-4 shrink-0 text-[#7c8797]" />
               )}
-              <button
-                className={`min-w-0 flex-1 truncate text-left text-sm ${entry.isDir ? 'text-cyan-100' : 'text-[#e6edf3]'}`}
-                onClick={() => (entry.isDir ? onNavigate(entry.path) : onFileOpen?.(entry))}
+              <span
+                className={`min-w-0 flex-1 truncate text-sm ${entry.isDir ? 'text-cyan-100' : 'text-[#e6edf3]'}`}
                 title={entry.name}
               >
                 {entry.name}
-              </button>
+              </span>
               <span className="w-16 shrink-0 text-right font-mono text-[11px] text-[#7c8797]">
                 {entry.isDir ? '' : formatSize(entry.size)}
               </span>
-              <span className="flex shrink-0 items-center gap-1 opacity-0 transition group-hover:opacity-100">
-                {rowAction?.(entry)}
-              </span>
+              {rowAction && (
+                <span
+                  className="flex shrink-0 items-center gap-1 opacity-0 transition group-hover:opacity-100"
+                  onClick={(e) => e.stopPropagation()}
+                  onDoubleClick={(e) => e.stopPropagation()}
+                >
+                  {rowAction(entry)}
+                </span>
+              )}
             </div>
           ))
         )}
