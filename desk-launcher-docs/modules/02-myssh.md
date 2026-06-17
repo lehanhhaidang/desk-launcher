@@ -6,12 +6,12 @@ MySSH is a Termius-style SSH client packaged as a Tauri plugin + React bundle. I
 ---
 
 ## KEY FEATURES
-- **Host management**: CRUD for hosts with single-level folders (groups), free-text tags, and sidebar search. Metadata in SQLite; the host editor picks an SSH key file via the Tauri dialog.
+- **Host management**: CRUD with single-level folders (groups), tags, and search; auth via password, SSH key, or the OS ssh-agent, with optional ProxyJump (bastion). Metadata in SQLite; secrets in the keyring.
 - **Embedded interactive terminal**: `russh` (0.61, `ring` backend) opens a PTY + shell; output streams to the frontend as `myssh://data/<id>` events and is rendered by `xterm.js`. Keystrokes go back via `send_input`; the terminal refits + sends `window_change` on resize.
 - **Multi-tab sessions**: each connection is a tab; all terminals stay mounted (visibility-toggled) so background sessions keep streaming.
-- **TOFU host-key verification**: the client handler records a host's key fingerprint on first connect (`known_hosts` table) and **rejects** a changed key as a possible MITM.
+- **Interactive host-key verification**: an unknown or changed key prompts the user (fingerprint shown, MITM warning on change) to accept or reject; accepted keys are stored in `known_hosts` and managed in a panel.
 - **Command snippets**: saved command strings; one click sends a snippet (+ newline) to the active session via `send_input`.
-- **Local port forwarding**: bind a local port and tunnel each connection to a destination over a dedicated SSH session (`direct-tcpip` + `copy_bidirectional`). Definitions persist; running state is tracked in memory.
+- **Port forwarding**: local (`-L`), remote (`-R`), and dynamic/SOCKS (`-D`), each over a dedicated SSH connection. Definitions persist (with an optional auto-start flag); running state is in memory.
 - **SFTP browser**: list/navigate remote directories, upload/download, mkdir, delete, and rename over the `sftp` subsystem (`russh-sftp`); each browser runs on its own dedicated SSH connection.
 
 ---
@@ -49,6 +49,7 @@ MySSH is a Termius-style SSH client packaged as a Tauri plugin + React bundle. I
 | Snippets | `list_snippets`, `create_snippet`, `update_snippet`, `delete_snippet` |
 | Forwards | `list_forwards`, `create_forward`, `delete_forward`, `start_forward`, `stop_forward` |
 | SFTP | `sftp_open`, `sftp_list`, `sftp_download`, `sftp_upload`, `sftp_mkdir`, `sftp_remove`, `sftp_rename`, `sftp_close` |
+| Host keys | `list_known_hosts`, `remove_known_host`, `respond_host_key` |
 
 **Events (Rust → frontend)**: `myssh://data/<session_id>` (output bytes), `myssh://exit/<session_id>` (session ended).
 
@@ -85,9 +86,9 @@ SQLite at `%APPDATA%\io.desklauncher\modules\myssh\myssh.db` (via `launcher-path
 
 ## NOTES / GOTCHAS
 - **Crypto backend**: `russh` uses `default-features = false` + `ring`/`flate2`/`rsa` to avoid `aws-lc-sys`, which needs NASM to build on Windows/CI.
-- **TOFU is automatic**: an unknown host key is accepted and stored on first use; a changed key is rejected. There is no interactive accept prompt yet (planned).
-- **v2 / deferred**: remote (`-R`) + dynamic/SOCKS forwarding, ssh-agent auth, key generation, and the interactive host-key accept modal.
-- **Auth methods**: v1 supports password and key-file (with optional passphrase). UI strings are English-only.
+- **Host keys are interactive**: unknown/changed keys prompt the user (`myssh://hostkey-prompt` event → `respond_host_key`); a known, unchanged key is accepted silently. Clear an entry from the Known Hosts panel to re-trust a legitimately re-keyed server.
+- **v2 / deferred**: SSH key generation, nested host folders, and cross-device sync.
+- **Auth methods**: password, SSH key (optional passphrase), and OS ssh-agent (Windows OpenSSH named pipe / `SSH_AUTH_SOCK`). UI strings are English-only.
 
 ---
 

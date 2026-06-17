@@ -8,7 +8,7 @@ Unified desktop tool launcher - một app Tauri 2 trên Windows, dashboard chứ
 
 | Module | Mô tả | Stack |
 |---|---|---|
-| **MySSH** | SSH client kiểu Termius: quản lý host, terminal tương tác multi-tab, snippets lệnh, local port forwarding, SFTP file browser. | `russh` + `russh-sftp` + `xterm.js` + `rusqlite` + `keyring` |
+| **MySSH** | SSH client kiểu Termius: quản lý host (auth password/key/agent, ProxyJump), terminal tương tác multi-tab, snippets lệnh, port forwarding (local/remote/dynamic), SFTP file browser. | `russh` + `russh-sftp` + `xterm.js` + `rusqlite` + `keyring` |
 | **Open Sesame** | Quản lý tài liệu dự án - workspace, doc-set, file tree, Markdown preview, GitHub device-flow OAuth + git sync. | `rusqlite` + `git2` + `oauth2` + `keyring` |
 | **Virtual Comtor** | Phiên dịch real-time Nhật <-> Việt cho meeting (Soniox + OpenAI), transcript + summary + xlsx export. | `rusqlite` + `keyring` (Windows Credential Manager) |
 | **Video Downloader** | Tải video/audio (YouTube, TikTok, Bilibili, ...) qua bundled `yt-dlp.exe` + `ffmpeg.exe`. | Tauri sidecar |
@@ -164,7 +164,7 @@ Tag phải khớp version trong `tauri.conf.json` (không khớp thì workflow t
 ## Roadmap
 
 - [ ] file-converter module (Markdown -> PDF với bundled Unicode font cho tiếng Việt)
-- [ ] MySSH: remote/dynamic port forwarding, ssh-agent auth, host-key accept prompt
+- [ ] MySSH: tạo SSH key, folder host lồng nhau, đồng bộ đa thiết bị
 - [ ] Export & sync dữ liệu — **theo từng module** (mỗi module tự export/sync data) và **toàn launcher** (gộp tất cả module). Hiện local thuần (SQLite từng module + OS keyring, không backend); kế hoạch: export/import có mã hoá trước, rồi git-sync tuỳ chọn (tái dùng pattern git2 + OAuth của Open Sesame). Secret cần vault mã hoá bằng master password, vì entry trong OS keyring không mang sang máy khác được.
 - [ ] CSP tightening (union từng module -> strict CSP ở launcher)
 - [ ] NSIS installer polish + auto-update

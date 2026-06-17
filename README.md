@@ -10,7 +10,7 @@ The backend is written in Rust. The frontend uses React 19, TypeScript, Vite mul
 
 | Module | What it does | Stack |
 | --- | --- | --- |
-| **MySSH** | Termius-style SSH client: managed hosts, multi-tab interactive terminals, command snippets, local port forwarding, and an SFTP file browser. | `russh` + `russh-sftp` + `xterm.js` + `rusqlite` + `keyring` |
+| **MySSH** | Termius-style SSH client: managed hosts (password/key/agent auth, ProxyJump), multi-tab interactive terminals, command snippets, local/remote/dynamic port forwarding, and an SFTP file browser. | `russh` + `russh-sftp` + `xterm.js` + `rusqlite` + `keyring` |
 | **Open Sesame** | Project documentation workspace with workspaces, doc sets, file tree browsing, Markdown preview, GitHub device-flow OAuth, and git sync. | `rusqlite` + `git2` + `oauth2` + `keyring` |
 | **Virtual Comtor** | Real-time Japanese/Vietnamese meeting interpreter with Soniox + OpenAI, transcripts, summaries, audio storage, and `.xlsx` export. | `rusqlite` + `keyring` |
 | **Video Downloader** | Downloads video/audio from YouTube, TikTok, Bilibili, and other supported sites through bundled `yt-dlp.exe` and `ffmpeg.exe`. | Tauri sidecars |
@@ -247,7 +247,7 @@ High-level checklist:
 ## Roadmap
 
 - [ ] File Converter module for Markdown-to-PDF conversion with bundled Unicode fonts.
-- [ ] MySSH: remote/dynamic port forwarding, ssh-agent auth, and an interactive host-key accept prompt.
+- [ ] MySSH: SSH key generation, nested host folders, and cross-device sync.
 - [ ] Data export & sync — **per-module** (each module exports/syncs its own data) and **launcher-wide** (all modules at once). Everything is local-only today (per-module SQLite + OS keyring, no backend); plan is encrypted export/import first, then optional git-based sync (reusing Open Sesame's git2 + OAuth pattern). Secrets need an encrypted master-password vault, since OS-keyring entries can't leave the machine.
 - [ ] Tighten CSP once the module permission and asset requirements are stable.
 - [ ] Polish the NSIS installer and add auto-update.
