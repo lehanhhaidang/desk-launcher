@@ -165,6 +165,7 @@ Tag phải khớp version trong `tauri.conf.json` (không khớp thì workflow t
 
 - [ ] file-converter module (Markdown -> PDF với bundled Unicode font cho tiếng Việt)
 - [ ] MySSH: SFTP browser, remote/dynamic port forwarding, ssh-agent auth, host-key accept prompt
+- [ ] Export & sync dữ liệu — **theo từng module** (mỗi module tự export/sync data) và **toàn launcher** (gộp tất cả module). Hiện local thuần (SQLite từng module + OS keyring, không backend); kế hoạch: export/import có mã hoá trước, rồi git-sync tuỳ chọn (tái dùng pattern git2 + OAuth của Open Sesame). Secret cần vault mã hoá bằng master password, vì entry trong OS keyring không mang sang máy khác được.
 - [ ] CSP tightening (union từng module -> strict CSP ở launcher)
 - [ ] NSIS installer polish + auto-update
 - [ ] First-run migration cho legacy comtor DB (`%APPDATA%\com.vcomtor.desktop\` -> `modules\comtor\`)

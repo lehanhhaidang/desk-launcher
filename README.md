@@ -248,6 +248,7 @@ High-level checklist:
 
 - [ ] File Converter module for Markdown-to-PDF conversion with bundled Unicode fonts.
 - [ ] MySSH: SFTP browser, remote/dynamic port forwarding, ssh-agent auth, and an interactive host-key accept prompt.
+- [ ] Data export & sync — **per-module** (each module exports/syncs its own data) and **launcher-wide** (all modules at once). Everything is local-only today (per-module SQLite + OS keyring, no backend); plan is encrypted export/import first, then optional git-based sync (reusing Open Sesame's git2 + OAuth pattern). Secrets need an encrypted master-password vault, since OS-keyring entries can't leave the machine.
 - [ ] Tighten CSP once the module permission and asset requirements are stable.
 - [ ] Polish the NSIS installer and add auto-update.
 - [ ] Add first-run migration for legacy Comtor data from `%APPDATA%\com.vcomtor.desktop\`.
