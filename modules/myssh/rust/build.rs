@@ -33,6 +33,7 @@ const COMMANDS: &[&str] = &[
     "list_known_hosts",
     "remove_known_host",
     "respond_host_key",
+    "respond_keyboard_interactive",
     "sftp_read_text",
     "sftp_upload_dir",
     "sftp_download_dir",

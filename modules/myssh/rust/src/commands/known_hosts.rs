@@ -32,3 +32,16 @@ pub async fn respond_host_key(
     }
     Ok(())
 }
+
+/// Answer a keyboard-interactive (OTP/2FA) prompt round.
+#[tauri::command]
+pub async fn respond_keyboard_interactive(
+    state: State<'_, AppState>,
+    request_id: String,
+    answers: Vec<String>,
+) -> AppResult<()> {
+    if let Some(tx) = state.kbi_prompts.lock().await.remove(&request_id) {
+        let _ = tx.send(answers);
+    }
+    Ok(())
+}

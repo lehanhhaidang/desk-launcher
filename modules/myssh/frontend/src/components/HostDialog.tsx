@@ -192,9 +192,10 @@ export function HostDialog({ open, host, groups, hosts, onClose, onSaved }: Prop
               <option value="password">Password</option>
               <option value="key">SSH key</option>
               <option value="agent">SSH agent</option>
+              <option value="keyboard-interactive">Keyboard-interactive (2FA/OTP)</option>
             </select>
           </div>
-          {form.authMethod !== 'agent' && (
+          {form.authMethod !== 'agent' && form.authMethod !== 'keyboard-interactive' && (
             <div>
               <label className={labelClass}>
                 {form.authMethod === 'key' ? 'Key passphrase' : 'Password'}

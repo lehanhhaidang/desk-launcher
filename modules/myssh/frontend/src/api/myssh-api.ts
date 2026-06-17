@@ -3,7 +3,7 @@ import { listen, type UnlistenFn } from '@tauri-apps/api/event'
 
 const ns = (cmd: string) => `plugin:myssh|${cmd}`
 
-export type AuthMethod = 'password' | 'key' | 'agent'
+export type AuthMethod = 'password' | 'key' | 'agent' | 'keyboard-interactive'
 
 export interface Host {
   id: string
@@ -151,6 +151,20 @@ export const respondHostKey = (requestId: string, accept: boolean) =>
 /** Subscribe to interactive host-key accept/reject prompts. */
 export const onHostKeyPrompt = (cb: (prompt: HostKeyPrompt) => void): Promise<UnlistenFn> =>
   listen<HostKeyPrompt>('myssh://hostkey-prompt', (e) => cb(e.payload))
+
+export interface KbiPrompt {
+  requestId: string
+  name: string
+  instructions: string
+  prompts: { prompt: string; echo: boolean }[]
+}
+
+export const respondKeyboardInteractive = (requestId: string, answers: string[]) =>
+  invoke<void>(ns('respond_keyboard_interactive'), { requestId, answers })
+
+/** Subscribe to keyboard-interactive (OTP/2FA) auth prompts. */
+export const onKbiPrompt = (cb: (prompt: KbiPrompt) => void): Promise<UnlistenFn> =>
+  listen<KbiPrompt>('myssh://kbi-prompt', (e) => cb(e.payload))
 
 // --- SFTP ---
 

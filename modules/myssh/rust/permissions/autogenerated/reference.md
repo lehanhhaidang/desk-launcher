@@ -35,6 +35,7 @@ Allows every MySSH plugin command.
 - `allow-list-known-hosts`
 - `allow-remove-known-host`
 - `allow-respond-host-key`
+- `allow-respond-keyboard-interactive`
 - `allow-sftp-read-text`
 - `allow-sftp-upload-dir`
 - `allow-sftp-download-dir`
@@ -701,6 +702,32 @@ Enables the respond_host_key command without any pre-configured scope.
 <td>
 
 Denies the respond_host_key command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:allow-respond-keyboard-interactive`
+
+</td>
+<td>
+
+Enables the respond_keyboard_interactive command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-respond-keyboard-interactive`
+
+</td>
+<td>
+
+Denies the respond_keyboard_interactive command without any pre-configured scope.
 
 </td>
 </tr>

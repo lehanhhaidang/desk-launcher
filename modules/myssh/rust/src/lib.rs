@@ -53,6 +53,7 @@ pub fn init() -> TauriPlugin<Wry> {
             commands::known_hosts::list_known_hosts,
             commands::known_hosts::remove_known_host,
             commands::known_hosts::respond_host_key,
+            commands::known_hosts::respond_keyboard_interactive,
             commands::sftp::sftp_read_text,
             commands::sftp::sftp_upload_dir,
             commands::sftp::sftp_download_dir,
@@ -80,14 +81,16 @@ pub fn init() -> TauriPlugin<Wry> {
                         let forwards = state.forwards.clone();
                         let sftp = state.sftp.clone();
                         let prompts = state.host_key_prompts.clone();
+                        let kbi = state.kbi_prompts.clone();
                         tauri::async_runtime::spawn(async move {
                             // Dropping the senders makes each session task see a
                             // closed channel and shut its russh handle down.
                             sessions.lock().await.clear();
                             // Dropping the SFTP handles closes their SSH connections.
                             sftp.lock().await.clear();
-                            // Drop any pending host-key prompt waiters.
+                            // Drop any pending host-key + keyboard-interactive waiters.
                             prompts.lock().await.clear();
+                            kbi.lock().await.clear();
                             let mut fwd = forwards.lock().await;
                             for (_, handle) in fwd.drain() {
                                 handle.stop();

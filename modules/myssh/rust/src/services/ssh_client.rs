@@ -5,7 +5,7 @@
 use crate::error::{AppError, AppResult};
 use crate::state::AppState;
 use rusqlite::Connection;
-use russh::client::{self, Handle, Msg, Session};
+use russh::client::{self, Handle, KeyboardInteractiveAuthResponse, Msg, Prompt, Session};
 use russh::keys::{ssh_key, PrivateKeyWithHashAlg};
 use russh::{Channel, ChannelMsg};
 use std::sync::Arc;
@@ -23,6 +23,57 @@ struct HostKeyPrompt {
     key_type: String,
     fingerprint: String,
     changed: bool,
+}
+
+#[derive(Clone, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct KbiField {
+    prompt: String,
+    echo: bool,
+}
+
+/// Emitted for a keyboard-interactive (OTP/2FA) auth round.
+#[derive(Clone, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct KbiPrompt {
+    request_id: String,
+    name: String,
+    instructions: String,
+    prompts: Vec<KbiField>,
+}
+
+/// Show a keyboard-interactive prompt set to the user and await their answers.
+async fn ask_kbi(
+    app: &AppHandle,
+    name: &str,
+    instructions: &str,
+    prompts: &[Prompt],
+) -> AppResult<Vec<String>> {
+    let map = match app.try_state::<AppState>() {
+        Some(state) => state.kbi_prompts.clone(),
+        None => return Ok(Vec::new()),
+    };
+    let request_id = uuid::Uuid::new_v4().to_string();
+    let (tx, rx) = oneshot::channel::<Vec<String>>();
+    map.lock().await.insert(request_id.clone(), tx);
+    let _ = app.emit(
+        "myssh://kbi-prompt",
+        KbiPrompt {
+            request_id: request_id.clone(),
+            name: name.to_string(),
+            instructions: instructions.to_string(),
+            prompts: prompts
+                .iter()
+                .map(|p| KbiField { prompt: p.prompt.clone(), echo: p.echo })
+                .collect(),
+        },
+    );
+    let answers = match tokio::time::timeout(std::time::Duration::from_secs(180), rx).await {
+        Ok(Ok(v)) => v,
+        _ => Vec::new(),
+    };
+    map.lock().await.remove(&request_id);
+    Ok(answers)
 }
 
 /// Messages the UI sends to a live session's driver task.
@@ -294,6 +345,29 @@ pub(crate) async fn connect_authenticated(
                 }
             }
             ok
+        }
+        "keyboard-interactive" => {
+            let mut resp = handle
+                .authenticate_keyboard_interactive_start(params.username.clone(), None::<String>)
+                .await
+                .map_err(|e| AppError::Ssh(format!("keyboard-interactive start: {e}")))?;
+            loop {
+                match resp {
+                    KeyboardInteractiveAuthResponse::Success => break true,
+                    KeyboardInteractiveAuthResponse::Failure { .. } => break false,
+                    KeyboardInteractiveAuthResponse::InfoRequest {
+                        name,
+                        instructions,
+                        prompts,
+                    } => {
+                        let answers = ask_kbi(&app, &name, &instructions, &prompts).await?;
+                        resp = handle
+                            .authenticate_keyboard_interactive_respond(answers)
+                            .await
+                            .map_err(|e| AppError::Ssh(format!("keyboard-interactive respond: {e}")))?;
+                    }
+                }
+            }
         }
         _ => {
             let password = params.secret.clone().unwrap_or_default();

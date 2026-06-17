@@ -23,6 +23,7 @@ import { SnippetsPanel } from './components/SnippetsPanel'
 import { ForwardsPanel } from './components/ForwardsPanel'
 import { KnownHostsPanel } from './components/KnownHostsPanel'
 import { HostKeyModal } from './components/HostKeyModal'
+import { KbiModal } from './components/KbiModal'
 import { Workspace, type WorkspaceTab } from './components/Workspace'
 import type { ConnStatus } from './terminal/TerminalView'
 import {
@@ -500,6 +501,8 @@ export default function MySSH() {
       <KnownHostsPanel open={knownHostsOpen} onClose={() => setKnownHostsOpen(false)} />
 
       <HostKeyModal />
+
+      <KbiModal />
     </div>
   )
 }

@@ -22,6 +22,9 @@ pub struct AppState {
     /// Pending interactive host-key decisions, keyed by request id; the value
     /// is fulfilled by the `respond_host_key` command.
     pub host_key_prompts: Arc<Mutex<HashMap<String, oneshot::Sender<bool>>>>,
+    /// Pending keyboard-interactive auth prompts (OTP/2FA), keyed by request id;
+    /// fulfilled by `respond_keyboard_interactive`.
+    pub kbi_prompts: Arc<Mutex<HashMap<String, oneshot::Sender<Vec<String>>>>>,
 }
 
 impl AppState {
@@ -32,6 +35,7 @@ impl AppState {
             forwards: Arc::new(Mutex::new(HashMap::new())),
             sftp: Arc::new(Mutex::new(HashMap::new())),
             host_key_prompts: Arc::new(Mutex::new(HashMap::new())),
+            kbi_prompts: Arc::new(Mutex::new(HashMap::new())),
         }
     }
 }

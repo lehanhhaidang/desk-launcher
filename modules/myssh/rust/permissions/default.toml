@@ -34,6 +34,7 @@ permissions = [
     "allow-list-known-hosts",
     "allow-remove-known-host",
     "allow-respond-host-key",
+    "allow-respond-keyboard-interactive",
     "allow-sftp-read-text",
     "allow-sftp-upload-dir",
     "allow-sftp-download-dir",
