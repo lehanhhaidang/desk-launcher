@@ -1,5 +1,5 @@
 use crate::error::{AppError, AppResult};
-use crate::models::sftp::{SftpEntry, SftpOpened};
+use crate::models::sftp::{make_preview, FilePreview, SftpEntry, SftpOpened, MAX_PREVIEW};
 use crate::services::sftp;
 use crate::services::ssh_client;
 use crate::state::AppState;
@@ -29,6 +29,33 @@ pub async fn sftp_list(
         .get(&sftp_id)
         .ok_or_else(|| AppError::NotFound(format!("sftp session {sftp_id}")))?;
     sftp::list(&handle.sftp, &path).await
+}
+
+#[tauri::command]
+pub async fn sftp_read_text(
+    state: State<'_, AppState>,
+    sftp_id: String,
+    path: String,
+) -> AppResult<FilePreview> {
+    let map = state.sftp.lock().await;
+    let handle = map
+        .get(&sftp_id)
+        .ok_or_else(|| AppError::NotFound(format!("sftp session {sftp_id}")))?;
+    let meta = handle
+        .sftp
+        .metadata(path.clone())
+        .await
+        .map_err(|e| AppError::Ssh(format!("stat: {e}")))?;
+    let size = meta.size.unwrap_or(0);
+    if size > MAX_PREVIEW {
+        return Ok(make_preview(Vec::new(), size, true));
+    }
+    let bytes = handle
+        .sftp
+        .read(path)
+        .await
+        .map_err(|e| AppError::Ssh(format!("read: {e}")))?;
+    Ok(make_preview(bytes, size, false))
 }
 
 #[tauri::command]

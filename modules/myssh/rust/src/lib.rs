@@ -53,6 +53,11 @@ pub fn init() -> TauriPlugin<Wry> {
             commands::known_hosts::list_known_hosts,
             commands::known_hosts::remove_known_host,
             commands::known_hosts::respond_host_key,
+            commands::sftp::sftp_read_text,
+            commands::local::local_home,
+            commands::local::local_roots,
+            commands::local::local_list,
+            commands::local::local_read_text,
         ])
         .on_window_ready(|window| {
             // The plugin's state outlives the module window, so if the MySSH

@@ -35,6 +35,11 @@ Allows every MySSH plugin command.
 - `allow-list-known-hosts`
 - `allow-remove-known-host`
 - `allow-respond-host-key`
+- `allow-sftp-read-text`
+- `allow-local-home`
+- `allow-local-roots`
+- `allow-local-list`
+- `allow-local-read-text`
 
 ## Permission Table
 
@@ -412,6 +417,110 @@ Denies the list_snippets command without any pre-configured scope.
 <tr>
 <td>
 
+`myssh:allow-local-home`
+
+</td>
+<td>
+
+Enables the local_home command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-local-home`
+
+</td>
+<td>
+
+Denies the local_home command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:allow-local-list`
+
+</td>
+<td>
+
+Enables the local_list command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-local-list`
+
+</td>
+<td>
+
+Denies the local_list command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:allow-local-read-text`
+
+</td>
+<td>
+
+Enables the local_read_text command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-local-read-text`
+
+</td>
+<td>
+
+Denies the local_read_text command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:allow-local-roots`
+
+</td>
+<td>
+
+Enables the local_roots command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-local-roots`
+
+</td>
+<td>
+
+Denies the local_roots command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
 `myssh:allow-open-session`
 
 </td>
@@ -665,6 +774,32 @@ Enables the sftp_open command without any pre-configured scope.
 <td>
 
 Denies the sftp_open command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:allow-sftp-read-text`
+
+</td>
+<td>
+
+Enables the sftp_read_text command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-sftp-read-text`
+
+</td>
+<td>
+
+Denies the sftp_read_text command without any pre-configured scope.
 
 </td>
 </tr>

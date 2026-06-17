@@ -20,3 +20,31 @@ pub struct SftpOpened {
     pub sftp_id: String,
     pub home: String,
 }
+
+/// Text content of a file for preview, or a flag explaining why not.
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FilePreview {
+    pub content: Option<String>,
+    pub is_binary: bool,
+    pub too_large: bool,
+    pub size: u64,
+}
+
+/// Files larger than this are not previewed inline.
+pub const MAX_PREVIEW: u64 = 2 * 1024 * 1024;
+
+/// Decide whether bytes are previewable text (UTF-8, no NUL bytes) and build
+/// the result.
+pub fn make_preview(bytes: Vec<u8>, size: u64, too_large: bool) -> FilePreview {
+    if too_large {
+        return FilePreview { content: None, is_binary: false, too_large: true, size };
+    }
+    if bytes.contains(&0) {
+        return FilePreview { content: None, is_binary: true, too_large: false, size };
+    }
+    match String::from_utf8(bytes) {
+        Ok(text) => FilePreview { content: Some(text), is_binary: false, too_large: false, size },
+        Err(_) => FilePreview { content: None, is_binary: true, too_large: false, size },
+    }
+}

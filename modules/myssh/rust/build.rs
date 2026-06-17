@@ -33,6 +33,11 @@ const COMMANDS: &[&str] = &[
     "list_known_hosts",
     "remove_known_host",
     "respond_host_key",
+    "sftp_read_text",
+    "local_home",
+    "local_roots",
+    "local_list",
+    "local_read_text",
 ];
 
 fn main() {
