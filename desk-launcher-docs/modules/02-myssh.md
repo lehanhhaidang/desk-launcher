@@ -12,7 +12,7 @@ MySSH is a Termius-style SSH client packaged as a Tauri plugin + React bundle. I
 - **Interactive host-key verification**: an unknown or changed key prompts the user (fingerprint shown, MITM warning on change) to accept or reject; accepted keys are stored in `known_hosts` and managed in a panel.
 - **Command snippets**: saved command strings; one click sends a snippet (+ newline) to the active session via `send_input`.
 - **Port forwarding**: local (`-L`), remote (`-R`), and dynamic/SOCKS (`-D`), each over a dedicated SSH connection. Definitions persist (with an optional auto-start flag); running state is in memory.
-- **SFTP browser**: list/navigate remote directories, upload/download, mkdir, delete, and rename over the `sftp` subsystem (`russh-sftp`); each browser runs on its own dedicated SSH connection.
+- **File manager (WinSCP-style)**: a dual pane — local + remote (SFTP over `russh-sftp`, its own SSH connection) — with a draggable splitter and drag-and-drop transfer, plus file preview tabs (text/code in a `<pre>`, Markdown rendered; remote binaries download, local binaries open in the OS app).
 
 ---
 
@@ -48,7 +48,8 @@ MySSH is a Termius-style SSH client packaged as a Tauri plugin + React bundle. I
 | Sessions | `open_session` (→ session id), `send_input`, `resize_session`, `close_session` |
 | Snippets | `list_snippets`, `create_snippet`, `update_snippet`, `delete_snippet` |
 | Forwards | `list_forwards`, `create_forward`, `delete_forward`, `start_forward`, `stop_forward` |
-| SFTP | `sftp_open`, `sftp_list`, `sftp_download`, `sftp_upload`, `sftp_mkdir`, `sftp_remove`, `sftp_rename`, `sftp_close` |
+| SFTP | `sftp_open`, `sftp_list`, `sftp_download`, `sftp_upload`, `sftp_mkdir`, `sftp_remove`, `sftp_rename`, `sftp_read_text`, `sftp_close` |
+| Local FS | `local_home`, `local_roots`, `local_list`, `local_read_text` |
 | Host keys | `list_known_hosts`, `remove_known_host`, `respond_host_key` |
 
 **Events (Rust → frontend)**: `myssh://data/<session_id>` (output bytes), `myssh://exit/<session_id>` (session ended).
@@ -56,15 +57,18 @@ MySSH is a Termius-style SSH client packaged as a Tauri plugin + React bundle. I
 ---
 
 ## FRONTEND FILES (`modules/myssh/frontend/src/`)
-- `MySSH.tsx` — layout: host sidebar (groups → hosts, search, new host/group, snippets + forwards buttons) and the terminal workspace; tab state; snippet routing to the active session.
-- `components/HostDialog.tsx` — host editor (label/host/port/user/group/tags/auth/key-file picker/secret→keyring).
-- `components/SnippetsPanel.tsx` — snippet list (run/edit/delete) + add form.
-- `components/ForwardsPanel.tsx` — forward list (running indicator, start/stop/delete) + add form.
-- `components/SftpPanel.tsx` — SFTP browser modal: path bar + file list, navigate, upload/download, mkdir, rename, delete.
-- `terminal/TerminalView.tsx` — one `xterm` instance wired to a session's events + input/resize; reports its session id to the parent.
-- `terminal/TerminalWorkspace.tsx` — tab bar + all mounted terminals (visibility-toggled).
+- `MySSH.tsx` — host sidebar + a collapsible host header + the tabbed workspace; tab state; snippet routing to the active session.
+- `components/Workspace.tsx` — one tab bar over multi-kind tabs (terminal / files / preview), all kept mounted (visibility-toggled).
+- `components/FilesTab.tsx` — WinSCP-style dual pane: local pane + remote (SFTP) pane, draggable splitter, per-row + drag-and-drop transfer.
+- `components/FilePane.tsx` — one reusable file list (path bar, navigate, row actions, drag source/drop target).
+- `components/PreviewTab.tsx` — file preview: text/code in a `<pre>`, `.md` via `MarkdownView`; remote binary → Download, local binary → open in the OS app.
+- `components/MarkdownView.tsx` — react-markdown + remark-gfm + rehype-highlight, styled like Open Sesame.
+- `components/HostDialog.tsx` — host editor (auth/key-file/secret→keyring, ProxyJump).
+- `components/{SnippetsPanel,ForwardsPanel,KnownHostsPanel}.tsx` — snippet / port-forward / known-host managers.
+- `components/HostKeyModal.tsx` — interactive host-key accept/reject prompt.
+- `terminal/TerminalView.tsx` — one `xterm` instance wired to a session's events + input/resize; copy/paste, search, reconnect, font zoom.
 - `api/myssh-api.ts` — `invoke` wrappers + event listeners.
-- `styles.css` — theme (imports shared `theme.css`, Tailwind `@source`s).
+- `styles.css` — theme + highlight.js code styling.
 
 ---
 
