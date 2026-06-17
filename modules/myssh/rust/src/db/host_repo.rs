@@ -17,6 +17,7 @@ fn row_to_host(row: &Row) -> rusqlite::Result<Host> {
         auth_method: row.get("auth_method")?,
         key_path: row.get("key_path")?,
         has_secret: secret_ref.is_some(),
+        jump_host_id: row.get("jump_host_id")?,
         tags,
         last_used: row.get("last_used")?,
         created_at: row.get("created_at")?,
@@ -78,8 +79,8 @@ pub fn create(conn: &Connection, input: HostInput) -> AppResult<Host> {
     let ts = now_unix();
     conn.execute(
         "INSERT INTO hosts
-            (id, label, hostname, port, username, group_id, auth_method, key_path, secret_ref, tags, last_used, created_at, updated_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, NULL, ?11, ?11)",
+            (id, label, hostname, port, username, group_id, auth_method, key_path, secret_ref, jump_host_id, tags, last_used, created_at, updated_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, NULL, ?12, ?12)",
         params![
             id,
             input.label,
@@ -90,6 +91,7 @@ pub fn create(conn: &Connection, input: HostInput) -> AppResult<Host> {
             input.auth_method,
             input.key_path,
             secret_ref,
+            input.jump_host_id,
             tags_json,
             ts,
         ],
@@ -108,7 +110,7 @@ pub fn update(conn: &Connection, id: &str, input: HostInput) -> AppResult<Host> 
     conn.execute(
         "UPDATE hosts SET
             label = ?2, hostname = ?3, port = ?4, username = ?5, group_id = ?6,
-            auth_method = ?7, key_path = ?8, secret_ref = ?9, tags = ?10, updated_at = ?11
+            auth_method = ?7, key_path = ?8, secret_ref = ?9, jump_host_id = ?10, tags = ?11, updated_at = ?12
          WHERE id = ?1",
         params![
             id,
@@ -120,6 +122,7 @@ pub fn update(conn: &Connection, id: &str, input: HostInput) -> AppResult<Host> 
             input.auth_method,
             input.key_path,
             secret_ref,
+            input.jump_host_id,
             tags_json,
             now_unix(),
         ],
@@ -167,6 +170,7 @@ mod tests {
             auth_method: "password".into(),
             key_path: None,
             secret: None,
+            jump_host_id: None,
             tags: vec!["prod".into()],
         }
     }

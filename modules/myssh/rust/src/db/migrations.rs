@@ -62,6 +62,9 @@ pub fn run(conn: &Connection) -> AppResult<()> {
         "ALTER TABLE port_forwards ADD COLUMN auto_start INTEGER NOT NULL DEFAULT 0;",
     );
 
+    // v3: optional ProxyJump host on hosts.
+    let _ = conn.execute_batch("ALTER TABLE hosts ADD COLUMN jump_host_id TEXT;");
+
     Ok(())
 }
 

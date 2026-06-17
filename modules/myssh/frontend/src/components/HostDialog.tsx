@@ -15,6 +15,7 @@ interface Props {
   open: boolean
   host: Host | null
   groups: Group[]
+  hosts: Host[]
   onClose: () => void
   onSaved: () => void
 }
@@ -28,6 +29,7 @@ interface FormState {
   authMethod: AuthMethod
   keyPath: string
   secret: string
+  jumpHostId: string
   tags: string
 }
 
@@ -41,6 +43,7 @@ function emptyForm(): FormState {
     authMethod: 'password',
     keyPath: '',
     secret: '',
+    jumpHostId: '',
     tags: '',
   }
 }
@@ -55,6 +58,7 @@ function formFromHost(host: Host): FormState {
     authMethod: host.authMethod,
     keyPath: host.keyPath ?? '',
     secret: '',
+    jumpHostId: host.jumpHostId ?? '',
     tags: host.tags.join(', '),
   }
 }
@@ -63,7 +67,7 @@ const inputClass =
   'w-full rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-[#edf3f7] outline-none transition focus:border-cyan-300/40 focus:bg-white/[0.06]'
 const labelClass = 'mb-1 block text-xs font-semibold uppercase tracking-wider text-[#9aa6b6]'
 
-export function HostDialog({ open, host, groups, onClose, onSaved }: Props) {
+export function HostDialog({ open, host, groups, hosts, onClose, onSaved }: Props) {
   const [form, setForm] = useState<FormState>(emptyForm)
   const [saving, setSaving] = useState(false)
 
@@ -97,6 +101,7 @@ export function HostDialog({ open, host, groups, onClose, onSaved }: Props) {
       authMethod: form.authMethod,
       keyPath: form.authMethod === 'key' ? form.keyPath.trim() || null : null,
       secret: form.secret ? form.secret : null,
+      jumpHostId: form.jumpHostId || null,
       tags: form.tags
         .split(',')
         .map((t) => t.trim())
@@ -226,6 +231,24 @@ export function HostDialog({ open, host, groups, onClose, onSaved }: Props) {
               onChange={(e) => set('tags', e.target.value)}
               placeholder="prod, db"
             />
+          </div>
+
+          <div className="col-span-2">
+            <label className={labelClass}>Jump host (ProxyJump, optional)</label>
+            <select
+              className={inputClass}
+              value={form.jumpHostId}
+              onChange={(e) => set('jumpHostId', e.target.value)}
+            >
+              <option value="">None — connect directly</option>
+              {hosts
+                .filter((h) => h.id !== host?.id)
+                .map((h) => (
+                  <option key={h.id} value={h.id}>
+                    {h.label}
+                  </option>
+                ))}
+            </select>
           </div>
         </div>
 

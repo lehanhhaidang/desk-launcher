@@ -15,6 +15,8 @@ pub struct Host {
     pub key_path: Option<String>,
     /// True when a password / passphrase is stored in the OS keyring.
     pub has_secret: bool,
+    /// Optional bastion: connect to this host through another host (ProxyJump).
+    pub jump_host_id: Option<String>,
     pub tags: Vec<String>,
     pub last_used: Option<i64>,
     pub created_at: i64,
@@ -35,6 +37,7 @@ pub struct HostInput {
     pub auth_method: String,
     pub key_path: Option<String>,
     pub secret: Option<String>,
+    pub jump_host_id: Option<String>,
     #[serde(default)]
     pub tags: Vec<String>,
 }

@@ -14,6 +14,7 @@ use tokio::sync::Mutex;
 /// connection stays open for the session's lifetime.
 pub struct SftpHandle {
     _ssh: Handle<ClientHandler>,
+    _jumps: Vec<Handle<ClientHandler>>,
     pub sftp: SftpSession,
 }
 
@@ -22,7 +23,7 @@ pub async fn open(
     db: Arc<Mutex<Connection>>,
     params: &ConnectParams,
 ) -> AppResult<(SftpHandle, String)> {
-    let ssh = connect_authenticated(db, params, None).await?;
+    let (ssh, jumps) = connect_authenticated(db, params, None).await?;
     let channel = ssh
         .channel_open_session()
         .await
@@ -35,7 +36,7 @@ pub async fn open(
         .await
         .map_err(|e| AppError::Ssh(format!("sftp init: {e}")))?;
     let home = sftp.canonicalize(".").await.unwrap_or_else(|_| "/".to_string());
-    Ok((SftpHandle { _ssh: ssh, sftp }, home))
+    Ok((SftpHandle { _ssh: ssh, _jumps: jumps, sftp }, home))
 }
 
 /// List a remote directory, directories first then case-insensitive by name.

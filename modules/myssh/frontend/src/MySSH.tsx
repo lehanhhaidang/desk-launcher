@@ -342,6 +342,7 @@ export default function MySSH() {
         open={dialogOpen}
         host={editing}
         groups={groups}
+        hosts={hosts}
         onClose={() => setDialogOpen(false)}
         onSaved={refresh}
       />

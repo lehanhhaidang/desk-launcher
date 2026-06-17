@@ -1,8 +1,7 @@
 use crate::db::host_repo;
 use crate::error::{AppError, AppResult};
-use crate::services::ssh_client::{self, ConnectParams, SessionRequest};
+use crate::services::ssh_client::{self, SessionRequest};
 use crate::state::AppState;
-use crate::utils::secret_store;
 use tauri::{AppHandle, State};
 
 #[tauri::command]
@@ -13,24 +12,7 @@ pub async fn open_session(
     cols: u32,
     rows: u32,
 ) -> AppResult<String> {
-    let host = {
-        let conn = state.db.lock().await;
-        host_repo::get(&conn, &host_id)?
-    };
-    let secret = if host.has_secret {
-        secret_store::get_host_secret(&host_id)?
-    } else {
-        None
-    };
-
-    let params = ConnectParams {
-        host: host.hostname.clone(),
-        port: host.port,
-        username: host.username.clone(),
-        auth_method: host.auth_method.clone(),
-        key_path: host.key_path.clone(),
-        secret,
-    };
+    let params = ssh_client::resolve_params(state.db.clone(), &host_id).await?;
 
     let session_id = uuid::Uuid::new_v4().to_string();
     let tx = ssh_client::open(

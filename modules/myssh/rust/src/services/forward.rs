@@ -36,9 +36,11 @@ pub async fn start_local(
         .await
         .map_err(|e| AppError::Ssh(format!("bind {bind}: {e}")))?;
 
-    let handle = Arc::new(connect_authenticated(db, &params, None).await?);
+    let (h, jumps) = connect_authenticated(db, &params, None).await?;
+    let handle = Arc::new(h);
 
     let task = tokio::spawn(async move {
+        let _jumps = jumps;
         loop {
             match listener.accept().await {
                 Ok((mut socket, _peer)) => {
@@ -78,7 +80,7 @@ pub async fn start_remote(
     params: ConnectParams,
     def: Forward,
 ) -> AppResult<ForwardHandle> {
-    let handle =
+    let (handle, jumps) =
         connect_authenticated(db, &params, Some((def.dest_host.clone(), def.dest_port))).await?;
     handle
         .tcpip_forward(def.bind_addr.clone(), def.bind_port as u32)
@@ -86,8 +88,10 @@ pub async fn start_remote(
         .map_err(|e| AppError::Ssh(format!("remote forward request: {e}")))?;
 
     let task = tokio::spawn(async move {
-        // Hold the connection open; the handler services forwarded channels.
+        // Hold the connection (and bastion hops) open; the handler services
+        // forwarded channels.
         let _keep = handle;
+        let _jumps = jumps;
         std::future::pending::<()>().await;
     });
     Ok(ForwardHandle { task })
@@ -104,9 +108,11 @@ pub async fn start_dynamic(
     let listener = TcpListener::bind(&bind)
         .await
         .map_err(|e| AppError::Ssh(format!("bind {bind}: {e}")))?;
-    let handle = Arc::new(connect_authenticated(db, &params, None).await?);
+    let (h, jumps) = connect_authenticated(db, &params, None).await?;
+    let handle = Arc::new(h);
 
     let task = tokio::spawn(async move {
+        let _jumps = jumps;
         loop {
             match listener.accept().await {
                 Ok((socket, _peer)) => {

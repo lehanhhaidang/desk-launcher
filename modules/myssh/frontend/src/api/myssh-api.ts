@@ -15,6 +15,7 @@ export interface Host {
   authMethod: AuthMethod
   keyPath: string | null
   hasSecret: boolean
+  jumpHostId: string | null
   tags: string[]
   lastUsed: number | null
   createdAt: number
@@ -31,6 +32,7 @@ export interface HostInput {
   keyPath: string | null
   /** Plaintext password/passphrase. `null` leaves a saved secret unchanged. */
   secret: string | null
+  jumpHostId: string | null
   tags: string[]
 }
 

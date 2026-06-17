@@ -28,6 +28,48 @@ pub struct ConnectParams {
     pub auth_method: String,
     pub key_path: Option<String>,
     pub secret: Option<String>,
+    /// Optional bastion to tunnel this connection through (ProxyJump).
+    pub jump: Option<Box<ConnectParams>>,
+}
+
+/// Resolve a host id into connection params, pulling its secret from the keyring
+/// and (one level) its ProxyJump host. Used by sessions, SFTP, and forwards.
+pub(crate) async fn resolve_params(
+    db: Arc<Mutex<Connection>>,
+    host_id: &str,
+) -> AppResult<ConnectParams> {
+    resolve_params_inner(db, host_id, true).await
+}
+
+async fn resolve_params_inner(
+    db: Arc<Mutex<Connection>>,
+    host_id: &str,
+    allow_jump: bool,
+) -> AppResult<ConnectParams> {
+    let host = {
+        let conn = db.lock().await;
+        crate::db::host_repo::get(&conn, host_id)?
+    };
+    let secret = if host.has_secret {
+        crate::utils::secret_store::get_host_secret(&host.id)?
+    } else {
+        None
+    };
+    let jump = match (allow_jump, &host.jump_host_id) {
+        (true, Some(jid)) => {
+            Some(Box::new(Box::pin(resolve_params_inner(db.clone(), jid, false)).await?))
+        }
+        _ => None,
+    };
+    Ok(ConnectParams {
+        host: host.hostname,
+        port: host.port,
+        username: host.username,
+        auth_method: host.auth_method,
+        key_path: host.key_path,
+        secret,
+        jump,
+    })
 }
 
 /// Client handler. Its only job is trust-on-first-use host-key verification:
@@ -102,22 +144,42 @@ pub(crate) async fn connect_authenticated(
     db: Arc<Mutex<Connection>>,
     params: &ConnectParams,
     remote_dest: Option<(String, u16)>,
-) -> AppResult<Handle<ClientHandler>> {
+) -> AppResult<(Handle<ClientHandler>, Vec<Handle<ClientHandler>>)> {
     let mut config = client::Config::default();
     // Send a keepalive every 30s so idle sessions aren't dropped by the server
     // or a NAT/firewall; disconnect after a few unanswered ones (keepalive_max).
     config.keepalive_interval = Some(std::time::Duration::from_secs(30));
     let config = Arc::new(config);
     let handler = ClientHandler {
-        db,
+        db: db.clone(),
         host: params.host.clone(),
         port: params.port,
         remote_dest,
     };
 
-    let mut handle = client::connect(config, (params.host.as_str(), params.port), handler)
-        .await
-        .map_err(|e| AppError::Ssh(format!("connect failed: {e}")))?;
+    // `jumps` holds any bastion connections that must stay alive for as long as
+    // this session does (the caller keeps them).
+    let (mut handle, jumps) = match &params.jump {
+        Some(jump) => {
+            let (jump_handle, mut prior) =
+                Box::pin(connect_authenticated(db.clone(), jump, None)).await?;
+            let channel = jump_handle
+                .channel_open_direct_tcpip(params.host.clone(), params.port as u32, "127.0.0.1", 0)
+                .await
+                .map_err(|e| AppError::Ssh(format!("jump channel: {e}")))?;
+            let handle = client::connect_stream(config, channel.into_stream(), handler)
+                .await
+                .map_err(|e| AppError::Ssh(format!("connect via jump host: {e}")))?;
+            prior.push(jump_handle);
+            (handle, prior)
+        }
+        None => {
+            let handle = client::connect(config, (params.host.as_str(), params.port), handler)
+                .await
+                .map_err(|e| AppError::Ssh(format!("connect failed: {e}")))?;
+            (handle, Vec::new())
+        }
+    };
 
     let authenticated = match params.auth_method.as_str() {
         "key" => {
@@ -155,7 +217,7 @@ pub(crate) async fn connect_authenticated(
         return Err(AppError::Ssh("authentication failed".into()));
     }
 
-    Ok(handle)
+    Ok((handle, jumps))
 }
 
 /// Open an interactive shell and spawn the driver task. Returns the sender used
@@ -170,7 +232,7 @@ pub async fn open(
     cols: u32,
     rows: u32,
 ) -> AppResult<mpsc::Sender<SessionRequest>> {
-    let handle = connect_authenticated(db, &params, None).await?;
+    let (handle, jumps) = connect_authenticated(db, &params, None).await?;
 
     let channel = handle
         .channel_open_session()
@@ -192,8 +254,9 @@ pub async fn open(
     let exit_event = format!("myssh://exit/{session_id}");
 
     tokio::spawn(async move {
-        // Hold the session handle alive for the channel's lifetime.
+        // Hold the session handle (and any bastion hops) alive for the channel's lifetime.
         let _handle = handle;
+        let _jumps = jumps;
         loop {
             tokio::select! {
                 msg = read_half.wait() => {

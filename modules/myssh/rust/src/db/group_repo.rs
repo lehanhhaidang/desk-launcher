@@ -84,6 +84,7 @@ mod tests {
                 auth_method: "password".into(),
                 key_path: None,
                 secret: None,
+                jump_host_id: None,
                 tags: vec![],
             },
         )
