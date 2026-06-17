@@ -55,6 +55,13 @@ pub fn run(conn: &Connection) -> AppResult<()> {
         );
         "#,
     )?;
+
+    // v2: auto-start flag on forwards. ALTER fails if the column already exists,
+    // which is the idempotent signal that this migration already ran.
+    let _ = conn.execute_batch(
+        "ALTER TABLE port_forwards ADD COLUMN auto_start INTEGER NOT NULL DEFAULT 0;",
+    );
+
     Ok(())
 }
 

@@ -13,6 +13,7 @@ fn row_to_forward(row: &Row) -> rusqlite::Result<Forward> {
         dest_host: row.get("dest_host")?,
         dest_port: row.get::<_, i64>("dest_port")? as u16,
         label: row.get("label")?,
+        auto_start: row.get("auto_start")?,
         created_at: row.get("created_at")?,
     })
 }
@@ -53,8 +54,8 @@ pub fn create(conn: &Connection, input: ForwardInput) -> AppResult<Forward> {
     };
     conn.execute(
         "INSERT INTO port_forwards
-            (id, host_id, kind, bind_addr, bind_port, dest_host, dest_port, label, created_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
+            (id, host_id, kind, bind_addr, bind_port, dest_host, dest_port, label, auto_start, created_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
         params![
             id,
             input.host_id,
@@ -64,6 +65,7 @@ pub fn create(conn: &Connection, input: ForwardInput) -> AppResult<Forward> {
             input.dest_host.trim(),
             input.dest_port as i64,
             input.label,
+            input.auto_start,
             now_unix(),
         ],
     )?;
@@ -114,6 +116,7 @@ mod tests {
             dest_host: "127.0.0.1".into(),
             dest_port: 5432,
             label: "db".into(),
+            auto_start: false,
         }
     }
 

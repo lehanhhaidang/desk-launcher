@@ -10,6 +10,7 @@ import {
   Plus,
   Search,
   Server,
+  ShieldCheck,
   TerminalSquare,
   Trash2,
 } from 'lucide-react'
@@ -18,14 +19,17 @@ import { HostDialog } from './components/HostDialog'
 import { SnippetsPanel } from './components/SnippetsPanel'
 import { ForwardsPanel } from './components/ForwardsPanel'
 import { SftpPanel } from './components/SftpPanel'
+import { KnownHostsPanel } from './components/KnownHostsPanel'
 import { TerminalWorkspace, type SessionTab } from './terminal/TerminalWorkspace'
 import {
   createGroup,
   deleteGroup,
   deleteHost,
+  listForwards,
   listGroups,
   listHosts,
   sendInput,
+  startForward,
   type Group,
   type Host,
 } from './api/myssh-api'
@@ -46,6 +50,7 @@ export default function MySSH() {
   const [snippetsOpen, setSnippetsOpen] = useState(false)
   const [forwardsOpen, setForwardsOpen] = useState(false)
   const [sftpHost, setSftpHost] = useState<Host | null>(null)
+  const [knownHostsOpen, setKnownHostsOpen] = useState(false)
   const sessionMap = useRef<Map<string, string>>(new Map())
 
   const registerSession = useCallback((tabKey: string, sessionId: string | null) => {
@@ -77,6 +82,14 @@ export default function MySSH() {
   useEffect(() => {
     refresh()
   }, [refresh])
+
+  // Start forwards flagged auto-start once, when the window opens.
+  useEffect(() => {
+    listForwards()
+      .then((items) => items.filter((i) => i.forward.autoStart && !i.running))
+      .then((pending) => Promise.allSettled(pending.map((i) => startForward(i.forward.id))))
+      .catch(() => {})
+  }, [])
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -187,6 +200,9 @@ export default function MySSH() {
           <div className="flex gap-1">
             <Button size="icon-sm" variant="ghost" title="Port forwarding" onClick={() => setForwardsOpen(true)}>
               <ArrowRightLeft className="size-4" />
+            </Button>
+            <Button size="icon-sm" variant="ghost" title="Known hosts" onClick={() => setKnownHostsOpen(true)}>
+              <ShieldCheck className="size-4" />
             </Button>
             <Button size="icon-sm" variant="ghost" title="Snippets" onClick={() => setSnippetsOpen(true)}>
               <Code2 className="size-4" />
@@ -339,6 +355,8 @@ export default function MySSH() {
       <ForwardsPanel open={forwardsOpen} onClose={() => setForwardsOpen(false)} hosts={hosts} />
 
       <SftpPanel open={!!sftpHost} host={sftpHost} onClose={() => setSftpHost(null)} />
+
+      <KnownHostsPanel open={knownHostsOpen} onClose={() => setKnownHostsOpen(false)} />
     </div>
   )
 }

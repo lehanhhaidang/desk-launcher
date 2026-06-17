@@ -50,6 +50,8 @@ pub fn init() -> TauriPlugin<Wry> {
             commands::sftp::sftp_remove,
             commands::sftp::sftp_rename,
             commands::sftp::sftp_close,
+            commands::known_hosts::list_known_hosts,
+            commands::known_hosts::remove_known_host,
         ])
         .on_window_ready(|window| {
             // The plugin's state outlives the module window, so if the MySSH

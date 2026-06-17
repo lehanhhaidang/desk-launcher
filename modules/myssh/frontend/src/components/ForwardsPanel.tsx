@@ -30,6 +30,7 @@ export function ForwardsPanel({ open, onClose, hosts }: Props) {
   const [bindPort, setBindPort] = useState('')
   const [destHost, setDestHost] = useState('127.0.0.1')
   const [destPort, setDestPort] = useState('')
+  const [autoStart, setAutoStart] = useState(false)
 
   const refresh = () => {
     listForwards()
@@ -61,10 +62,12 @@ export function ForwardsPanel({ open, onClose, hosts }: Props) {
         destHost: destHost.trim(),
         destPort: dp,
         label: label.trim(),
+        autoStart,
       })
       setLabel('')
       setBindPort('')
       setDestPort('')
+      setAutoStart(false)
       refresh()
     } catch (e) {
       toast.error(`Create failed: ${errMessage(e)}`)
@@ -114,7 +117,14 @@ export function ForwardsPanel({ open, onClose, hosts }: Props) {
                   title={running ? 'Running' : 'Stopped'}
                 />
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-medium">{f.label || 'Local forward'}</div>
+                  <div className="flex items-center gap-2 truncate text-sm font-medium">
+                    {f.label || 'Local forward'}
+                    {f.autoStart && (
+                      <span className="rounded bg-cyan-300/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-cyan-200">
+                        auto
+                      </span>
+                    )}
+                  </div>
                   <div className="truncate font-mono text-xs text-[#7c8797]">
                     {f.bindAddr}:{f.bindPort} → {f.destHost}:{f.destPort} · {hostName(f.hostId)}
                   </div>
@@ -170,6 +180,10 @@ export function ForwardsPanel({ open, onClose, hosts }: Props) {
             <label className={labelClass}>Destination port</label>
             <input className={inputClass} value={destPort} onChange={(e) => setDestPort(e.target.value)} inputMode="numeric" placeholder="5432" />
           </div>
+          <label className="col-span-2 flex cursor-pointer items-center gap-2 text-sm text-[#9aa6b6]">
+            <input type="checkbox" checked={autoStart} onChange={(e) => setAutoStart(e.target.checked)} />
+            Auto-start this forward when MySSH opens
+          </label>
         </div>
 
         <div className="mt-4 flex justify-end">

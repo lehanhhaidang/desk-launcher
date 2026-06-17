@@ -1,4 +1,5 @@
 use crate::error::AppResult;
+use crate::models::known_host::KnownHost;
 use rusqlite::{params, Connection, OptionalExtension};
 
 /// Stored fingerprint for a (host, port), or `None` if never seen.
@@ -10,6 +11,34 @@ pub fn get(conn: &Connection, host: &str, port: u16) -> AppResult<Option<String>
             |r| r.get::<_, String>(0),
         )
         .optional()?)
+}
+
+/// All stored host-key records, ordered by host/port.
+pub fn list(conn: &Connection) -> AppResult<Vec<KnownHost>> {
+    let mut stmt =
+        conn.prepare("SELECT host, port, key_type, fingerprint FROM known_hosts ORDER BY host, port")?;
+    let rows = stmt.query_map([], |r| {
+        Ok(KnownHost {
+            host: r.get("host")?,
+            port: r.get::<_, i64>("port")? as u16,
+            key_type: r.get("key_type")?,
+            fingerprint: r.get("fingerprint")?,
+        })
+    })?;
+    let mut out = Vec::new();
+    for row in rows {
+        out.push(row?);
+    }
+    Ok(out)
+}
+
+/// Forget a (host, port) so the next connection re-trusts on first use.
+pub fn remove(conn: &Connection, host: &str, port: u16) -> AppResult<()> {
+    conn.execute(
+        "DELETE FROM known_hosts WHERE host = ?1 AND port = ?2",
+        params![host, port as i64],
+    )?;
+    Ok(())
 }
 
 /// Record a (host, port) fingerprint on first use (trust-on-first-use).

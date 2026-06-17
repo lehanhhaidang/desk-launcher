@@ -12,6 +12,7 @@ pub struct Forward {
     pub dest_host: String,
     pub dest_port: u16,
     pub label: String,
+    pub auto_start: bool,
     pub created_at: i64,
 }
 
@@ -25,6 +26,8 @@ pub struct ForwardInput {
     pub dest_host: String,
     pub dest_port: u16,
     pub label: String,
+    #[serde(default)]
+    pub auto_start: bool,
 }
 
 /// A forward definition plus whether it is currently running.

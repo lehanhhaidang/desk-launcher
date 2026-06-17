@@ -32,6 +32,8 @@ Allows every MySSH plugin command.
 - `allow-sftp-remove`
 - `allow-sftp-rename`
 - `allow-sftp-close`
+- `allow-list-known-hosts`
+- `allow-remove-known-host`
 
 ## Permission Table
 
@@ -357,6 +359,32 @@ Denies the list_hosts command without any pre-configured scope.
 <tr>
 <td>
 
+`myssh:allow-list-known-hosts`
+
+</td>
+<td>
+
+Enables the list_known_hosts command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-list-known-hosts`
+
+</td>
+<td>
+
+Denies the list_known_hosts command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
 `myssh:allow-list-snippets`
 
 </td>
@@ -402,6 +430,32 @@ Enables the open_session command without any pre-configured scope.
 <td>
 
 Denies the open_session command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:allow-remove-known-host`
+
+</td>
+<td>
+
+Enables the remove_known_host command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`myssh:deny-remove-known-host`
+
+</td>
+<td>
+
+Denies the remove_known_host command without any pre-configured scope.
 
 </td>
 </tr>

@@ -61,6 +61,7 @@ export interface Forward {
   destHost: string
   destPort: number
   label: string
+  autoStart: boolean
   createdAt: number
 }
 
@@ -72,6 +73,14 @@ export interface ForwardInput {
   destHost: string
   destPort: number
   label: string
+  autoStart: boolean
+}
+
+export interface KnownHost {
+  host: string
+  port: number
+  keyType: string
+  fingerprint: string
 }
 
 export interface ForwardStatus {
@@ -118,6 +127,12 @@ export const createForward = (input: ForwardInput) => invoke<Forward>(ns('create
 export const deleteForward = (id: string) => invoke<void>(ns('delete_forward'), { id })
 export const startForward = (id: string) => invoke<void>(ns('start_forward'), { id })
 export const stopForward = (id: string) => invoke<void>(ns('stop_forward'), { id })
+
+// --- Known hosts ---
+
+export const listKnownHosts = () => invoke<KnownHost[]>(ns('list_known_hosts'))
+export const removeKnownHost = (host: string, port: number) =>
+  invoke<void>(ns('remove_known_host'), { host, port })
 
 // --- SFTP ---
 

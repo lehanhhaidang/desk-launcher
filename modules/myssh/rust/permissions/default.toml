@@ -31,4 +31,6 @@ permissions = [
     "allow-sftp-remove",
     "allow-sftp-rename",
     "allow-sftp-close",
+    "allow-list-known-hosts",
+    "allow-remove-known-host",
 ]
