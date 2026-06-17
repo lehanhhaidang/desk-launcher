@@ -14,6 +14,8 @@ import {
   sendInput,
 } from '../api/myssh-api'
 
+export type ConnStatus = 'connecting' | 'connected' | 'closed'
+
 interface Props {
   hostId: string
   /** Whether this terminal's tab is currently visible. */
@@ -21,6 +23,8 @@ interface Props {
   /** Reports the live session id (or null when it ends) so the parent can
    *  route snippets to the active session. */
   onSession?: (sessionId: string | null) => void
+  /** Reports the connection status for the tab indicator. */
+  onStatus?: (status: ConnStatus) => void
 }
 
 const encoder = new TextEncoder()
@@ -28,7 +32,7 @@ const MIN_FONT = 8
 const MAX_FONT = 28
 const DEFAULT_FONT = 13
 
-export function TerminalView({ hostId, active, onSession }: Props) {
+export function TerminalView({ hostId, active, onSession, onStatus }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const termRef = useRef<XTerm | null>(null)
   const fitRef = useRef<FitAddon | null>(null)
@@ -36,6 +40,8 @@ export function TerminalView({ hostId, active, onSession }: Props) {
   const sessionIdRef = useRef<string | null>(null)
   const onSessionRef = useRef(onSession)
   onSessionRef.current = onSession
+  const onStatusRef = useRef(onStatus)
+  onStatusRef.current = onStatus
   // Disposes the current session's listeners + onData handler before a
   // reconnect or unmount, so we never double-wire.
   const teardownRef = useRef<() => void>(() => {})
@@ -88,6 +94,12 @@ export function TerminalView({ hostId, active, onSession }: Props) {
     term.attachCustomKeyEventHandler((e) => {
       if (e.type !== 'keydown') return true
       const mod = e.ctrlKey || e.metaKey
+      // Ctrl/Cmd+C copies when there's a selection, else passes through as the
+      // interrupt (SIGINT). Ctrl/Cmd+Shift+C always copies.
+      if (mod && !e.shiftKey && e.code === 'KeyC') {
+        if (copySelection()) return false
+        return true
+      }
       if (mod && e.shiftKey && e.code === 'KeyC') {
         if (copySelection()) return false
         return true
@@ -129,16 +141,19 @@ export function TerminalView({ hostId, active, onSession }: Props) {
     const startSession = async () => {
       teardownRef.current()
       setClosed(false)
+      onStatusRef.current?.('connecting')
       term.writeln('\x1b[2m[connecting…]\x1b[0m')
       try {
         const sessionId = await openSession(hostId, term.cols, term.rows)
         sessionIdRef.current = sessionId
         onSessionRef.current?.(sessionId)
+        onStatusRef.current?.('connected')
 
         const unlistenData: UnlistenFn = await onSessionData(sessionId, (bytes) => term.write(bytes))
         const unlistenExit: UnlistenFn = await onSessionExit(sessionId, () => {
           term.write('\r\n\x1b[33m[session closed]\x1b[0m\r\n')
           onSessionRef.current?.(null)
+          onStatusRef.current?.('closed')
           setClosed(true)
         })
         const onData = term.onData((d) => {
@@ -155,6 +170,7 @@ export function TerminalView({ hostId, active, onSession }: Props) {
         }
       } catch (e) {
         term.write(`\r\n\x1b[31mConnection failed: ${errMessage(e)}\x1b[0m\r\n`)
+        onStatusRef.current?.('closed')
         setClosed(true)
       }
     }

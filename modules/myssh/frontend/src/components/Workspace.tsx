@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
-import { TerminalView } from '../terminal/TerminalView'
+import { TerminalView, type ConnStatus } from '../terminal/TerminalView'
 import { FilesTab } from './FilesTab'
 import { PreviewTab } from './PreviewTab'
 
@@ -23,6 +23,8 @@ interface Props {
   onClose: (key: string) => void
   onRename: (key: string, label: string) => void
   onSessionForTab?: (tabKey: string, sessionId: string | null) => void
+  onStatusForTab?: (tabKey: string, status: ConnStatus) => void
+  tabStatus?: Record<string, ConnStatus>
   onPreview?: (file: {
     origin: 'local' | 'remote'
     path: string
@@ -38,6 +40,8 @@ export function Workspace({
   onClose,
   onRename,
   onSessionForTab,
+  onStatusForTab,
+  tabStatus,
   onPreview,
 }: Props) {
   const [editingKey, setEditingKey] = useState<string | null>(null)
@@ -62,6 +66,18 @@ export function Workspace({
               activeKey === tab.key ? 'bg-cyan-300/15 text-cyan-100' : 'text-[#9aa6b6] hover:bg-white/5'
             }`}
           >
+            {tab.kind === 'terminal' && (
+              <span
+                className={`size-1.5 shrink-0 rounded-full ${
+                  tabStatus?.[tab.key] === 'connected'
+                    ? 'bg-emerald-400'
+                    : tabStatus?.[tab.key] === 'connecting'
+                      ? 'animate-pulse bg-amber-400'
+                      : 'bg-white/30'
+                }`}
+                title={tabStatus?.[tab.key] ?? 'connecting'}
+              />
+            )}
             <span
               className={`shrink-0 rounded px-1 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
                 tab.kind === 'terminal'
@@ -131,6 +147,7 @@ export function Workspace({
                     hostId={tab.hostId}
                     active={visible}
                     onSession={(sid) => onSessionForTab?.(tab.key, sid)}
+                    onStatus={(s) => onStatusForTab?.(tab.key, s)}
                   />
                 </div>
               ) : tab.kind === 'files' ? (

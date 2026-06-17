@@ -226,6 +226,7 @@ export function FilesTab({ hostId, hostLabel, onPreview }: Props) {
           selectedPath={localSel}
           onSelect={(e) => setLocalSel(e.path)}
           onOpen={(e) => (e.isDir ? reloadLocal(e.path) : onPreview?.({ origin: 'local', path: e.path, name: e.name }))}
+          onNavigatePath={reloadLocal}
           onUp={() => reloadLocal(parentLocal(localCwd))}
           onRefresh={refreshLocal}
           onDelete={deleteLocal}
@@ -289,6 +290,7 @@ export function FilesTab({ hostId, hostLabel, onPreview }: Props) {
                 ? sftpIdRef.current && reloadRemote(sftpIdRef.current, e.path)
                 : onPreview?.({ origin: 'remote', path: e.path, name: e.name, sftpId: sftpId ?? undefined })
             }
+            onNavigatePath={(p) => sftpIdRef.current && reloadRemote(sftpIdRef.current, p)}
             onUp={() => sftpIdRef.current && reloadRemote(sftpIdRef.current, parentRemote(remoteCwd))}
             onRefresh={refreshRemote}
             onNewFolder={() => setNewFolderOpen(true)}

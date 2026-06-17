@@ -1,4 +1,4 @@
-import { useRef, type ReactNode } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import { ArrowUp, File as FileIcon, Folder, FolderPlus, RefreshCw } from 'lucide-react'
 import type { SftpEntry } from '../api/myssh-api'
 
@@ -13,6 +13,8 @@ interface Props {
   onSelect: (entry: SftpEntry) => void
   /** Double-click opens it (enter folder / preview file). */
   onOpen: (entry: SftpEntry) => void
+  /** Navigate to a typed absolute path. */
+  onNavigatePath: (path: string) => void
   onUp: () => void
   onRefresh: () => void
   onNewFolder?: () => void
@@ -34,6 +36,7 @@ export function FilePane({
   selectedPath,
   onSelect,
   onOpen,
+  onNavigatePath,
   onUp,
   onRefresh,
   onNewFolder,
@@ -44,6 +47,8 @@ export function FilePane({
   onPaneDrop,
 }: Props) {
   const listRef = useRef<HTMLDivElement>(null)
+  const [editingPath, setEditingPath] = useState(false)
+  const [pathDraft, setPathDraft] = useState('')
 
   return (
     <div
@@ -66,9 +71,33 @@ export function FilePane({
             <FolderPlus className="size-4" />
           </button>
         )}
-        <div className="ml-1 min-w-0 flex-1 truncate rounded bg-black/20 px-2 py-1 font-mono text-[11px] text-[#9aa6b6]">
-          {cwd || '…'}
-        </div>
+        {editingPath ? (
+          <input
+            autoFocus
+            className="ml-1 min-w-0 flex-1 rounded bg-black/30 px-2 py-1 font-mono text-[11px] text-[#edf3f7] outline-none"
+            value={pathDraft}
+            onChange={(e) => setPathDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                onNavigatePath(pathDraft.trim())
+                setEditingPath(false)
+              }
+              if (e.key === 'Escape') setEditingPath(false)
+            }}
+            onBlur={() => setEditingPath(false)}
+          />
+        ) : (
+          <div
+            className="ml-1 min-w-0 flex-1 cursor-text truncate rounded bg-black/20 px-2 py-1 font-mono text-[11px] text-[#9aa6b6] hover:text-[#c9d4e0]"
+            title="Click to type a path"
+            onClick={() => {
+              setPathDraft(cwd)
+              setEditingPath(true)
+            }}
+          >
+            {cwd || '…'}
+          </div>
+        )}
       </div>
 
       <div

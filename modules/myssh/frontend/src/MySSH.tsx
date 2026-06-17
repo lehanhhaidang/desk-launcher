@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   TerminalSquare,
   Trash2,
+  Unplug,
 } from 'lucide-react'
 import { Button } from '@desk-launcher/ui'
 import { HostDialog } from './components/HostDialog'
@@ -23,6 +24,7 @@ import { ForwardsPanel } from './components/ForwardsPanel'
 import { KnownHostsPanel } from './components/KnownHostsPanel'
 import { HostKeyModal } from './components/HostKeyModal'
 import { Workspace, type WorkspaceTab } from './components/Workspace'
+import type { ConnStatus } from './terminal/TerminalView'
 import {
   createGroup,
   deleteGroup,
@@ -49,6 +51,7 @@ export default function MySSH() {
   const [newGroupName, setNewGroupName] = useState('')
   const [tabs, setTabs] = useState<WorkspaceTab[]>([])
   const [activeTab, setActiveTab] = useState<string | null>(null)
+  const [tabStatus, setTabStatus] = useState<Record<string, ConnStatus>>({})
   const [headerCollapsed, setHeaderCollapsed] = useState(false)
   const [snippetsOpen, setSnippetsOpen] = useState(false)
   const [forwardsOpen, setForwardsOpen] = useState(false)
@@ -58,6 +61,10 @@ export default function MySSH() {
   const registerSession = useCallback((tabKey: string, sessionId: string | null) => {
     if (sessionId) sessionMap.current.set(tabKey, sessionId)
     else sessionMap.current.delete(tabKey)
+  }, [])
+
+  const registerStatus = useCallback((tabKey: string, status: ConnStatus) => {
+    setTabStatus((s) => ({ ...s, [tabKey]: status }))
   }, [])
 
   const runSnippet = (command: string) => {
@@ -198,22 +205,50 @@ export default function MySSH() {
     setActiveTab(key)
   }
 
-  const closeTab = (key: string) => {
+  const removeTab = (key: string) => {
     setTabs((prev) => {
       const next = prev.filter((t) => t.key !== key)
       setActiveTab((cur) => (cur === key ? (next.at(-1)?.key ?? null) : cur))
       return next
     })
+    setTabStatus((s) => {
+      const next = { ...s }
+      delete next[key]
+      return next
+    })
+  }
+
+  const closeTab = async (key: string) => {
+    const tab = tabs.find((t) => t.key === key)
+    if (tab && (tab.kind === 'terminal' || tab.kind === 'files')) {
+      const ok = await confirm(
+        `Close this ${tab.kind === 'terminal' ? 'terminal' : 'file'} tab? Its connection will be closed.`,
+        { title: 'Close tab', kind: 'warning' },
+      )
+      if (!ok) return
+    }
+    removeTab(key)
+  }
+
+  const hostConnected = (hostId: string) =>
+    tabs.some((t) => t.kind === 'terminal' && t.hostId === hostId)
+
+  const disconnectHost = (host: Host) => {
+    const tab = tabs.filter((t) => t.kind === 'terminal' && t.hostId === host.id).at(-1)
+    if (tab) removeTab(tab.key)
   }
 
   const renameTab = (key: string, label: string) => {
     setTabs((prev) => prev.map((t) => (t.key === key ? { ...t, label } : t)))
   }
 
-  const connectedHostIds = useMemo(
-    () => new Set(tabs.filter((t) => t.kind === 'terminal').map((t) => t.hostId)),
-    [tabs],
-  )
+  const connectedHostIds = useMemo(() => {
+    const ids = new Set<string>()
+    for (const t of tabs) {
+      if (t.kind === 'terminal' && tabStatus[t.key] === 'connected') ids.add(t.hostId)
+    }
+    return ids
+  }, [tabs, tabStatus])
 
   return (
     <div className="myssh-bg flex h-screen w-screen text-[#edf3f7]">
@@ -328,9 +363,15 @@ export default function MySSH() {
                 )}
                 {selected && (
                   <div className="ml-auto flex gap-1">
-                    <Button size="sm" variant="ghost" onClick={() => connect(selected)}>
-                      <TerminalSquare className="size-4" /> Connect
-                    </Button>
+                    {hostConnected(selected.id) ? (
+                      <Button size="sm" variant="ghost" onClick={() => disconnectHost(selected)}>
+                        <Unplug className="size-4" /> Disconnect
+                      </Button>
+                    ) : (
+                      <Button size="sm" variant="ghost" onClick={() => connect(selected)}>
+                        <TerminalSquare className="size-4" /> Connect
+                      </Button>
+                    )}
                     <Button size="sm" variant="ghost" onClick={() => openFiles(selected)}>
                       <FolderOpen className="size-4" /> Files
                     </Button>
@@ -354,9 +395,15 @@ export default function MySSH() {
                   <div className="flex shrink-0 items-center gap-1">
                     {selected && (
                       <>
-                        <Button variant="ghost" size="sm" onClick={() => connect(selected)}>
-                          <TerminalSquare className="size-4" /> Connect
-                        </Button>
+                        {hostConnected(selected.id) ? (
+                          <Button variant="ghost" size="sm" onClick={() => disconnectHost(selected)}>
+                            <Unplug className="size-4" /> Disconnect
+                          </Button>
+                        ) : (
+                          <Button variant="ghost" size="sm" onClick={() => connect(selected)}>
+                            <TerminalSquare className="size-4" /> Connect
+                          </Button>
+                        )}
                         <Button variant="ghost" size="sm" onClick={() => openFiles(selected)}>
                           <FolderOpen className="size-4" /> Files
                         </Button>
@@ -380,6 +427,8 @@ export default function MySSH() {
                 onClose={closeTab}
                 onRename={renameTab}
                 onSessionForTab={registerSession}
+                onStatusForTab={registerStatus}
+                tabStatus={tabStatus}
                 onPreview={openPreview}
               />
             </div>
