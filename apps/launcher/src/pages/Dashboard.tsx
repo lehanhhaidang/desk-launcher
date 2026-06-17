@@ -86,11 +86,11 @@ export function Dashboard() {
   }
 
   return (
-    <div className="launcher-bg flex h-screen overflow-hidden text-[#edf3f7]">
-      <aside className="launcher-panel m-3 hidden h-[calc(100%-24px)] w-64 flex-shrink-0 flex-col rounded-xl border py-3 text-white md:flex">
+    <div className="launcher-bg flex h-screen overflow-hidden text-[var(--text)]">
+      <aside className="launcher-panel m-3 hidden h-[calc(100%-24px)] w-64 flex-shrink-0 flex-col rounded-xl border py-3 text-[var(--text)] md:flex">
         <div className="mb-8 px-4">
           <h1 className="launcher-lux-text text-2xl font-semibold leading-8 tracking-tight">Desk Launcher</h1>
-          <p className="mt-1 font-mono text-[11px] font-bold uppercase leading-4 tracking-wider text-[#aeb8c7]">
+          <p className="mt-1 font-mono text-[11px] font-bold uppercase leading-4 tracking-wider text-[var(--text-muted)]">
             v1.0.4-stable
           </p>
         </div>
@@ -104,8 +104,8 @@ export function Dashboard() {
                 type="button"
                 className={
                   item.active
-                    ? 'flex items-center gap-3 rounded-lg border border-white/10 bg-white/[0.075] px-4 py-3 text-left text-sm text-[#edf3f7] shadow-inner shadow-white/[0.02]'
-                    : 'flex items-center gap-3 rounded-lg px-4 py-3 text-left text-sm text-[#aeb8c7] transition-all duration-150 hover:bg-white/[0.055] hover:text-[#edf3f7]'
+                    ? 'flex items-center gap-3 rounded-lg border border-white/10 bg-white/[0.075] px-4 py-3 text-left text-sm text-[var(--text)] shadow-inner shadow-white/[0.02]'
+                    : 'flex items-center gap-3 rounded-lg px-4 py-3 text-left text-sm text-[var(--text-muted)] transition-all duration-150 hover:bg-white/[0.055] hover:text-[var(--text)]'
                 }
               >
                 <Icon className="size-5" aria-hidden="true" />
@@ -120,7 +120,7 @@ export function Dashboard() {
             type="button"
             variant="outline"
             onClick={() => setModal('scaffold')}
-            className="h-9 w-full rounded-lg border-white/10 bg-white/[0.035] text-xs text-[#edf3f7] hover:bg-white/[0.07] hover:text-white"
+            className="h-9 w-full rounded-lg border-white/10 bg-white/[0.035] text-xs text-[var(--text)] hover:bg-white/[0.07] hover:text-[var(--text)]"
           >
             <CirclePlus className="size-[18px]" aria-hidden="true" />
             <span>New module scaffold</span>
@@ -131,23 +131,23 @@ export function Dashboard() {
       <main className="flex min-w-0 flex-1 flex-col">
         <header className="launcher-panel m-3 ml-0 flex h-16 flex-shrink-0 items-center justify-between gap-4 rounded-xl border px-4">
           <div className="relative w-full max-w-96">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-[#aeb8c7]" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-[var(--text-muted)]" />
             <Input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              className="h-9 rounded-lg border-white/10 bg-white/[0.045] pl-10 text-xs text-[#edf3f7] placeholder:text-[#aeb8c7] shadow-none focus-visible:border-[#b79cff]/50 focus-visible:ring-[#b79cff]/25"
+              className="h-9 rounded-lg border-white/10 bg-white/[0.045] pl-10 text-xs text-[var(--text)] placeholder:text-[var(--text-muted)] shadow-none focus-visible:border-[var(--brand-2)]/50 focus-visible:ring-[var(--brand-2)]/25"
               placeholder="Search modules..."
               type="text"
             />
           </div>
 
-          <div className="flex items-center gap-2 text-[#aeb8c7]">
+          <div className="flex items-center gap-2 text-[var(--text-muted)]">
             <Button
               type="button"
               variant="ghost"
               size="icon"
               onClick={refreshOpenModules}
-              className="rounded-full text-[#aeb8c7] hover:bg-white/[0.07] hover:text-white"
+              className="rounded-full text-[var(--text-muted)] hover:bg-white/[0.07] hover:text-[var(--text)]"
               title="Refresh status"
             >
               <RefreshCw className="size-5" aria-hidden="true" />
@@ -157,7 +157,7 @@ export function Dashboard() {
               variant="ghost"
               size="icon"
               onClick={() => setModal('appearance')}
-              className="rounded-full text-[#aeb8c7] hover:bg-white/[0.07] hover:text-white"
+              className="rounded-full text-[var(--text-muted)] hover:bg-white/[0.07] hover:text-[var(--text)]"
               title="Appearance"
             >
               <Palette className="size-5" aria-hidden="true" />
@@ -167,7 +167,7 @@ export function Dashboard() {
               variant="ghost"
               size="icon"
               onClick={() => setModal('settings')}
-              className="rounded-full text-[#aeb8c7] hover:bg-white/[0.07] hover:text-white"
+              className="rounded-full text-[var(--text-muted)] hover:bg-white/[0.07] hover:text-[var(--text)]"
               title="Settings"
             >
               <Settings className="size-5" aria-hidden="true" />
@@ -176,7 +176,7 @@ export function Dashboard() {
               type="button"
               variant="ghost"
               size="icon"
-              className="rounded-full text-[#aeb8c7] hover:bg-white/[0.07] hover:text-white"
+              className="rounded-full text-[var(--text-muted)] hover:bg-white/[0.07] hover:text-[var(--text)]"
               title="Terminal"
             >
               <TerminalSquare className="size-5" aria-hidden="true" />
@@ -205,17 +205,17 @@ export function Dashboard() {
           </div>
         </div>
 
-        <footer className="launcher-panel m-3 ml-0 mt-0 flex h-8 flex-shrink-0 items-center justify-between rounded-xl border px-4 text-[#aeb8c7]">
+        <footer className="launcher-panel m-3 ml-0 mt-0 flex h-8 flex-shrink-0 items-center justify-between rounded-xl border px-4 text-[var(--text-muted)]">
           <div className="flex gap-4 font-mono text-[11px] font-bold uppercase leading-4 tracking-wider">
             <span>System Health: Optimal | CPU: 12% | RAM: 4.2GB</span>
             <span className="text-white/25">|</span>
             <span>{MODULES.length} modules available | v1.0.4-stable</span>
           </div>
           <div className="hidden gap-4 font-mono text-[11px] font-bold uppercase leading-4 tracking-wider sm:flex">
-            <a className="transition-colors duration-200 hover:text-white" href="#">
+            <a className="transition-colors duration-200 hover:text-[var(--text)]" href="#">
               Documentation
             </a>
-            <a className="transition-colors duration-200 hover:text-white" href="#">
+            <a className="transition-colors duration-200 hover:text-[var(--text)]" href="#">
               API Status
             </a>
           </div>
@@ -261,15 +261,15 @@ function SettingsModal({ onClose }: { onClose: () => void }) {
               <ShieldCheck className="size-5" />
             </div>
             <div>
-              <h3 className="font-semibold text-[#edf3f7]">Credential scope</h3>
-              <p className="mt-1 text-sm leading-6 text-[#aeb8c7]">
+              <h3 className="font-semibold text-[var(--text)]">Credential scope</h3>
+              <p className="mt-1 text-sm leading-6 text-[var(--text-muted)]">
                 This key is for launcher-only actions: module scaffolding, summary generation, and planning documents.
                 It is not shared with module windows such as Virtual Comtor.
               </p>
             </div>
           </div>
 
-          <div className="space-y-3 text-sm text-[#aeb8c7]">
+          <div className="space-y-3 text-sm text-[var(--text-muted)]">
             <InfoRow label="Storage target" value="Launcher secure settings" />
             <InfoRow label="Current status" value="Not connected" />
             <InfoRow label="Provider strategy" value="Multi-provider ready" />
@@ -279,8 +279,8 @@ function SettingsModal({ onClose }: { onClose: () => void }) {
         <section className="launcher-panel rounded-xl border p-4">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
-              <h3 className="font-semibold text-[#edf3f7]">AI provider</h3>
-              <p className="text-sm text-[#aeb8c7]">OpenAI is the first provider; the shape leaves room for others.</p>
+              <h3 className="font-semibold text-[var(--text)]">AI provider</h3>
+              <p className="text-sm text-[var(--text-muted)]">OpenAI is the first provider; the shape leaves room for others.</p>
             </div>
             <span className="rounded-md border border-emerald-200/25 bg-emerald-200/10 px-2 py-1 font-mono text-[11px] font-bold uppercase text-emerald-100">
               launcher only
@@ -308,7 +308,7 @@ function SettingsModal({ onClose }: { onClose: () => void }) {
           </div>
 
           <div className="mt-5 flex flex-wrap justify-end gap-2">
-            <Button variant="outline" className="border-white/10 bg-white/[0.035] text-[#edf3f7] hover:bg-white/[0.07]">
+            <Button variant="outline" className="border-white/10 bg-white/[0.035] text-[var(--text)] hover:bg-white/[0.07]">
               Test connection
             </Button>
             <Button className="launcher-primary-button">
@@ -389,7 +389,7 @@ function ScaffoldModal({ onClose }: { onClose: () => void }) {
           <section className="launcher-form-section rounded-xl border p-4">
             <div className="flex items-center justify-between gap-3">
               <SectionTitle icon={<FileCode2 className="size-4" />} title="Pages & features" />
-              <Button size="sm" variant="outline" className="border-white/10 bg-white/[0.035] text-[#edf3f7]" onClick={addPage}>
+              <Button size="sm" variant="outline" className="border-white/10 bg-white/[0.035] text-[var(--text)]" onClick={addPage}>
                 <Plus className="size-4" />
                 Add page
               </Button>
@@ -400,7 +400,7 @@ function ScaffoldModal({ onClose }: { onClose: () => void }) {
 
         <aside className="launcher-form-section flex min-h-0 flex-col rounded-xl border p-4 xl:sticky xl:top-0 xl:max-h-[calc(92vh-9.5rem)]">
           <SectionTitle icon={<Database className="size-4" />} title="Generated planning pack" />
-          <p className="mt-2 text-sm leading-6 text-[#aeb8c7]">
+          <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">
             After confirmation, the launcher will create a module template and ask AI to summarize your description into
             focused Markdown docs. These docs are meant to be handed back to an AI coding agent.
           </p>
@@ -415,15 +415,15 @@ function ScaffoldModal({ onClose }: { onClose: () => void }) {
               ['docs/ai-brief.md', 'A concise prompt-ready brief for the next AI development pass.'],
             ].map(([name, description]) => (
               <div key={name} className="rounded-lg border border-white/10 bg-white/[0.035] p-3">
-                <div className="font-mono text-xs font-bold text-[#edf3f7]">{name}</div>
-                <div className="mt-1 text-xs leading-5 text-[#aeb8c7]">{description}</div>
+                <div className="font-mono text-xs font-bold text-[var(--text)]">{name}</div>
+                <div className="mt-1 text-xs leading-5 text-[var(--text-muted)]">{description}</div>
               </div>
             ))}
           </div>
 
           <div className="mt-auto pt-4">
             <div className="mt-4 flex justify-end gap-2">
-              <Button variant="outline" className="border-white/10 bg-white/[0.035] text-[#edf3f7]" onClick={onClose}>
+              <Button variant="outline" className="border-white/10 bg-white/[0.035] text-[var(--text)]" onClick={onClose}>
                 Cancel
               </Button>
               <Button className="launcher-primary-button">
@@ -463,12 +463,12 @@ function ModalShell({
               {icon}
             </div>
             <div className="min-w-0">
-              <div className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#aeb8c7]">{eyebrow}</div>
-              <h2 className="mt-1 text-xl font-semibold text-[#edf3f7]">{title}</h2>
-          <p className="mt-1 max-w-3xl text-sm leading-6 text-[#aeb8c7]">{description}</p>
+              <div className="font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">{eyebrow}</div>
+              <h2 className="mt-1 text-xl font-semibold text-[var(--text)]">{title}</h2>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-[var(--text-muted)]">{description}</p>
             </div>
           </div>
-          <Button variant="ghost" size="icon" className="rounded-full text-[#aeb8c7] hover:bg-white/[0.07] hover:text-white" onClick={onClose}>
+          <Button variant="ghost" size="icon" className="rounded-full text-[var(--text-muted)] hover:bg-white/[0.07] hover:text-[var(--text)]" onClick={onClose}>
             <X className="size-5" />
           </Button>
         </header>
@@ -481,8 +481,8 @@ function ModalShell({
 function Field({ label, hint, children }: { label: string; hint: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="text-sm font-semibold text-[#edf3f7]">{label}</span>
-      <span className="mt-0.5 block text-xs leading-5 text-[#aeb8c7]">{hint}</span>
+      <span className="text-sm font-semibold text-[var(--text)]">{label}</span>
+      <span className="mt-0.5 block text-xs leading-5 text-[var(--text-muted)]">{hint}</span>
       <div className="mt-2">{children}</div>
     </label>
   )
@@ -490,7 +490,7 @@ function Field({ label, hint, children }: { label: string; hint: string; childre
 
 function SectionTitle({ icon, title }: { icon: React.ReactNode; title: string }) {
   return (
-    <div className="flex items-center gap-2 font-semibold text-[#edf3f7]">
+    <div className="flex items-center gap-2 font-semibold text-[var(--text)]">
       <span className="text-cyan-100">{icon}</span>
       <span>{title}</span>
     </div>
@@ -501,7 +501,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2">
       <span>{label}</span>
-      <span className="font-mono text-xs text-[#edf3f7]">{value}</span>
+      <span className="font-mono text-xs text-[var(--text)]">{value}</span>
     </div>
   )
 }
@@ -585,7 +585,7 @@ function PageFeatureEditor({
               type="button"
               variant="ghost"
               size="icon"
-              className="text-[#aeb8c7] hover:bg-red-400/10 hover:text-red-200"
+              className="text-[var(--text-muted)] hover:bg-red-400/10 hover:text-red-200"
               onClick={() => removePage(pageIndex)}
             >
               <Trash2 className="size-4" />
@@ -594,14 +594,14 @@ function PageFeatureEditor({
 
           <div className="mt-3 border-t border-white/10 pt-3">
             <div className="mb-2 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2 text-sm font-semibold text-[#edf3f7]">
+              <div className="flex items-center gap-2 text-sm font-semibold text-[var(--text)]">
                 <Sparkles className="size-4 text-cyan-100" />
                 <span>Features on this page</span>
               </div>
               <Button
                 size="sm"
                 variant="outline"
-                className="h-8 border-white/10 bg-white/[0.035] text-[#edf3f7]"
+                className="h-8 border-white/10 bg-white/[0.035] text-[var(--text)]"
                 onClick={() => addFeature(pageIndex)}
               >
                 <Plus className="size-4" />
@@ -611,7 +611,7 @@ function PageFeatureEditor({
 
             <div className="space-y-2">
               {page.features.length === 0 && (
-                <div className="rounded-lg border border-dashed border-white/10 px-3 py-2 text-xs text-[#aeb8c7]">
+                <div className="rounded-lg border border-dashed border-white/10 px-3 py-2 text-xs text-[var(--text-muted)]">
                   No features yet. Add feature ideas for this page.
                 </div>
               )}
@@ -633,7 +633,7 @@ function PageFeatureEditor({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="text-[#aeb8c7] hover:bg-red-400/10 hover:text-red-200"
+                    className="text-[var(--text-muted)] hover:bg-red-400/10 hover:text-red-200"
                     onClick={() => removeFeature(pageIndex, featureIndex)}
                   >
                     <Trash2 className="size-4" />

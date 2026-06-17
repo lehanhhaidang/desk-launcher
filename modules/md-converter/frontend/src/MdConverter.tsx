@@ -256,15 +256,15 @@ export default function MdConverter() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <Button variant="outline" className="border-white/10 bg-white/[0.035] text-[var(--on-surface)] hover:bg-white/[0.07] hover:text-white" onClick={handlePickFolder} disabled={busy}>
+            <Button variant="outline" className="border-white/10 bg-white/[0.035] text-[var(--on-surface)] hover:bg-white/[0.07] hover:text-[var(--text)]" onClick={handlePickFolder} disabled={busy}>
               <FolderOpen className="h-4 w-4" />
               Choose folder
             </Button>
-            <Button variant="outline" className="border-white/10 bg-white/[0.035] text-[var(--on-surface)] hover:bg-white/[0.07] hover:text-white" onClick={handlePickFiles} disabled={busy}>
+            <Button variant="outline" className="border-white/10 bg-white/[0.035] text-[var(--on-surface)] hover:bg-white/[0.07] hover:text-[var(--text)]" onClick={handlePickFiles} disabled={busy}>
               <FileText className="h-4 w-4" />
               Choose files
             </Button>
-            <Button variant="outline" className="border-white/10 bg-white/[0.035] text-[var(--on-surface)] hover:bg-white/[0.07] hover:text-white" onClick={handleCopy} disabled={!activeFile?.markdown}>
+            <Button variant="outline" className="border-white/10 bg-white/[0.035] text-[var(--on-surface)] hover:bg-white/[0.07] hover:text-[var(--text)]" onClick={handleCopy} disabled={!activeFile?.markdown}>
               <Copy className="h-4 w-4" />
               {copied ? 'Copied' : 'Copy'}
             </Button>
@@ -272,7 +272,7 @@ export default function MdConverter() {
               <Save className="h-4 w-4" />
               Save
             </Button>
-            <AppearanceButton className="inline-flex size-9 items-center justify-center rounded-md border border-white/10 bg-white/[0.035] text-[var(--on-surface)] transition-colors hover:bg-white/[0.07] hover:text-white" />
+            <AppearanceButton className="inline-flex size-9 items-center justify-center rounded-md border border-white/10 bg-white/[0.035] text-[var(--on-surface)] transition-colors hover:bg-white/[0.07] hover:text-[var(--text)]" />
           </div>
         </div>
 

@@ -33,7 +33,7 @@ export function VideoPreview({ info, platform }: VideoPreviewProps) {
 
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div className="min-w-0">
-          <h3 className="vd-title-clamp text-base font-semibold leading-snug text-[#eef6ff]" title={info.title}>
+          <h3 className="vd-title-clamp text-base font-semibold leading-snug text-[var(--text)]" title={info.title}>
             {info.title}
           </h3>
           <div className="mt-1.5 flex min-w-0 flex-wrap items-center gap-2">

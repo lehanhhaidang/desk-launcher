@@ -63,7 +63,7 @@ export function Workspace({
             key={tab.key}
             onClick={() => onActivate(tab.key)}
             className={`flex cursor-pointer items-center gap-2 rounded-md px-3 py-1.5 text-sm transition ${
-              activeKey === tab.key ? 'bg-cyan-300/15 text-cyan-100' : 'text-[#9aa6b6] hover:bg-white/5'
+              activeKey === tab.key ? 'bg-[color-mix(in_oklch,var(--brand)_15%,transparent)] text-[var(--brand)]' : 'text-[var(--text-muted)] hover:bg-white/5'
             }`}
           >
             {tab.kind === 'terminal' && (
@@ -83,8 +83,8 @@ export function Workspace({
                 tab.kind === 'terminal'
                   ? 'bg-emerald-300/15 text-emerald-200'
                   : tab.kind === 'files'
-                    ? 'bg-cyan-300/15 text-cyan-200'
-                    : 'bg-violet-300/15 text-violet-200'
+                    ? 'bg-[color-mix(in_oklch,var(--brand)_15%,transparent)] text-[var(--brand)]'
+                    : 'bg-[color-mix(in_oklch,var(--brand-2)_15%,transparent)] text-[var(--brand-2)]'
               }`}
             >
               {tab.kind === 'terminal' ? 'SSH' : tab.kind === 'files' ? 'SFTP' : 'FILE'}

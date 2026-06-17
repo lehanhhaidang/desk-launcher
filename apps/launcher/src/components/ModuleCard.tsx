@@ -106,8 +106,8 @@ export function ModuleCard({ module, opening, isOpen, onOpen }: Props) {
         </span>
       </div>
 
-      <h3 className="relative mb-2 text-lg font-semibold leading-6 text-[#edf3f7]">{module.displayName}</h3>
-      <p className="relative mb-6 line-clamp-3 flex-grow text-sm leading-6 text-[#aeb8c7]">{module.description}</p>
+      <h3 className="relative mb-2 text-lg font-semibold leading-6 text-[var(--text)]">{module.displayName}</h3>
+      <p className="relative mb-6 line-clamp-3 flex-grow text-sm leading-6 text-[var(--text-muted)]">{module.description}</p>
 
       <div className="relative mt-auto border-t border-white/[0.08] pt-4">
         <Button

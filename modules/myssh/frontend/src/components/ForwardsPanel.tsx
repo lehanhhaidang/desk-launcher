@@ -20,8 +20,8 @@ interface Props {
 }
 
 const inputClass =
-  'w-full rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-[#edf3f7] outline-none transition focus:border-cyan-300/40'
-const labelClass = 'mb-1 block text-xs font-semibold uppercase tracking-wider text-[#9aa6b6]'
+  'w-full rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-[var(--text)] outline-none transition focus:border-[color-mix(in_oklch,var(--brand)_40%,transparent)]'
+const labelClass = 'mb-1 block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]'
 
 export function ForwardsPanel({ open, onClose, hosts }: Props) {
   const [items, setItems] = useState<ForwardStatus[]>([])
@@ -102,7 +102,7 @@ export function ForwardsPanel({ open, onClose, hosts }: Props) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
       <div className="myssh-panel flex max-h-[82vh] w-full max-w-2xl flex-col rounded-xl border p-6 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-[#edf3f7]">Port forwarding</h2>
+          <h2 className="text-lg font-semibold text-[var(--text)]">Port forwarding</h2>
           <Button variant="ghost" size="sm" onClick={onClose}>
             Close
           </Button>
@@ -110,7 +110,7 @@ export function ForwardsPanel({ open, onClose, hosts }: Props) {
 
         <div className="mb-4 max-h-56 overflow-y-auto rounded-lg border border-white/10">
           {items.length === 0 ? (
-            <p className="px-4 py-6 text-center text-sm text-[#7c8797]">No forwards yet.</p>
+            <p className="px-4 py-6 text-center text-sm text-[var(--text-faint)]">No forwards yet.</p>
           ) : (
             items.map(({ forward: f, running }) => (
               <div
@@ -125,24 +125,24 @@ export function ForwardsPanel({ open, onClose, hosts }: Props) {
                   <div className="flex items-center gap-2 truncate text-sm font-medium">
                     {f.label || 'Local forward'}
                     {f.autoStart && (
-                      <span className="rounded bg-cyan-300/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-cyan-200">
+                      <span className="rounded bg-[color-mix(in_oklch,var(--brand)_15%,transparent)] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--brand)]">
                         auto
                       </span>
                     )}
                   </div>
-                  <div className="truncate font-mono text-xs text-[#7c8797]">
+                  <div className="truncate font-mono text-xs text-[var(--text-faint)]">
                     {routeText(f)} · {hostName(f.hostId)}
                   </div>
                 </div>
                 <button
-                  className="text-[#9aa6b6] transition hover:text-cyan-300"
+                  className="text-[var(--text-muted)] transition hover:text-[var(--brand)]"
                   title={running ? 'Stop' : 'Start'}
                   onClick={() => toggle({ forward: f, running })}
                 >
                   {running ? <Square className="size-4" /> : <Play className="size-4" />}
                 </button>
                 <button
-                  className="text-[#9aa6b6] transition hover:text-[#ffb4ab]"
+                  className="text-[var(--text-muted)] transition hover:text-[#ffb4ab]"
                   title="Delete"
                   onClick={() => remove(f.id)}
                 >
@@ -199,7 +199,7 @@ export function ForwardsPanel({ open, onClose, hosts }: Props) {
               </div>
             </>
           )}
-          <label className="col-span-2 flex cursor-pointer items-center gap-2 text-sm text-[#9aa6b6]">
+          <label className="col-span-2 flex cursor-pointer items-center gap-2 text-sm text-[var(--text-muted)]">
             <input type="checkbox" checked={autoStart} onChange={(e) => setAutoStart(e.target.checked)} />
             Auto-start this forward when MySSH opens
           </label>

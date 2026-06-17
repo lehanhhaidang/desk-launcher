@@ -34,26 +34,26 @@ export function KbiModal() {
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
       <div className="myssh-panel w-full max-w-md rounded-xl border p-6 shadow-2xl">
-        <h2 className="mb-2 flex items-center gap-2 text-lg font-semibold text-[#edf3f7]">
-          <KeyRound className="size-5 text-cyan-300" /> {prompt.name || 'Authentication required'}
+        <h2 className="mb-2 flex items-center gap-2 text-lg font-semibold text-[var(--text)]">
+          <KeyRound className="size-5 text-[var(--brand)]" /> {prompt.name || 'Authentication required'}
         </h2>
         {prompt.instructions && (
-          <p className="mb-3 whitespace-pre-wrap text-sm text-[#9aa6b6]">{prompt.instructions}</p>
+          <p className="mb-3 whitespace-pre-wrap text-sm text-[var(--text-muted)]">{prompt.instructions}</p>
         )}
 
         <div className="space-y-3">
           {prompt.prompts.length === 0 ? (
-            <p className="text-sm text-[#9aa6b6]">The server is waiting — continue to proceed.</p>
+            <p className="text-sm text-[var(--text-muted)]">The server is waiting — continue to proceed.</p>
           ) : (
             prompt.prompts.map((p, i) => (
               <div key={i}>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#9aa6b6]">
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
                   {p.prompt}
                 </label>
                 <input
                   autoFocus={i === 0}
                   type={p.echo ? 'text' : 'password'}
-                  className="w-full rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-[#edf3f7] outline-none focus:border-cyan-300/40"
+                  className="w-full rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[color-mix(in_oklch,var(--brand)_40%,transparent)]"
                   value={answers[i] ?? ''}
                   onChange={(e) =>
                     setAnswers((a) => {

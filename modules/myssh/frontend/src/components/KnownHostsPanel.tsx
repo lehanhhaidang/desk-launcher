@@ -43,8 +43,8 @@ export function KnownHostsPanel({ open, onClose }: Props) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
       <div className="myssh-panel flex max-h-[80vh] w-full max-w-2xl flex-col rounded-xl border p-6 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="flex items-center gap-2 text-lg font-semibold text-[#edf3f7]">
-            <ShieldCheck className="size-5 text-cyan-300" /> Known hosts
+          <h2 className="flex items-center gap-2 text-lg font-semibold text-[var(--text)]">
+            <ShieldCheck className="size-5 text-[var(--brand)]" /> Known hosts
           </h2>
           <Button variant="ghost" size="sm" onClick={onClose}>
             Close
@@ -53,7 +53,7 @@ export function KnownHostsPanel({ open, onClose }: Props) {
 
         <div className="overflow-y-auto rounded-lg border border-white/10">
           {items.length === 0 ? (
-            <p className="px-4 py-6 text-center text-sm text-[#7c8797]">
+            <p className="px-4 py-6 text-center text-sm text-[var(--text-faint)]">
               No host keys remembered yet.
             </p>
           ) : (
@@ -66,12 +66,12 @@ export function KnownHostsPanel({ open, onClose }: Props) {
                   <div className="truncate text-sm font-medium">
                     {h.host}:{h.port}
                   </div>
-                  <div className="truncate font-mono text-xs text-[#7c8797]">
+                  <div className="truncate font-mono text-xs text-[var(--text-faint)]">
                     {h.keyType} · {h.fingerprint}
                   </div>
                 </div>
                 <button
-                  className="text-[#9aa6b6] transition hover:text-[#ffb4ab]"
+                  className="text-[var(--text-muted)] transition hover:text-[#ffb4ab]"
                   title="Forget this key"
                   onClick={() => forget(h)}
                 >
