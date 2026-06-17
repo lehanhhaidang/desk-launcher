@@ -1,0 +1,786 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PermissionFile",
+  "description": "Permission file that can define a default permission, a set of permissions or a list of inlined permissions.",
+  "type": "object",
+  "properties": {
+    "default": {
+      "description": "The default permission set for the plugin",
+      "anyOf": [
+        {
+          "$ref": "#/definitions/DefaultPermission"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "set": {
+      "description": "A list of permissions sets defined",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/PermissionSet"
+      }
+    },
+    "permission": {
+      "description": "A list of inlined permissions",
+      "default": [],
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Permission"
+      }
+    }
+  },
+  "definitions": {
+    "DefaultPermission": {
+      "description": "The default permission set of the plugin.\n\nWorks similarly to a permission with the \"default\" identifier.",
+      "type": "object",
+      "required": [
+        "permissions"
+      ],
+      "properties": {
+        "version": {
+          "description": "The version of the permission.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 1.0
+        },
+        "description": {
+          "description": "Human-readable description of what the permission does. Tauri convention is to use `<h4>` headings in markdown content for Tauri documentation generation purposes.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "permissions": {
+          "description": "All permissions this set contains.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "PermissionSet": {
+      "description": "A set of direct permissions grouped together under a new name.",
+      "type": "object",
+      "required": [
+        "description",
+        "identifier",
+        "permissions"
+      ],
+      "properties": {
+        "identifier": {
+          "description": "A unique identifier for the permission.",
+          "type": "string"
+        },
+        "description": {
+          "description": "Human-readable description of what the permission does.",
+          "type": "string"
+        },
+        "permissions": {
+          "description": "All permissions this set contains.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PermissionKind"
+          }
+        }
+      }
+    },
+    "Permission": {
+      "description": "Descriptions of explicit privileges of commands.\n\nIt can enable commands to be accessible in the frontend of the application.\n\nIf the scope is defined it can be used to fine grain control the access of individual or multiple commands.",
+      "type": "object",
+      "required": [
+        "identifier"
+      ],
+      "properties": {
+        "version": {
+          "description": "The version of the permission.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 1.0
+        },
+        "identifier": {
+          "description": "A unique identifier for the permission.",
+          "type": "string"
+        },
+        "description": {
+          "description": "Human-readable description of what the permission does. Tauri internal convention is to use `<h4>` headings in markdown content for Tauri documentation generation purposes.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "commands": {
+          "description": "Allowed or denied commands when using this permission.",
+          "default": {
+            "allow": [],
+            "deny": []
+          },
+          "allOf": [
+            {
+              "$ref": "#/definitions/Commands"
+            }
+          ]
+        },
+        "scope": {
+          "description": "Allowed or denied scoped when using this permission.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Scopes"
+            }
+          ]
+        },
+        "platforms": {
+          "description": "Target platforms this permission applies. By default all platforms are affected by this permission.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/Target"
+          }
+        }
+      }
+    },
+    "Commands": {
+      "description": "Allowed and denied commands inside a permission.\n\nIf two commands clash inside of `allow` and `deny`, it should be denied by default.",
+      "type": "object",
+      "properties": {
+        "allow": {
+          "description": "Allowed command.",
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "deny": {
+          "description": "Denied command, which takes priority.",
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Scopes": {
+      "description": "An argument for fine grained behavior control of Tauri commands.\n\nIt can be of any serde serializable type and is used to allow or prevent certain actions inside a Tauri command. The configured scope is passed to the command and will be enforced by the command implementation.\n\n## Example\n\n```json { \"allow\": [{ \"path\": \"$HOME/**\" }], \"deny\": [{ \"path\": \"$HOME/secret.txt\" }] } ```",
+      "type": "object",
+      "properties": {
+        "allow": {
+          "description": "Data that defines what is allowed by the scope.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/Value"
+          }
+        },
+        "deny": {
+          "description": "Data that defines what is denied by the scope. This should be prioritized by validation logic.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/Value"
+          }
+        }
+      }
+    },
+    "Value": {
+      "description": "All supported ACL values.",
+      "anyOf": [
+        {
+          "description": "Represents a null JSON value.",
+          "type": "null"
+        },
+        {
+          "description": "Represents a [`bool`].",
+          "type": "boolean"
+        },
+        {
+          "description": "Represents a valid ACL [`Number`].",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Number"
+            }
+          ]
+        },
+        {
+          "description": "Represents a [`String`].",
+          "type": "string"
+        },
+        {
+          "description": "Represents a list of other [`Value`]s.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Value"
+          }
+        },
+        {
+          "description": "Represents a map of [`String`] keys to [`Value`]s.",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/Value"
+          }
+        }
+      ]
+    },
+    "Number": {
+      "description": "A valid ACL number.",
+      "anyOf": [
+        {
+          "description": "Represents an [`i64`].",
+          "type": "integer",
+          "format": "int64"
+        },
+        {
+          "description": "Represents a [`f64`].",
+          "type": "number",
+          "format": "double"
+        }
+      ]
+    },
+    "Target": {
+      "description": "Platform target.",
+      "oneOf": [
+        {
+          "description": "MacOS.",
+          "type": "string",
+          "enum": [
+            "macOS"
+          ]
+        },
+        {
+          "description": "Windows.",
+          "type": "string",
+          "enum": [
+            "windows"
+          ]
+        },
+        {
+          "description": "Linux.",
+          "type": "string",
+          "enum": [
+            "linux"
+          ]
+        },
+        {
+          "description": "Android.",
+          "type": "string",
+          "enum": [
+            "android"
+          ]
+        },
+        {
+          "description": "iOS.",
+          "type": "string",
+          "enum": [
+            "iOS"
+          ]
+        }
+      ]
+    },
+    "PermissionKind": {
+      "type": "string",
+      "oneOf": [
+        {
+          "description": "Enables the close_session command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-close-session",
+          "markdownDescription": "Enables the close_session command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the close_session command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-close-session",
+          "markdownDescription": "Denies the close_session command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the create_forward command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-create-forward",
+          "markdownDescription": "Enables the create_forward command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the create_forward command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-create-forward",
+          "markdownDescription": "Denies the create_forward command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the create_group command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-create-group",
+          "markdownDescription": "Enables the create_group command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the create_group command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-create-group",
+          "markdownDescription": "Denies the create_group command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the create_host command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-create-host",
+          "markdownDescription": "Enables the create_host command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the create_host command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-create-host",
+          "markdownDescription": "Denies the create_host command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the create_snippet command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-create-snippet",
+          "markdownDescription": "Enables the create_snippet command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the create_snippet command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-create-snippet",
+          "markdownDescription": "Denies the create_snippet command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the delete_forward command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-delete-forward",
+          "markdownDescription": "Enables the delete_forward command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the delete_forward command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-delete-forward",
+          "markdownDescription": "Denies the delete_forward command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the delete_group command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-delete-group",
+          "markdownDescription": "Enables the delete_group command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the delete_group command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-delete-group",
+          "markdownDescription": "Denies the delete_group command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the delete_host command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-delete-host",
+          "markdownDescription": "Enables the delete_host command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the delete_host command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-delete-host",
+          "markdownDescription": "Denies the delete_host command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the delete_snippet command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-delete-snippet",
+          "markdownDescription": "Enables the delete_snippet command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the delete_snippet command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-delete-snippet",
+          "markdownDescription": "Denies the delete_snippet command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the list_forwards command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-list-forwards",
+          "markdownDescription": "Enables the list_forwards command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the list_forwards command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-list-forwards",
+          "markdownDescription": "Denies the list_forwards command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the list_groups command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-list-groups",
+          "markdownDescription": "Enables the list_groups command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the list_groups command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-list-groups",
+          "markdownDescription": "Denies the list_groups command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the list_hosts command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-list-hosts",
+          "markdownDescription": "Enables the list_hosts command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the list_hosts command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-list-hosts",
+          "markdownDescription": "Denies the list_hosts command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the list_known_hosts command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-list-known-hosts",
+          "markdownDescription": "Enables the list_known_hosts command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the list_known_hosts command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-list-known-hosts",
+          "markdownDescription": "Denies the list_known_hosts command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the list_snippets command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-list-snippets",
+          "markdownDescription": "Enables the list_snippets command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the list_snippets command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-list-snippets",
+          "markdownDescription": "Denies the list_snippets command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the local_home command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-local-home",
+          "markdownDescription": "Enables the local_home command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the local_home command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-local-home",
+          "markdownDescription": "Denies the local_home command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the local_list command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-local-list",
+          "markdownDescription": "Enables the local_list command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the local_list command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-local-list",
+          "markdownDescription": "Denies the local_list command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the local_mkdir command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-local-mkdir",
+          "markdownDescription": "Enables the local_mkdir command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the local_mkdir command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-local-mkdir",
+          "markdownDescription": "Denies the local_mkdir command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the local_read_text command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-local-read-text",
+          "markdownDescription": "Enables the local_read_text command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the local_read_text command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-local-read-text",
+          "markdownDescription": "Denies the local_read_text command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the local_remove command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-local-remove",
+          "markdownDescription": "Enables the local_remove command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the local_remove command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-local-remove",
+          "markdownDescription": "Denies the local_remove command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the local_rename command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-local-rename",
+          "markdownDescription": "Enables the local_rename command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the local_rename command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-local-rename",
+          "markdownDescription": "Denies the local_rename command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the local_roots command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-local-roots",
+          "markdownDescription": "Enables the local_roots command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the local_roots command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-local-roots",
+          "markdownDescription": "Denies the local_roots command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the open_session command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-open-session",
+          "markdownDescription": "Enables the open_session command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the open_session command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-open-session",
+          "markdownDescription": "Denies the open_session command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the remove_known_host command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-remove-known-host",
+          "markdownDescription": "Enables the remove_known_host command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the remove_known_host command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-remove-known-host",
+          "markdownDescription": "Denies the remove_known_host command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the resize_session command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-resize-session",
+          "markdownDescription": "Enables the resize_session command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the resize_session command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-resize-session",
+          "markdownDescription": "Denies the resize_session command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the respond_host_key command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-respond-host-key",
+          "markdownDescription": "Enables the respond_host_key command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the respond_host_key command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-respond-host-key",
+          "markdownDescription": "Denies the respond_host_key command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the respond_keyboard_interactive command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-respond-keyboard-interactive",
+          "markdownDescription": "Enables the respond_keyboard_interactive command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the respond_keyboard_interactive command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-respond-keyboard-interactive",
+          "markdownDescription": "Denies the respond_keyboard_interactive command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the send_input command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-send-input",
+          "markdownDescription": "Enables the send_input command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the send_input command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-send-input",
+          "markdownDescription": "Denies the send_input command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the sftp_close command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-sftp-close",
+          "markdownDescription": "Enables the sftp_close command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the sftp_close command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-sftp-close",
+          "markdownDescription": "Denies the sftp_close command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the sftp_download command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-sftp-download",
+          "markdownDescription": "Enables the sftp_download command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the sftp_download command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-sftp-download",
+          "markdownDescription": "Denies the sftp_download command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the sftp_list command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-sftp-list",
+          "markdownDescription": "Enables the sftp_list command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the sftp_list command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-sftp-list",
+          "markdownDescription": "Denies the sftp_list command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the sftp_mkdir command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-sftp-mkdir",
+          "markdownDescription": "Enables the sftp_mkdir command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the sftp_mkdir command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-sftp-mkdir",
+          "markdownDescription": "Denies the sftp_mkdir command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the sftp_open command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-sftp-open",
+          "markdownDescription": "Enables the sftp_open command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the sftp_open command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-sftp-open",
+          "markdownDescription": "Denies the sftp_open command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the sftp_read_text command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-sftp-read-text",
+          "markdownDescription": "Enables the sftp_read_text command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the sftp_read_text command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-sftp-read-text",
+          "markdownDescription": "Denies the sftp_read_text command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the sftp_remove command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-sftp-remove",
+          "markdownDescription": "Enables the sftp_remove command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the sftp_remove command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-sftp-remove",
+          "markdownDescription": "Denies the sftp_remove command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the sftp_rename command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-sftp-rename",
+          "markdownDescription": "Enables the sftp_rename command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the sftp_rename command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-sftp-rename",
+          "markdownDescription": "Denies the sftp_rename command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the sftp_upload command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-sftp-upload",
+          "markdownDescription": "Enables the sftp_upload command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the sftp_upload command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-sftp-upload",
+          "markdownDescription": "Denies the sftp_upload command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the start_forward command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-start-forward",
+          "markdownDescription": "Enables the start_forward command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the start_forward command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-start-forward",
+          "markdownDescription": "Denies the start_forward command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the stop_forward command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-stop-forward",
+          "markdownDescription": "Enables the stop_forward command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the stop_forward command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-stop-forward",
+          "markdownDescription": "Denies the stop_forward command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the update_host command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-update-host",
+          "markdownDescription": "Enables the update_host command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the update_host command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-update-host",
+          "markdownDescription": "Denies the update_host command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the update_snippet command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-update-snippet",
+          "markdownDescription": "Enables the update_snippet command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the update_snippet command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-update-snippet",
+          "markdownDescription": "Denies the update_snippet command without any pre-configured scope."
+        },
+        {
+          "description": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`\n- `allow-open-session`\n- `allow-send-input`\n- `allow-resize-session`\n- `allow-close-session`\n- `allow-list-snippets`\n- `allow-create-snippet`\n- `allow-update-snippet`\n- `allow-delete-snippet`\n- `allow-list-forwards`\n- `allow-create-forward`\n- `allow-delete-forward`\n- `allow-start-forward`\n- `allow-stop-forward`\n- `allow-sftp-open`\n- `allow-sftp-list`\n- `allow-sftp-download`\n- `allow-sftp-upload`\n- `allow-sftp-mkdir`\n- `allow-sftp-remove`\n- `allow-sftp-rename`\n- `allow-sftp-close`\n- `allow-list-known-hosts`\n- `allow-remove-known-host`\n- `allow-respond-host-key`\n- `allow-respond-keyboard-interactive`\n- `allow-sftp-read-text`\n- `allow-local-home`\n- `allow-local-roots`\n- `allow-local-list`\n- `allow-local-read-text`\n- `allow-local-remove`\n- `allow-local-mkdir`\n- `allow-local-rename`",
+          "type": "string",
+          "const": "default",
+          "markdownDescription": "Allows every MySSH plugin command.\n#### This default permission set includes:\n\n- `allow-list-hosts`\n- `allow-create-host`\n- `allow-update-host`\n- `allow-delete-host`\n- `allow-list-groups`\n- `allow-create-group`\n- `allow-delete-group`\n- `allow-open-session`\n- `allow-send-input`\n- `allow-resize-session`\n- `allow-close-session`\n- `allow-list-snippets`\n- `allow-create-snippet`\n- `allow-update-snippet`\n- `allow-delete-snippet`\n- `allow-list-forwards`\n- `allow-create-forward`\n- `allow-delete-forward`\n- `allow-start-forward`\n- `allow-stop-forward`\n- `allow-sftp-open`\n- `allow-sftp-list`\n- `allow-sftp-download`\n- `allow-sftp-upload`\n- `allow-sftp-mkdir`\n- `allow-sftp-remove`\n- `allow-sftp-rename`\n- `allow-sftp-close`\n- `allow-list-known-hosts`\n- `allow-remove-known-host`\n- `allow-respond-host-key`\n- `allow-respond-keyboard-interactive`\n- `allow-sftp-read-text`\n- `allow-local-home`\n- `allow-local-roots`\n- `allow-local-list`\n- `allow-local-read-text`\n- `allow-local-remove`\n- `allow-local-mkdir`\n- `allow-local-rename`"
+        }
+      ]
+    }
+  }
+}

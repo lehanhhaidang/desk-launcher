@@ -1,0 +1,17 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "myssh-window",
+  "description": "Permissions for the MySSH module window. Needs dialogs for the SSH key-file picker and logging; all host/session/forward commands live in the myssh Rust plugin.",
+  "windows": ["myssh"],
+  "permissions": [
+    "core:default",
+    "dialog:default",
+    "log:default",
+    "myssh:default",
+    "opener:default",
+    {
+      "identifier": "opener:allow-open-path",
+      "allow": [{ "path": "**" }]
+    }
+  ]
+}

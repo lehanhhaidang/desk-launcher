@@ -1,0 +1,34 @@
+[package]
+name = "tauri-plugin-myssh"
+version = "0.1.0"
+edition.workspace = true
+description = "MySSH module — Termius-style embedded SSH client (russh + xterm)."
+authors.workspace = true
+links = "tauri-plugin-myssh"
+
+[lib]
+name = "tauri_plugin_myssh"
+
+[build-dependencies]
+tauri-plugin = { version = "2", features = ["build"] }
+
+[dependencies]
+tauri = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+log = { workspace = true }
+
+tokio = { version = "1", features = ["full"] }
+rusqlite = { version = "0.32", features = ["bundled"] }
+uuid = { version = "1", features = ["v4"] }
+keyring = "2"
+
+launcher-paths = { path = "../../../crates/launcher-paths" }
+# Use the `ring` crypto backend instead of the default `aws-lc-rs`, which pulls
+# `aws-lc-sys` and requires NASM to assemble on Windows (not available in CI).
+russh = { version = "0.61.2", default-features = false, features = ["ring", "flate2", "rsa"] }
+russh-sftp = "2.3.0"
+
+[dev-dependencies]
+tempfile = "3"

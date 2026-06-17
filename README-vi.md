@@ -8,7 +8,7 @@ Unified desktop tool launcher - một app Tauri 2 trên Windows, dashboard chứ
 
 | Module | Mô tả | Stack |
 |---|---|---|
-| **Port Killer** | Liệt kê & kill TCP/UDP ports đang lắng nghe. SSH tunneling deferred. | `netstat2` + `sysinfo` |
+| **MySSH** | SSH client kiểu Termius: quản lý host (auth password/key/agent, ProxyJump), terminal tương tác multi-tab, snippets lệnh, port forwarding (local/remote/dynamic), SFTP file browser. | `russh` + `russh-sftp` + `xterm.js` + `rusqlite` + `keyring` |
 | **Open Sesame** | Quản lý tài liệu dự án - workspace, doc-set, file tree, Markdown preview, GitHub device-flow OAuth + git sync. | `rusqlite` + `git2` + `oauth2` + `keyring` |
 | **Virtual Comtor** | Phiên dịch real-time Nhật <-> Việt cho meeting (Soniox + OpenAI), transcript + summary + xlsx export. | `rusqlite` + `keyring` (Windows Credential Manager) |
 | **Video Downloader** | Tải video/audio (YouTube, TikTok, Bilibili, ...) qua bundled `yt-dlp.exe` + `ffmpeg.exe`. | Tauri sidecar |
@@ -25,11 +25,11 @@ desk-launcher/
 |       |-- modules-pages/<id>/      # HTML entry + main.tsx shim mỗi module
 |       `-- src-tauri/
 |           |-- src/                 # main.rs, lib.rs, window_manager.rs, module_registry.rs
-|           |-- capabilities/        # 1 file per window (port-killer.json, ...)
+|           |-- capabilities/        # 1 file per window (myssh.json, ...)
 |           `-- binaries/            # yt-dlp.exe, ffmpeg.exe (gitignored)
 |
 |-- modules/                         # Mỗi module tự chứa frontend + Rust plugin
-|   |-- port-killer/
+|   |-- myssh/
 |   |   |-- frontend/src/            # React UI + api/ + components/
 |   |   `-- rust/                    # Tauri plugin crate
 |   |       |-- src/lib.rs           # pub fn init() -> TauriPlugin<Wry>
@@ -156,14 +156,16 @@ Tag phải khớp version trong `tauri.conf.json` (không khớp thì workflow t
 
 ## Origin của các module
 
-- **port-killer**, **video-downloader**, **file-converter** (deferred) - gốc từ [`Tools`](https://github.com/lehanhhaidang) (Python sidecar đã được drop, rewrite pure Rust)
+- **video-downloader**, **file-converter** (deferred) - gốc từ [`Tools`](https://github.com/lehanhhaidang) (Python sidecar đã được drop, rewrite pure Rust)
+- **myssh** - module mới viết trên `russh` (SSH nhúng) + `xterm.js`, thay cho module Port Killer cũ
 - **open-sesame** - gốc standalone Tauri app, plugin-hóa
 - **comtor** - gốc từ [`virtual_comtor_desktop`](https://github.com/lehanhhaidang), plugin-hóa, refactor AppShell deferred
 
 ## Roadmap
 
 - [ ] file-converter module (Markdown -> PDF với bundled Unicode font cho tiếng Việt)
-- [ ] SSH tunneling cho port-killer (russh)
+- [ ] MySSH: tạo SSH key, folder host lồng nhau, đồng bộ đa thiết bị
+- [ ] Export & sync dữ liệu — **theo từng module** (mỗi module tự export/sync data) và **toàn launcher** (gộp tất cả module). Hiện local thuần (SQLite từng module + OS keyring, không backend); kế hoạch: export/import có mã hoá trước, rồi git-sync tuỳ chọn (tái dùng pattern git2 + OAuth của Open Sesame). Secret cần vault mã hoá bằng master password, vì entry trong OS keyring không mang sang máy khác được.
 - [ ] CSP tightening (union từng module -> strict CSP ở launcher)
 - [ ] NSIS installer polish + auto-update
 - [ ] First-run migration cho legacy comtor DB (`%APPDATA%\com.vcomtor.desktop\` -> `modules\comtor\`)

@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-remove-known-host"
+description = "Enables the remove_known_host command without any pre-configured scope."
+commands.allow = ["remove_known_host"]
+
+[[permission]]
+identifier = "deny-remove-known-host"
+description = "Denies the remove_known_host command without any pre-configured scope."
+commands.deny = ["remove_known_host"]

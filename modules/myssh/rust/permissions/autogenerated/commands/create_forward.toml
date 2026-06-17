@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-create-forward"
+description = "Enables the create_forward command without any pre-configured scope."
+commands.allow = ["create_forward"]
+
+[[permission]]
+identifier = "deny-create-forward"
+description = "Denies the create_forward command without any pre-configured scope."
+commands.deny = ["create_forward"]
