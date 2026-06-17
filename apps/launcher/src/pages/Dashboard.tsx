@@ -12,6 +12,7 @@ import {
   Layers3,
   LayoutDashboard,
   ListTree,
+  Palette,
   Plus,
   RadioTower,
   RefreshCw,
@@ -24,6 +25,7 @@ import {
   WandSparkles,
   X,
 } from 'lucide-react'
+import { ThemePicker } from '@desk-launcher/theme'
 import { MODULES } from '../modules/registry'
 import { ModuleCard } from '../components/ModuleCard'
 
@@ -34,7 +36,7 @@ const sidebarItems = [
   { label: 'System Logs', icon: ListTree },
 ]
 
-type Modal = 'settings' | 'scaffold' | null
+type Modal = 'settings' | 'scaffold' | 'appearance' | null
 
 export function Dashboard() {
   const [opening, setOpening] = useState<string | null>(null)
@@ -154,6 +156,16 @@ export function Dashboard() {
               type="button"
               variant="ghost"
               size="icon"
+              onClick={() => setModal('appearance')}
+              className="rounded-full text-[#aeb8c7] hover:bg-white/[0.07] hover:text-white"
+              title="Appearance"
+            >
+              <Palette className="size-5" aria-hidden="true" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
               onClick={() => setModal('settings')}
               className="rounded-full text-[#aeb8c7] hover:bg-white/[0.07] hover:text-white"
               title="Settings"
@@ -210,9 +222,26 @@ export function Dashboard() {
         </footer>
       </main>
 
+      {modal === 'appearance' && <AppearanceModal onClose={() => setModal(null)} />}
       {modal === 'settings' && <SettingsModal onClose={() => setModal(null)} />}
       {modal === 'scaffold' && <ScaffoldModal onClose={() => setModal(null)} />}
     </div>
+  )
+}
+
+function AppearanceModal({ onClose }: { onClose: () => void }) {
+  return (
+    <ModalShell
+      title="Appearance"
+      eyebrow="Theme"
+      icon={<Palette className="size-5" />}
+      onClose={onClose}
+      description="Customize how Desk Launcher looks. Saved on this device."
+    >
+      <section className="launcher-panel mx-auto w-full max-w-md rounded-xl border p-5">
+        <ThemePicker />
+      </section>
+    </ModalShell>
   )
 }
 

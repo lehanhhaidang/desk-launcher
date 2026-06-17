@@ -22,6 +22,7 @@
    this theme). Tell Tailwind to scan launcher source + shim files. */
 @source "../../../apps/launcher/src";
 @source "../../../apps/launcher/modules-pages";
+@source "../../theme/src";
 @source ".";
 
 @custom-variant dark (&:is(.dark *));
@@ -134,6 +135,48 @@
     --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.551 0.027 264.364);
+}
+
+/* ---------------------------------------------------------------------------
+   Desk Launcher brand tokens. The `packages/theme` engine sets --brand /
+   --brand-2 at runtime (from the chosen accent) and toggles `.dark`; the
+   surface/text/line values below switch with the mode. All launcher + module
+   CSS consumes these instead of hardcoding hex, so theming survives UI rework.
+--------------------------------------------------------------------------- */
+:root {
+    --brand: oklch(0.8665 0.1086 195);
+    --brand-2: oklch(0.78 0.11 305);
+
+    /* light surfaces */
+    --bg: #eef1f6;
+    --surface: #ffffff;
+    --panel: rgba(255, 255, 255, 0.86);
+    --panel-2: rgba(255, 255, 255, 0.94);
+    --text: #0d1117;
+    --text-muted: #475063;
+    --text-faint: rgba(60, 68, 82, 0.7);
+    --line: rgba(20, 30, 50, 0.12);
+}
+
+.dark {
+    --bg: #101015;
+    --surface: #12131b;
+    --panel: rgba(18, 19, 27, 0.92);
+    --panel-2: rgba(36, 39, 55, 0.9);
+    --text: #edf3f7;
+    --text-muted: #aeb8c7;
+    --text-faint: rgba(174, 184, 199, 0.68);
+    --line: rgba(158, 170, 190, 0.16);
+}
+
+/* Reduce motion — engine sets data-reduce-motion on <html>. */
+[data-reduce-motion="true"] *,
+[data-reduce-motion="true"] *::before,
+[data-reduce-motion="true"] *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
 }
 
 @layer base {

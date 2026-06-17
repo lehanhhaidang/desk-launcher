@@ -31,6 +31,7 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
       '@modules': path.resolve(__dirname, '../../modules'),
       '@desk-launcher/ui': path.resolve(__dirname, '../../packages/ui/src'),
+      '@desk-launcher/theme': path.resolve(__dirname, '../../packages/theme/src'),
       '@desk-launcher/tauri-bridge': path.resolve(__dirname, '../../packages/tauri-bridge/src'),
       // Module-internal aliases — each module gets its own short prefix so
       // its existing `@/` imports can be sed'd to `@<module>/` without
