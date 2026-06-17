@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FileText, FolderOpen, TerminalSquare, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { TerminalView } from '../terminal/TerminalView'
 import { FilesTab } from './FilesTab'
 import { PreviewTab } from './PreviewTab'
@@ -62,13 +62,17 @@ export function Workspace({
               activeKey === tab.key ? 'bg-cyan-300/15 text-cyan-100' : 'text-[#9aa6b6] hover:bg-white/5'
             }`}
           >
-            {tab.kind === 'files' ? (
-              <FolderOpen className="size-3.5 shrink-0" />
-            ) : tab.kind === 'preview' ? (
-              <FileText className="size-3.5 shrink-0" />
-            ) : (
-              <TerminalSquare className="size-3.5 shrink-0" />
-            )}
+            <span
+              className={`shrink-0 rounded px-1 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
+                tab.kind === 'terminal'
+                  ? 'bg-emerald-300/15 text-emerald-200'
+                  : tab.kind === 'files'
+                    ? 'bg-cyan-300/15 text-cyan-200'
+                    : 'bg-violet-300/15 text-violet-200'
+              }`}
+            >
+              {tab.kind === 'terminal' ? 'SSH' : tab.kind === 'files' ? 'SFTP' : 'FILE'}
+            </span>
             {editingKey === tab.key ? (
               <input
                 autoFocus
