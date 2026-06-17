@@ -138,6 +138,25 @@ impl client::Handler for ClientHandler {
     }
 }
 
+/// Connect to the OS SSH agent (Windows OpenSSH named pipe; `SSH_AUTH_SOCK`
+/// elsewhere).
+#[cfg(windows)]
+async fn connect_ssh_agent() -> AppResult<
+    russh::keys::agent::client::AgentClient<tokio::net::windows::named_pipe::NamedPipeClient>,
+> {
+    russh::keys::agent::client::AgentClient::connect_named_pipe(r"\\.\pipe\openssh-ssh-agent")
+        .await
+        .map_err(|e| AppError::Ssh(format!("connect ssh-agent (is the OpenSSH agent running?): {e}")))
+}
+
+#[cfg(not(windows))]
+async fn connect_ssh_agent(
+) -> AppResult<russh::keys::agent::client::AgentClient<tokio::net::UnixStream>> {
+    russh::keys::agent::client::AgentClient::connect_env()
+        .await
+        .map_err(|e| AppError::Ssh(format!("connect ssh-agent: {e}")))
+}
+
 /// Connect + authenticate, returning the live session handle. Shared by the
 /// interactive terminal and by port forwarding.
 pub(crate) async fn connect_authenticated(
@@ -202,6 +221,30 @@ pub(crate) async fn connect_authenticated(
                 .await
                 .map_err(|e| AppError::Ssh(format!("auth: {e}")))?
                 .success()
+        }
+        "agent" => {
+            let mut agent = connect_ssh_agent().await?;
+            let identities = agent
+                .request_identities()
+                .await
+                .map_err(|e| AppError::Ssh(format!("list agent identities: {e}")))?;
+            let mut ok = false;
+            for id in identities {
+                if let russh::keys::agent::AgentIdentity::PublicKey { key, .. } = id {
+                    match handle
+                        .authenticate_publickey_with(params.username.clone(), key, None, &mut agent)
+                        .await
+                    {
+                        Ok(result) if result.success() => {
+                            ok = true;
+                            break;
+                        }
+                        Ok(_) => {}
+                        Err(e) => return Err(AppError::Ssh(format!("agent auth: {e}"))),
+                    }
+                }
+            }
+            ok
         }
         _ => {
             let password = params.secret.clone().unwrap_or_default();

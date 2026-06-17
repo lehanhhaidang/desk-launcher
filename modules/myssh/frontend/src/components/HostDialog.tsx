@@ -191,20 +191,23 @@ export function HostDialog({ open, host, groups, hosts, onClose, onSaved }: Prop
             >
               <option value="password">Password</option>
               <option value="key">SSH key</option>
+              <option value="agent">SSH agent</option>
             </select>
           </div>
-          <div>
-            <label className={labelClass}>
-              {form.authMethod === 'key' ? 'Key passphrase' : 'Password'}
-            </label>
-            <input
-              type="password"
-              className={inputClass}
-              value={form.secret}
-              onChange={(e) => set('secret', e.target.value)}
-              placeholder={host?.hasSecret ? '•••••• (unchanged)' : ''}
-            />
-          </div>
+          {form.authMethod !== 'agent' && (
+            <div>
+              <label className={labelClass}>
+                {form.authMethod === 'key' ? 'Key passphrase' : 'Password'}
+              </label>
+              <input
+                type="password"
+                className={inputClass}
+                value={form.secret}
+                onChange={(e) => set('secret', e.target.value)}
+                placeholder={host?.hasSecret ? '•••••• (unchanged)' : ''}
+              />
+            </div>
+          )}
 
           {form.authMethod === 'key' && (
             <div className="col-span-2">
