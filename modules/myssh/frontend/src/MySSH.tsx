@@ -166,6 +166,12 @@ export default function MySSH() {
     })
   }
 
+  const renameTab = (key: string, label: string) => {
+    setTabs((prev) => prev.map((t) => (t.key === key ? { ...t, label } : t)))
+  }
+
+  const connectedHostIds = useMemo(() => new Set(tabs.map((t) => t.hostId)), [tabs])
+
   return (
     <div className="myssh-bg flex h-screen w-screen text-[#edf3f7]">
       {/* Sidebar */}
@@ -232,6 +238,7 @@ export default function MySSH() {
                 title={group.name}
                 hosts={list}
                 selectedId={selectedId}
+                connectedIds={connectedHostIds}
                 onSelect={setSelectedId}
                 onConnect={connect}
                 onDeleteGroup={() => onDeleteGroup(group)}
@@ -242,6 +249,7 @@ export default function MySSH() {
             title="Ungrouped"
             hosts={grouped.get(null) ?? []}
             selectedId={selectedId}
+            connectedIds={connectedHostIds}
             onSelect={setSelectedId}
             onConnect={connect}
           />
@@ -261,6 +269,7 @@ export default function MySSH() {
             activeKey={activeTab}
             onActivate={setActiveTab}
             onClose={closeTab}
+            onRename={renameTab}
             onSessionForTab={registerSession}
           />
         ) : selected ? (
@@ -330,6 +339,7 @@ function GroupSection({
   title,
   hosts,
   selectedId,
+  connectedIds,
   onSelect,
   onConnect,
   onDeleteGroup,
@@ -337,6 +347,7 @@ function GroupSection({
   title: string
   hosts: Host[]
   selectedId: string | null
+  connectedIds: Set<string>
   onSelect: (id: string) => void
   onConnect: (host: Host) => void
   onDeleteGroup?: () => void
@@ -358,25 +369,36 @@ function GroupSection({
           </button>
         )}
       </div>
-      {hosts.map((host) => (
-        <button
-          key={host.id}
-          onClick={() => onSelect(host.id)}
-          onDoubleClick={() => onConnect(host)}
-          title="Double-click to connect"
-          className={`flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left transition ${
-            selectedId === host.id ? 'bg-cyan-300/12 text-cyan-100' : 'hover:bg-white/[0.04]'
-          }`}
-        >
-          <Server className="size-4 shrink-0 text-[#7c8797]" />
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm font-medium">{host.label}</span>
-            <span className="block truncate font-mono text-xs text-[#7c8797]">
-              {host.username}@{host.hostname}
+      {hosts.map((host) => {
+        const connected = connectedIds.has(host.id)
+        return (
+          <button
+            key={host.id}
+            onClick={() => onSelect(host.id)}
+            onDoubleClick={() => onConnect(host)}
+            title="Double-click to connect"
+            className={`flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left transition ${
+              selectedId === host.id ? 'bg-cyan-300/12 text-cyan-100' : 'hover:bg-white/[0.04]'
+            }`}
+          >
+            <span className="relative shrink-0">
+              <Server className={`size-4 ${connected ? 'text-emerald-300' : 'text-[#7c8797]'}`} />
+              {connected && (
+                <span className="absolute -right-0.5 -top-0.5 size-2 rounded-full bg-emerald-400 ring-2 ring-[#0d0f14]" />
+              )}
             </span>
-          </span>
-        </button>
-      ))}
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-medium">{host.label}</span>
+              <span className="block truncate font-mono text-xs text-[#7c8797]">
+                {host.username}@{host.hostname}
+              </span>
+            </span>
+            {host.lastUsed != null && (
+              <span className="shrink-0 text-[10px] text-[#5f6b7a]">{formatRelative(host.lastUsed)}</span>
+            )}
+          </button>
+        )
+      })}
     </div>
   )
 }
@@ -393,4 +415,13 @@ function Row({ label, value }: { label: string; value: string }) {
 function errMessage(e: unknown): string {
   if (e && typeof e === 'object' && 'message' in e) return String((e as { message: unknown }).message)
   return String(e)
+}
+
+function formatRelative(unixSeconds: number): string {
+  const diff = Date.now() / 1000 - unixSeconds
+  if (diff < 60) return 'now'
+  if (diff < 3600) return `${Math.floor(diff / 60)}m`
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h`
+  if (diff < 86400 * 30) return `${Math.floor(diff / 86400)}d`
+  return new Date(unixSeconds * 1000).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
 }

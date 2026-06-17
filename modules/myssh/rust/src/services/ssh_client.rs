@@ -74,7 +74,11 @@ pub(crate) async fn connect_authenticated(
     db: Arc<Mutex<Connection>>,
     params: &ConnectParams,
 ) -> AppResult<Handle<ClientHandler>> {
-    let config = Arc::new(client::Config::default());
+    let mut config = client::Config::default();
+    // Send a keepalive every 30s so idle sessions aren't dropped by the server
+    // or a NAT/firewall; disconnect after a few unanswered ones (keepalive_max).
+    config.keepalive_interval = Some(std::time::Duration::from_secs(30));
+    let config = Arc::new(config);
     let handler = ClientHandler {
         db,
         host: params.host.clone(),

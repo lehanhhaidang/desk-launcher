@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { X } from 'lucide-react'
 import { TerminalView } from './TerminalView'
 
@@ -12,10 +13,33 @@ interface Props {
   activeKey: string | null
   onActivate: (key: string) => void
   onClose: (key: string) => void
+  onRename: (key: string, label: string) => void
   onSessionForTab?: (tabKey: string, sessionId: string | null) => void
 }
 
-export function TerminalWorkspace({ tabs, activeKey, onActivate, onClose, onSessionForTab }: Props) {
+export function TerminalWorkspace({
+  tabs,
+  activeKey,
+  onActivate,
+  onClose,
+  onRename,
+  onSessionForTab,
+}: Props) {
+  const [editingKey, setEditingKey] = useState<string | null>(null)
+  const [draft, setDraft] = useState('')
+
+  const startEdit = (tab: SessionTab) => {
+    setEditingKey(tab.key)
+    setDraft(tab.label)
+  }
+  const commitEdit = () => {
+    if (editingKey) {
+      const name = draft.trim()
+      if (name) onRename(editingKey, name)
+    }
+    setEditingKey(null)
+  }
+
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-1 overflow-x-auto border-b border-white/10 bg-black/20 px-2 py-1.5">
@@ -29,7 +53,31 @@ export function TerminalWorkspace({ tabs, activeKey, onActivate, onClose, onSess
                 : 'text-[#9aa6b6] hover:bg-white/5'
             }`}
           >
-            <span className="max-w-[160px] truncate">{tab.label}</span>
+            {editingKey === tab.key ? (
+              <input
+                autoFocus
+                className="w-28 bg-transparent text-sm outline-none"
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                onClick={(e) => e.stopPropagation()}
+                onBlur={commitEdit}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') commitEdit()
+                  if (e.key === 'Escape') setEditingKey(null)
+                }}
+              />
+            ) : (
+              <span
+                className="max-w-[160px] truncate"
+                onDoubleClick={(e) => {
+                  e.stopPropagation()
+                  startEdit(tab)
+                }}
+                title="Double-click to rename"
+              >
+                {tab.label}
+              </span>
+            )}
             <button
               type="button"
               onClick={(e) => {
