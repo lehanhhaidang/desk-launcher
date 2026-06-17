@@ -1,5 +1,6 @@
 export { ThemeProvider, useTheme } from './provider'
 export { ThemePicker } from './ThemePicker'
+export { AppearanceButton } from './AppearanceButton'
 export { applyTheme, applyThemeFromStorage } from './apply'
 export { loadTheme, saveTheme } from './storage'
 export {
