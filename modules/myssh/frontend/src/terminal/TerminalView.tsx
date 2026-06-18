@@ -118,11 +118,11 @@ export function TerminalView({ hostId, active, onSession, onStatus, onManageComm
         })
         .catch(() => {})
     }
-    // Type text onto the prompt without a trailing newline, so the user can
-    // review/edit it and press Enter to run.
+    // Type text onto the prompt (no trailing newline) through the same path as
+    // paste, so it works whenever paste does. Bracketed paste keeps it on the
+    // prompt for the user to review and press Enter.
     const insertText = (text: string) => {
-      const id = sessionIdRef.current
-      if (id) sendInput(id, Array.from(encoder.encode(text))).catch(() => {})
+      term.paste(text)
       term.focus()
     }
     copyRef.current = copySelection
@@ -143,10 +143,10 @@ export function TerminalView({ hostId, active, onSession, onStatus, onManageComm
         if (copySelection()) return false
         return true
       }
-      // Paste on Ctrl/Cmd+V (and +Shift+V). Plain Ctrl+V matches the Windows
-      // convention; a terminal rarely needs the literal-insert it would shadow.
+      // Paste on Ctrl/Cmd+V. Returning false makes xterm ignore the key without
+      // calling preventDefault, so the browser's native paste fires exactly once
+      // — calling term.paste here as well would double it.
       if (mod && e.code === 'KeyV') {
-        pasteClipboard()
         return false
       }
       if (mod && e.shiftKey && e.code === 'KeyF') {
