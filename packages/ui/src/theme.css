@@ -147,11 +147,21 @@
     --brand: oklch(0.8665 0.1086 195);
     --brand-2: oklch(0.78 0.11 305);
 
-    /* light surfaces */
+    /* How strongly the accent bleeds into every surface. The Background
+       control overrides this per [data-bg]; this is the pre-JS default. */
+    --tint: 4%;
+
+    /* light surfaces — accent-tinted so the WHOLE UI carries the theme, not
+       just the page backdrop behind the panels. Each token has a plain
+       fallback first for engines without color-mix. */
     --bg: #eef1f6;
+    --bg: color-mix(in oklch, var(--brand) var(--tint), #eef1f6);
     --surface: #ffffff;
+    --surface: color-mix(in oklch, var(--brand) var(--tint), #ffffff);
     --panel: rgba(255, 255, 255, 0.86);
+    --panel: color-mix(in oklch, var(--brand) var(--tint), rgba(255, 255, 255, 0.86));
     --panel-2: rgba(255, 255, 255, 0.94);
+    --panel-2: color-mix(in oklch, var(--brand) var(--tint), rgba(255, 255, 255, 0.94));
     --text: #0d1117;
     --text-muted: #475063;
     --text-faint: rgba(60, 68, 82, 0.7);
@@ -160,9 +170,13 @@
 
 .dark {
     --bg: #101015;
+    --bg: color-mix(in oklch, var(--brand) var(--tint), #101015);
     --surface: #12131b;
+    --surface: color-mix(in oklch, var(--brand) var(--tint), #12131b);
     --panel: rgba(18, 19, 27, 0.92);
+    --panel: color-mix(in oklch, var(--brand) var(--tint), rgba(18, 19, 27, 0.92));
     --panel-2: rgba(36, 39, 55, 0.9);
+    --panel-2: color-mix(in oklch, var(--brand) var(--tint), rgba(36, 39, 55, 0.9));
     --text: #edf3f7;
     --text-muted: #aeb8c7;
     --text-faint: rgba(174, 184, 199, 0.68);
@@ -180,15 +194,23 @@
         linear-gradient(135deg, var(--bg) 0%, var(--surface) 48%, var(--bg) 100%);
 }
 
+/* --tint also scales the accent bled into every surface, so the Background
+   choice recolors the whole app — not just the backdrop behind the panels. */
+[data-bg="aurora"] {
+    --tint: 4%;
+}
+
 [data-bg="vivid"] {
+    --tint: 13%;
     --app-bg:
         radial-gradient(circle at 10% 4%, color-mix(in oklch, var(--brand) 42%, transparent), transparent 48%),
         radial-gradient(circle at 92% 6%, color-mix(in oklch, var(--brand-2) 40%, transparent), transparent 46%),
         radial-gradient(circle at 62% 114%, color-mix(in oklch, var(--brand-2) 26%, transparent), transparent 54%),
-        linear-gradient(135deg, var(--bg) 0%, color-mix(in oklch, var(--brand) 12%, var(--surface)) 50%, var(--bg) 100%);
+        linear-gradient(135deg, var(--bg) 0%, color-mix(in oklch, var(--brand) 14%, var(--surface)) 50%, var(--bg) 100%);
 }
 
 [data-bg="flat"] {
+    --tint: 0%;
     --app-bg: var(--bg);
 }
 
