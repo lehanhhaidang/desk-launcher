@@ -30,14 +30,14 @@ export function HostKeyModal() {
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
       <div className="myssh-panel w-full max-w-md rounded-xl border p-6 shadow-2xl">
-        <h2 className="mb-2 flex items-center gap-2 text-lg font-semibold text-[#edf3f7]">
+        <h2 className="mb-2 flex items-center gap-2 text-lg font-semibold text-[var(--text)]">
           {prompt.changed ? (
             <>
               <ShieldAlert className="size-5 text-[#ffb4ab]" /> Host key changed
             </>
           ) : (
             <>
-              <ShieldCheck className="size-5 text-cyan-300" /> Unknown host key
+              <ShieldCheck className="size-5 text-[var(--brand)]" /> Unknown host key
             </>
           )}
         </h2>
@@ -52,7 +52,7 @@ export function HostKeyModal() {
             man-in-the-middle attack. Only accept if you trust the change.
           </p>
         ) : (
-          <p className="mb-3 text-sm text-[#9aa6b6]">
+          <p className="mb-3 text-sm text-[var(--text-muted)]">
             First time connecting to{' '}
             <span className="font-mono">
               {prompt.host}:{prompt.port}
@@ -62,10 +62,10 @@ export function HostKeyModal() {
         )}
 
         <div className="mb-5 rounded-md border border-white/10 bg-black/20 px-3 py-2">
-          <div className="text-[11px] uppercase tracking-wider text-[#7c8797]">
+          <div className="text-[11px] uppercase tracking-wider text-[var(--text-faint)]">
             {prompt.keyType}
           </div>
-          <div className="break-all font-mono text-sm text-[#e6edf3]">{prompt.fingerprint}</div>
+          <div className="break-all font-mono text-sm text-[var(--text)]">{prompt.fingerprint}</div>
         </div>
 
         <div className="flex justify-end gap-2">

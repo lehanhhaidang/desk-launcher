@@ -1,6 +1,12 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Pull the shared brand/surface/text tokens (--brand/--brand-2/--bg/--panel/
+   --text/--line ...) from the UI package. They are driven by the
+   packages/theme engine, so accent + mode changes recolor this module's
+   chrome just like the launcher. */
+@import "../../../../packages/ui/src/theme.css";
+
 /* Vite root is apps/launcher/. Tell Tailwind v4 to scan this module's
    own files plus the shared UI package so utility classes used only
    here get generated. */
@@ -62,47 +68,53 @@
 }
 
 /*
- * Industrial Dark theme — Virtual Comtor
- * Dark-only design optimized for meeting rooms
+ * Virtual Comtor — shadcn tokens mapped onto the shared theme engine.
+ *
+ * Surface / text / border tokens follow the engine's mode-switching values
+ * (--bg/--surface/--panel/--text/--line from theme.css), and the accent-driven
+ * tokens point at --brand/--brand-2, so changing the accent or switching
+ * light/dark recolors the chrome. Per-feature semantic colors (destructive,
+ * speaker roles, charts) stay hardcoded.
+ *
+ * The .dark block below restores the exact Industrial Dark palette so dark
+ * mode looks identical to before.
  */
 :root {
-  /* Force dark mode always */
-  --background: oklch(0.13 0.01 250);
-  --foreground: oklch(0.93 0.005 250);
-  --card: oklch(0.17 0.01 250);
-  --card-foreground: oklch(0.93 0.005 250);
-  --popover: oklch(0.17 0.01 250);
-  --popover-foreground: oklch(0.93 0.005 250);
-  --primary: oklch(0.70 0.15 265);
+  --background: var(--bg);
+  --foreground: var(--text);
+  --card: var(--surface);
+  --card-foreground: var(--text);
+  --popover: var(--surface);
+  --popover-foreground: var(--text);
+  --primary: var(--brand);
   --primary-foreground: oklch(0.98 0 0);
-  --secondary: oklch(0.22 0.01 250);
-  --secondary-foreground: oklch(0.88 0.005 250);
-  --muted: oklch(0.22 0.01 250);
-  --muted-foreground: oklch(0.60 0.01 250);
-  --accent: oklch(0.25 0.015 250);
-  --accent-foreground: oklch(0.93 0.005 250);
+  --secondary: var(--panel-2);
+  --secondary-foreground: var(--text);
+  --muted: var(--panel-2);
+  --muted-foreground: var(--text-muted);
+  --accent: var(--panel-2);
+  --accent-foreground: var(--text);
   --destructive: oklch(0.65 0.2 25);
-  --border: oklch(0.25 0.01 250);
-  --input: oklch(0.22 0.01 250);
-  --ring: oklch(0.70 0.15 265);
-  --radius: 0.625rem;
+  --border: var(--line);
+  --input: var(--panel-2);
+  --ring: var(--brand);
 
   /* Chart colors */
-  --chart-1: oklch(0.70 0.15 265);
+  --chart-1: var(--brand);
   --chart-2: oklch(0.72 0.14 160);
   --chart-3: oklch(0.75 0.15 45);
   --chart-4: oklch(0.65 0.2 25);
   --chart-5: oklch(0.60 0.15 300);
 
   /* Sidebar */
-  --sidebar: oklch(0.11 0.01 250);
-  --sidebar-foreground: oklch(0.88 0.005 250);
-  --sidebar-primary: oklch(0.70 0.15 265);
+  --sidebar: var(--bg);
+  --sidebar-foreground: var(--text);
+  --sidebar-primary: var(--brand);
   --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: oklch(0.20 0.015 250);
-  --sidebar-accent-foreground: oklch(0.88 0.005 250);
-  --sidebar-border: oklch(0.22 0.01 250);
-  --sidebar-ring: oklch(0.70 0.15 265);
+  --sidebar-accent: var(--panel-2);
+  --sidebar-accent-foreground: var(--text);
+  --sidebar-border: var(--line);
+  --sidebar-ring: var(--brand);
 
   /* Virtual Comtor specific colors */
   --japanese: oklch(0.78 0.14 55);
@@ -111,7 +123,12 @@
   --our: oklch(0.68 0.12 240);
 }
 
-/* Keep .dark class working for next-themes compatibility */
+/*
+ * Dark mode — exact Industrial Dark surfaces/text/borders preserved so the
+ * appearance is identical to before. Accent-driven tokens (primary / ring /
+ * sidebar-primary / chart-1) follow the engine's --brand so changing the
+ * accent recolors the chrome here too.
+ */
 .dark {
   --background: oklch(0.13 0.01 250);
   --foreground: oklch(0.93 0.005 250);
@@ -119,7 +136,7 @@
   --card-foreground: oklch(0.93 0.005 250);
   --popover: oklch(0.17 0.01 250);
   --popover-foreground: oklch(0.93 0.005 250);
-  --primary: oklch(0.70 0.15 265);
+  --primary: var(--brand);
   --primary-foreground: oklch(0.98 0 0);
   --secondary: oklch(0.22 0.01 250);
   --secondary-foreground: oklch(0.88 0.005 250);
@@ -130,20 +147,20 @@
   --destructive: oklch(0.65 0.2 25);
   --border: oklch(0.25 0.01 250);
   --input: oklch(0.22 0.01 250);
-  --ring: oklch(0.70 0.15 265);
-  --chart-1: oklch(0.70 0.15 265);
+  --ring: var(--brand);
+  --chart-1: var(--brand);
   --chart-2: oklch(0.72 0.14 160);
   --chart-3: oklch(0.75 0.15 45);
   --chart-4: oklch(0.65 0.2 25);
   --chart-5: oklch(0.60 0.15 300);
   --sidebar: oklch(0.11 0.01 250);
   --sidebar-foreground: oklch(0.88 0.005 250);
-  --sidebar-primary: oklch(0.70 0.15 265);
+  --sidebar-primary: var(--brand);
   --sidebar-primary-foreground: oklch(0.98 0 0);
   --sidebar-accent: oklch(0.20 0.015 250);
   --sidebar-accent-foreground: oklch(0.88 0.005 250);
   --sidebar-border: oklch(0.22 0.01 250);
-  --sidebar-ring: oklch(0.70 0.15 265);
+  --sidebar-ring: var(--brand);
   --japanese: oklch(0.78 0.14 55);
   --vietnamese: oklch(0.72 0.14 160);
   --customer: oklch(0.75 0.12 45);

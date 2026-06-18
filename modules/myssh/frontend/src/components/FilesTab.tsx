@@ -266,7 +266,7 @@ export function FilesTab({ hostId, hostLabel, onPreview }: Props) {
         {localNewFolderOpen && (
           <input
             autoFocus
-            className="border-b border-cyan-300/30 bg-white/[0.05] px-3 py-1.5 text-sm outline-none"
+            className="border-b border-[color-mix(in_oklch,var(--brand)_30%,transparent)] bg-white/[0.05] px-3 py-1.5 text-sm outline-none"
             placeholder="Folder name, Enter to create"
             value={localNewFolder}
             onChange={(e) => setLocalNewFolder(e.target.value)}
@@ -305,13 +305,13 @@ export function FilesTab({ hostId, hostLabel, onPreview }: Props) {
             rowAction={(e) => (
               <>
                 <button
-                  className="text-[#9aa6b6] hover:text-cyan-300"
+                  className="text-[var(--text-muted)] hover:text-[var(--brand)]"
                   title="Upload to remote →"
                   onClick={() => upload(asPayload('local', e))}
                 >
                   <ArrowRight className="size-3.5" />
                 </button>
-                <button className="text-[#9aa6b6] hover:text-[#ffb4ab]" title="Delete" onClick={() => deleteLocal(e)}>
+                <button className="text-[var(--text-muted)] hover:text-[#ffb4ab]" title="Delete" onClick={() => deleteLocal(e)}>
                   <Trash2 className="size-3.5" />
                 </button>
               </>
@@ -322,14 +322,14 @@ export function FilesTab({ hostId, hostLabel, onPreview }: Props) {
 
       <div
         onMouseDown={startSplit}
-        className="w-1 shrink-0 cursor-col-resize bg-white/10 transition hover:bg-cyan-300/40"
+        className="w-1 shrink-0 cursor-col-resize bg-white/10 transition hover:bg-[color-mix(in_oklch,var(--brand)_40%,transparent)]"
       />
 
       <div style={{ width: `${100 - splitPct}%` }} className="flex min-w-0 flex-col">
         {newFolderOpen && (
           <input
             autoFocus
-            className="border-b border-cyan-300/30 bg-white/[0.05] px-3 py-1.5 text-sm outline-none"
+            className="border-b border-[color-mix(in_oklch,var(--brand)_30%,transparent)] bg-white/[0.05] px-3 py-1.5 text-sm outline-none"
             placeholder="Folder name, Enter to create"
             value={newFolder}
             onChange={(e) => setNewFolder(e.target.value)}
@@ -372,13 +372,13 @@ export function FilesTab({ hostId, hostLabel, onPreview }: Props) {
             rowAction={(e) => (
               <>
                 <button
-                  className="text-[#9aa6b6] hover:text-cyan-300"
+                  className="text-[var(--text-muted)] hover:text-[var(--brand)]"
                   title="← Download to local"
                   onClick={() => download(asPayload('remote', e))}
                 >
                   <ArrowLeft className="size-3.5" />
                 </button>
-                <button className="text-[#9aa6b6] hover:text-[#ffb4ab]" title="Delete" onClick={() => deleteRemote(e)}>
+                <button className="text-[var(--text-muted)] hover:text-[#ffb4ab]" title="Delete" onClick={() => deleteRemote(e)}>
                   <Trash2 className="size-3.5" />
                 </button>
               </>

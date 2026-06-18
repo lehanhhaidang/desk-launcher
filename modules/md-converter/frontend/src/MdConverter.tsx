@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@desk-launcher/ui'
+import { AppearanceButton } from '@desk-launcher/theme'
 import { convertFile, supportedExtensions } from './api/md-api'
 import { MarkdownDocument } from './components/MarkdownDocument'
 
@@ -255,15 +256,15 @@ export default function MdConverter() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <Button variant="outline" className="border-white/10 bg-white/[0.035] text-[var(--on-surface)] hover:bg-white/[0.07] hover:text-white" onClick={handlePickFolder} disabled={busy}>
+            <Button variant="outline" className="border-white/10 bg-white/[0.035] text-[var(--on-surface)] hover:bg-white/[0.07] hover:text-[var(--text)]" onClick={handlePickFolder} disabled={busy}>
               <FolderOpen className="h-4 w-4" />
               Choose folder
             </Button>
-            <Button variant="outline" className="border-white/10 bg-white/[0.035] text-[var(--on-surface)] hover:bg-white/[0.07] hover:text-white" onClick={handlePickFiles} disabled={busy}>
+            <Button variant="outline" className="border-white/10 bg-white/[0.035] text-[var(--on-surface)] hover:bg-white/[0.07] hover:text-[var(--text)]" onClick={handlePickFiles} disabled={busy}>
               <FileText className="h-4 w-4" />
               Choose files
             </Button>
-            <Button variant="outline" className="border-white/10 bg-white/[0.035] text-[var(--on-surface)] hover:bg-white/[0.07] hover:text-white" onClick={handleCopy} disabled={!activeFile?.markdown}>
+            <Button variant="outline" className="border-white/10 bg-white/[0.035] text-[var(--on-surface)] hover:bg-white/[0.07] hover:text-[var(--text)]" onClick={handleCopy} disabled={!activeFile?.markdown}>
               <Copy className="h-4 w-4" />
               {copied ? 'Copied' : 'Copy'}
             </Button>
@@ -271,6 +272,7 @@ export default function MdConverter() {
               <Save className="h-4 w-4" />
               Save
             </Button>
+            <AppearanceButton className="inline-flex size-9 items-center justify-center rounded-md border border-white/10 bg-white/[0.035] text-[var(--on-surface)] transition-colors hover:bg-white/[0.07] hover:text-[var(--text)]" />
           </div>
         </div>
 
@@ -278,7 +280,7 @@ export default function MdConverter() {
           <div
             className={`rounded-xl border border-dashed px-4 py-3 text-sm transition ${
               dropActive
-                ? 'border-[var(--primary)] bg-[rgba(124,238,230,0.1)] text-[var(--primary)]'
+                ? 'border-[var(--primary)] bg-[color-mix(in_oklch,var(--brand)_10%,transparent)] text-[var(--primary)]'
                 : 'border-[var(--outline-variant)] bg-white/[0.025] text-[var(--on-surface-variant)]'
             }`}
           >
@@ -344,7 +346,7 @@ export default function MdConverter() {
               onChange={(event) => handleMarkdownChange(event.target.value)}
               placeholder="Converted Markdown will appear here."
               spellCheck={false}
-              className="mdc-editor min-h-0 flex-1 resize-none border-0 bg-[rgba(10,11,16,0.58)] p-5 font-mono text-sm leading-6 outline-none"
+              className="mdc-editor min-h-0 flex-1 resize-none border-0 bg-[color-mix(in_oklch,var(--bg)_58%,transparent)] p-5 font-mono text-sm leading-6 outline-none"
             />
           )}
         </section>

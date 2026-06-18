@@ -3,11 +3,17 @@
 
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import { ThemeProvider, applyThemeFromStorage } from '@desk-launcher/theme'
 import MdConverter from '@modules/md-converter/frontend/src/MdConverter'
 import '@modules/md-converter/frontend/src/styles.css'
 
+// Apply the saved theme before the first paint to avoid a flash of defaults.
+applyThemeFromStorage('md-converter')
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <MdConverter />
+    <ThemeProvider appId="md-converter">
+      <MdConverter />
+    </ThemeProvider>
   </React.StrictMode>,
 )

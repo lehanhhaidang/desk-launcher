@@ -18,7 +18,7 @@ interface Props {
 }
 
 const inputClass =
-  'w-full rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-[#edf3f7] outline-none transition focus:border-cyan-300/40'
+  'w-full rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-[var(--text)] outline-none transition focus:border-[color-mix(in_oklch,var(--brand)_40%,transparent)]'
 
 export function SnippetsPanel({ open, onClose, onRun }: Props) {
   const [snippets, setSnippets] = useState<Snippet[]>([])
@@ -79,7 +79,7 @@ export function SnippetsPanel({ open, onClose, onRun }: Props) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
       <div className="myssh-panel flex max-h-[80vh] w-full max-w-2xl flex-col rounded-xl border p-6 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-[#edf3f7]">Snippets</h2>
+          <h2 className="text-lg font-semibold text-[var(--text)]">Snippets</h2>
           <Button variant="ghost" size="sm" onClick={onClose}>
             Close
           </Button>
@@ -87,7 +87,7 @@ export function SnippetsPanel({ open, onClose, onRun }: Props) {
 
         <div className="mb-4 max-h-56 overflow-y-auto rounded-lg border border-white/10">
           {snippets.length === 0 ? (
-            <p className="px-4 py-6 text-center text-sm text-[#7c8797]">No snippets yet.</p>
+            <p className="px-4 py-6 text-center text-sm text-[var(--text-faint)]">No snippets yet.</p>
           ) : (
             snippets.map((s) => (
               <div
@@ -96,24 +96,24 @@ export function SnippetsPanel({ open, onClose, onRun }: Props) {
               >
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-medium">{s.name}</div>
-                  <div className="truncate font-mono text-xs text-[#7c8797]">{s.command}</div>
+                  <div className="truncate font-mono text-xs text-[var(--text-faint)]">{s.command}</div>
                 </div>
                 <button
-                  className="text-[#9aa6b6] transition hover:text-cyan-300"
+                  className="text-[var(--text-muted)] transition hover:text-[var(--brand)]"
                   title="Run on active session"
                   onClick={() => onRun(s.command)}
                 >
                   <Play className="size-4" />
                 </button>
                 <button
-                  className="text-[#9aa6b6] transition hover:text-[#edf3f7]"
+                  className="text-[var(--text-muted)] transition hover:text-[var(--text)]"
                   title="Edit"
                   onClick={() => startEdit(s)}
                 >
                   <Pencil className="size-4" />
                 </button>
                 <button
-                  className="text-[#9aa6b6] transition hover:text-[#ffb4ab]"
+                  className="text-[var(--text-muted)] transition hover:text-[#ffb4ab]"
                   title="Delete"
                   onClick={() => remove(s)}
                 >

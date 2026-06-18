@@ -9,7 +9,7 @@ interface WorkspaceListProps {
 export function WorkspaceList({ workspaces, activeId, onSelect }: WorkspaceListProps) {
     if (workspaces.length === 0) {
         return (
-            <div className="p-4 text-sm text-gray-500">
+            <div className="p-4 text-sm text-[var(--text-muted)]">
                 No workspaces yet
             </div>
         );
@@ -23,7 +23,7 @@ export function WorkspaceList({ workspaces, activeId, onSelect }: WorkspaceListP
                     onClick={() => onSelect(workspace.id)}
                     className={`flex items-center gap-2 px-4 py-2 cursor-pointer text-sm ${activeId === workspace.id
                             ? 'bg-blue-50 text-blue-700'
-                            : 'text-gray-700 hover:bg-gray-50'
+                            : 'text-[var(--text)] hover:bg-gray-50'
                         }`}
                 >
                     <span>{workspace.icon || '📁'}</span>

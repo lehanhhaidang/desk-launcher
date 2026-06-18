@@ -8,6 +8,7 @@ import {
   Code2,
   FolderOpen,
   FolderPlus,
+  Palette,
   Pencil,
   Plus,
   Search,
@@ -17,7 +18,8 @@ import {
   Trash2,
   Unplug,
 } from 'lucide-react'
-import { Button } from '@desk-launcher/ui'
+import { Button, buttonVariants } from '@desk-launcher/ui'
+import { AppearanceButton } from '@desk-launcher/theme'
 import { HostDialog } from './components/HostDialog'
 import { SnippetsPanel } from './components/SnippetsPanel'
 import { ForwardsPanel } from './components/ForwardsPanel'
@@ -253,15 +255,18 @@ export default function MySSH() {
   }, [tabs, tabStatus])
 
   return (
-    <div className="myssh-bg flex h-screen w-screen text-[#edf3f7]">
+    <div className="myssh-bg flex h-screen w-screen text-[var(--text)]">
       {/* Sidebar */}
       <aside className="myssh-panel flex w-80 flex-col border-r">
         <header className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <TerminalSquare className="size-5 text-cyan-300" />
+            <TerminalSquare className="size-5 text-[var(--brand)]" />
             <span className="text-sm font-semibold tracking-wide">MySSH</span>
           </div>
           <div className="flex gap-1">
+            <AppearanceButton className={buttonVariants({ variant: 'ghost', size: 'icon-sm' })}>
+              <Palette className="size-4" />
+            </AppearanceButton>
             <Button size="icon-sm" variant="ghost" title="Port forwarding" onClick={() => setForwardsOpen(true)}>
               <ArrowRightLeft className="size-4" />
             </Button>
@@ -282,9 +287,9 @@ export default function MySSH() {
 
         <div className="px-4 pb-3">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-[#7c8797]" />
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-[var(--text-faint)]" />
             <input
-              className="w-full rounded-md border border-white/10 bg-white/[0.04] py-1.5 pl-8 pr-3 text-sm outline-none focus:border-cyan-300/40"
+              className="w-full rounded-md border border-white/10 bg-white/[0.04] py-1.5 pl-8 pr-3 text-sm outline-none focus:border-[color-mix(in_oklch,var(--brand)_40%,transparent)]"
               placeholder="Search hosts…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -296,7 +301,7 @@ export default function MySSH() {
           <div className="px-4 pb-2">
             <input
               autoFocus
-              className="w-full rounded-md border border-cyan-300/30 bg-white/[0.05] px-3 py-1.5 text-sm outline-none"
+              className="w-full rounded-md border border-[color-mix(in_oklch,var(--brand)_30%,transparent)] bg-white/[0.05] px-3 py-1.5 text-sm outline-none"
               placeholder="Group name, Enter to save"
               value={newGroupName}
               onChange={(e) => setNewGroupName(e.target.value)}
@@ -337,8 +342,8 @@ export default function MySSH() {
             onConnect={connect}
           />
           {hosts.length === 0 && (
-            <p className="px-3 py-8 text-center text-sm text-[#7c8797]">
-              No hosts yet. Click <span className="text-cyan-300">+</span> to add one.
+            <p className="px-3 py-8 text-center text-sm text-[var(--text-faint)]">
+              No hosts yet. Click <span className="text-[var(--brand)]">+</span> to add one.
             </p>
           )}
         </div>
@@ -351,7 +356,7 @@ export default function MySSH() {
             {headerCollapsed ? (
               <div className="flex items-center gap-2 border-b border-white/10 px-4 py-1.5">
                 <button
-                  className="text-[#9aa6b6] hover:text-cyan-300"
+                  className="text-[var(--text-muted)] hover:text-[var(--brand)]"
                   title="Show host details"
                   onClick={() => setHeaderCollapsed(false)}
                 >
@@ -359,7 +364,7 @@ export default function MySSH() {
                 </button>
                 <span className="text-sm font-medium">{selected ? selected.label : 'No host selected'}</span>
                 {selected && (
-                  <span className="font-mono text-xs text-[#7c8797]">
+                  <span className="font-mono text-xs text-[var(--text-faint)]">
                     {selected.username}@{selected.hostname}
                   </span>
                 )}
@@ -388,7 +393,7 @@ export default function MySSH() {
                       {selected ? selected.label : 'No host selected'}
                     </h1>
                     {selected && (
-                      <p className="mt-0.5 truncate font-mono text-xs text-[#9aa6b6]">
+                      <p className="mt-0.5 truncate font-mono text-xs text-[var(--text-muted)]">
                         {selected.username}@{selected.hostname}:{selected.port}
                         {selected.tags.length > 0 && <span className="ml-2">· {selected.tags.join(', ')}</span>}
                       </p>
@@ -441,7 +446,7 @@ export default function MySSH() {
               <div className="mb-4 flex items-start justify-between">
                 <div>
                   <h1 className="text-xl font-semibold">{selected.label}</h1>
-                  <p className="mt-1 font-mono text-sm text-[#9aa6b6]">
+                  <p className="mt-1 font-mono text-sm text-[var(--text-muted)]">
                     {selected.username}@{selected.hostname}:{selected.port}
                   </p>
                 </div>
@@ -475,7 +480,7 @@ export default function MySSH() {
             </div>
           </div>
         ) : (
-          <div className="flex h-full flex-col items-center justify-center text-center text-[#7c8797]">
+          <div className="flex h-full flex-col items-center justify-center text-center text-[var(--text-faint)]">
             <Server className="mb-4 size-12 opacity-40" />
             <p className="text-sm">Select a host to see its details, or create a new one.</p>
           </div>
@@ -531,7 +536,7 @@ function GroupSection({
   return (
     <div className="mb-2">
       <div className="group flex items-center justify-between px-3 py-1.5">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-[#7c8797]">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-faint)]">
           {title}
         </span>
         {onDeleteGroup && (
@@ -540,7 +545,7 @@ function GroupSection({
             title="Delete group"
             onClick={onDeleteGroup}
           >
-            <Trash2 className="size-3.5 text-[#7c8797] hover:text-[#ffb4ab]" />
+            <Trash2 className="size-3.5 text-[var(--text-faint)] hover:text-[#ffb4ab]" />
           </button>
         )}
       </div>
@@ -553,23 +558,23 @@ function GroupSection({
             onDoubleClick={() => onConnect(host)}
             title="Double-click to connect"
             className={`flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left transition ${
-              selectedId === host.id ? 'bg-cyan-300/12 text-cyan-100' : 'hover:bg-white/[0.04]'
+              selectedId === host.id ? 'bg-[color-mix(in_oklch,var(--brand)_12%,transparent)] text-[var(--brand)]' : 'hover:bg-white/[0.04]'
             }`}
           >
             <span className="relative shrink-0">
-              <Server className={`size-4 ${connected ? 'text-emerald-300' : 'text-[#7c8797]'}`} />
+              <Server className={`size-4 ${connected ? 'text-emerald-300' : 'text-[var(--text-faint)]'}`} />
               {connected && (
-                <span className="absolute -right-0.5 -top-0.5 size-2 rounded-full bg-emerald-400 ring-2 ring-[#0d0f14]" />
+                <span className="absolute -right-0.5 -top-0.5 size-2 rounded-full bg-emerald-400 ring-2 ring-[var(--panel)]" />
               )}
             </span>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-medium">{host.label}</span>
-              <span className="block truncate font-mono text-xs text-[#7c8797]">
+              <span className="block truncate font-mono text-xs text-[var(--text-faint)]">
                 {host.username}@{host.hostname}
               </span>
             </span>
             {host.lastUsed != null && (
-              <span className="shrink-0 text-[10px] text-[#5f6b7a]">{formatRelative(host.lastUsed)}</span>
+              <span className="shrink-0 text-[10px] text-[var(--text-faint)]">{formatRelative(host.lastUsed)}</span>
             )}
           </button>
         )
@@ -581,7 +586,7 @@ function GroupSection({
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <>
-      <dt className="text-[#7c8797]">{label}</dt>
+      <dt className="text-[var(--text-faint)]">{label}</dt>
       <dd className="truncate font-mono">{value}</dd>
     </>
   )

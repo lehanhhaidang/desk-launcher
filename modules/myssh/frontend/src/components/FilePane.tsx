@@ -72,24 +72,24 @@ export function FilePane({
       onDrop={onPaneDrop}
     >
       <div className="flex items-center gap-1 border-b border-white/10 bg-black/20 px-2 py-1.5">
-        <span className="mr-1 max-w-[40%] truncate text-xs font-semibold uppercase tracking-wider text-[#7c8797]">
+        <span className="mr-1 max-w-[40%] truncate text-xs font-semibold uppercase tracking-wider text-[var(--text-faint)]">
           {title}
         </span>
-        <button className="text-[#9aa6b6] hover:text-cyan-300" title="Up" onClick={onUp}>
+        <button className="text-[var(--text-muted)] hover:text-[var(--brand)]" title="Up" onClick={onUp}>
           <ArrowUp className="size-4" />
         </button>
-        <button className="text-[#9aa6b6] hover:text-cyan-300" title="Refresh" onClick={onRefresh}>
+        <button className="text-[var(--text-muted)] hover:text-[var(--brand)]" title="Refresh" onClick={onRefresh}>
           <RefreshCw className="size-4" />
         </button>
         {onNewFolder && (
-          <button className="text-[#9aa6b6] hover:text-cyan-300" title="New folder" onClick={onNewFolder}>
+          <button className="text-[var(--text-muted)] hover:text-[var(--brand)]" title="New folder" onClick={onNewFolder}>
             <FolderPlus className="size-4" />
           </button>
         )}
         {editingPath ? (
           <input
             autoFocus
-            className="ml-1 min-w-0 flex-1 rounded bg-black/30 px-2 py-1 font-mono text-[11px] text-[#edf3f7] outline-none"
+            className="ml-1 min-w-0 flex-1 rounded bg-black/30 px-2 py-1 font-mono text-[11px] text-[var(--text)] outline-none"
             value={pathDraft}
             onChange={(e) => setPathDraft(e.target.value)}
             onKeyDown={(e) => {
@@ -103,7 +103,7 @@ export function FilePane({
           />
         ) : (
           <div
-            className="ml-1 min-w-0 flex-1 cursor-text truncate rounded bg-black/20 px-2 py-1 font-mono text-[11px] text-[#9aa6b6] hover:text-[#c9d4e0]"
+            className="ml-1 min-w-0 flex-1 cursor-text truncate rounded bg-black/20 px-2 py-1 font-mono text-[11px] text-[var(--text-muted)] hover:text-[var(--text)]"
             title="Click to type a path"
             onClick={() => {
               setPathDraft(cwd)
@@ -128,15 +128,15 @@ export function FilePane({
         {error ? (
           <p className="px-3 py-6 text-center text-sm text-[#ffb4ab]">{error}</p>
         ) : loading ? (
-          <p className="px-3 py-6 text-center text-sm text-[#7c8797]">Loading…</p>
+          <p className="px-3 py-6 text-center text-sm text-[var(--text-faint)]">Loading…</p>
         ) : entries.length === 0 ? (
-          <p className="px-3 py-6 text-center text-sm text-[#7c8797]">Empty folder.</p>
+          <p className="px-3 py-6 text-center text-sm text-[var(--text-faint)]">Empty folder.</p>
         ) : (
           entries.map((entry) => (
             <div
               key={entry.path}
               className={`group flex select-none items-center gap-2 px-2 py-1 ${
-                selectedPath === entry.path ? 'bg-cyan-300/15' : 'hover:bg-white/[0.03]'
+                selectedPath === entry.path ? 'bg-[color-mix(in_oklch,var(--brand)_15%,transparent)]' : 'hover:bg-white/[0.03]'
               }`}
               draggable={rowDraggable}
               onDragStart={onRowDragStart ? (e) => onRowDragStart(entry, e) : undefined}
@@ -147,14 +147,14 @@ export function FilePane({
               onDoubleClick={() => onOpen(entry)}
             >
               {entry.isDir ? (
-                <Folder className="size-4 shrink-0 text-cyan-300/80" />
+                <Folder className="size-4 shrink-0 text-[color-mix(in_oklch,var(--brand)_80%,transparent)]" />
               ) : (
-                <FileIcon className="size-4 shrink-0 text-[#7c8797]" />
+                <FileIcon className="size-4 shrink-0 text-[var(--text-faint)]" />
               )}
               {renamingPath === entry.path ? (
                 <input
                   autoFocus
-                  className="min-w-0 flex-1 rounded bg-black/30 px-1 text-sm text-[#edf3f7] outline-none"
+                  className="min-w-0 flex-1 rounded bg-black/30 px-1 text-sm text-[var(--text)] outline-none"
                   value={renameDraft}
                   onChange={(e) => setRenameDraft(e.target.value)}
                   onClick={(e) => e.stopPropagation()}
@@ -168,13 +168,13 @@ export function FilePane({
                 />
               ) : (
                 <span
-                  className={`min-w-0 flex-1 truncate text-sm ${entry.isDir ? 'text-cyan-100' : 'text-[#e6edf3]'}`}
+                  className={`min-w-0 flex-1 truncate text-sm ${entry.isDir ? 'text-[var(--brand)]' : 'text-[var(--text)]'}`}
                   title={entry.name}
                 >
                   {entry.name}
                 </span>
               )}
-              <span className="w-16 shrink-0 text-right font-mono text-[11px] text-[#7c8797]">
+              <span className="w-16 shrink-0 text-right font-mono text-[11px] text-[var(--text-faint)]">
                 {entry.isDir ? '' : formatSize(entry.size)}
               </span>
               {(rowAction || onRename) && (
@@ -186,7 +186,7 @@ export function FilePane({
                   {rowAction?.(entry)}
                   {onRename && (
                     <button
-                      className="text-[#9aa6b6] hover:text-[#edf3f7]"
+                      className="text-[var(--text-muted)] hover:text-[var(--text)]"
                       title="Rename (F2)"
                       onClick={() => startRename(entry)}
                     >

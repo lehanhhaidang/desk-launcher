@@ -13,7 +13,7 @@ export function SyncHistory({ docSetId }: { docSetId: string }) {
     }, [docSetId]);
 
     if (logs.length === 0) {
-        return <p className="text-sm text-gray-500 p-4">No sync history yet</p>;
+        return <p className="text-sm text-[var(--text-muted)] p-4">No sync history yet</p>;
     }
 
     return (
@@ -31,8 +31,8 @@ export function SyncHistory({ docSetId }: { docSetId: string }) {
                         <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
                     )}
                     <span className="flex-1 truncate">{log.message || log.error_msg || 'Sync'}</span>
-                    <span className="text-gray-400 shrink-0">{log.files_count} files</span>
-                    <time className="text-gray-400 shrink-0">{formatRelativeTime(log.created_at)}</time>
+                    <span className="text-[var(--text-faint)] shrink-0">{log.files_count} files</span>
+                    <time className="text-[var(--text-faint)] shrink-0">{formatRelativeTime(log.created_at)}</time>
                 </div>
             ))}
         </div>

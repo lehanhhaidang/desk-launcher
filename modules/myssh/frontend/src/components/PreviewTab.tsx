@@ -75,8 +75,8 @@ export function PreviewTab({ origin, path, name, sftpId }: Props) {
       : 'Binary file'
     return (
       <Centered>
-        <FileWarning className="mb-3 size-10 text-[#7c8797]" />
-        <p className="mb-4 text-sm text-[#9aa6b6]">{reason}</p>
+        <FileWarning className="mb-3 size-10 text-[var(--text-faint)]" />
+        <p className="mb-4 text-sm text-[var(--text-muted)]">{reason}</p>
         {origin === 'local' ? (
           <Button variant="outline" size="sm" onClick={openInSystem}>
             <ExternalLink className="size-4" /> Open with system app
@@ -95,10 +95,10 @@ export function PreviewTab({ origin, path, name, sftpId }: Props) {
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-2 border-b border-white/10 bg-black/20 px-4 py-1.5">
         <span className="truncate text-sm font-medium">{name}</span>
-        <span className="shrink-0 text-xs text-[#7c8797]">{formatSize(preview.size)}</span>
+        <span className="shrink-0 text-xs text-[var(--text-faint)]">{formatSize(preview.size)}</span>
         {origin === 'local' && (
           <button
-            className="ml-auto text-[#9aa6b6] hover:text-cyan-300"
+            className="ml-auto text-[var(--text-muted)] hover:text-[var(--brand)]"
             title="Open with system app"
             onClick={openInSystem}
           >
@@ -123,7 +123,7 @@ export function PreviewTab({ origin, path, name, sftpId }: Props) {
 
 function Centered({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex h-full flex-col items-center justify-center px-6 text-center text-sm text-[#9aa6b6]">
+    <div className="flex h-full flex-col items-center justify-center px-6 text-center text-sm text-[var(--text-muted)]">
       {children}
     </div>
   )

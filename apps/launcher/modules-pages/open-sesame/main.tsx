@@ -4,12 +4,18 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { Toaster } from 'sonner'
+import { ThemeProvider, applyThemeFromStorage } from '@desk-launcher/theme'
 import App from '@os/App'
 import '@os/index.css'
 
+// Apply the saved theme before the first paint to avoid a flash of defaults.
+applyThemeFromStorage('open-sesame')
+
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <App />
-    <Toaster position="top-right" />
+    <ThemeProvider appId="open-sesame">
+      <App />
+      <Toaster position="top-right" />
+    </ThemeProvider>
   </React.StrictMode>,
 )

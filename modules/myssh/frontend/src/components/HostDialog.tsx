@@ -64,8 +64,8 @@ function formFromHost(host: Host): FormState {
 }
 
 const inputClass =
-  'w-full rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-[#edf3f7] outline-none transition focus:border-cyan-300/40 focus:bg-white/[0.06]'
-const labelClass = 'mb-1 block text-xs font-semibold uppercase tracking-wider text-[#9aa6b6]'
+  'w-full rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-[var(--text)] outline-none transition focus:border-[color-mix(in_oklch,var(--brand)_40%,transparent)] focus:bg-white/[0.06]'
+const labelClass = 'mb-1 block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]'
 
 export function HostDialog({ open, host, groups, hosts, onClose, onSaved }: Props) {
   const [form, setForm] = useState<FormState>(emptyForm)
@@ -125,7 +125,7 @@ export function HostDialog({ open, host, groups, hosts, onClose, onSaved }: Prop
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
       <div className="myssh-panel w-full max-w-lg rounded-xl border p-6 shadow-2xl">
-        <h2 className="mb-4 text-lg font-semibold text-[#edf3f7]">
+        <h2 className="mb-4 text-lg font-semibold text-[var(--text)]">
           {host ? 'Edit host' : 'New host'}
         </h2>
 

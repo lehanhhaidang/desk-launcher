@@ -6,13 +6,13 @@
   filter: drop-shadow(0 0 2em #61dafb);
 }
 :root {
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+  font-family: var(--font-sans, Inter, Avenir, Helvetica, Arial, sans-serif);
   font-size: 16px;
   line-height: 24px;
   font-weight: 400;
 
-  color: #0f0f0f;
-  background-color: #f6f6f6;
+  color: var(--text);
+  background-color: var(--bg);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -48,12 +48,12 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: var(--brand);
   text-decoration: inherit;
 }
 
 a:hover {
-  color: #535bf2;
+  color: var(--brand-2);
 }
 
 h1 {
@@ -63,13 +63,13 @@ h1 {
 input,
 button {
   border-radius: 8px;
-  border: 1px solid transparent;
+  border: 1px solid var(--line);
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  color: #0f0f0f;
-  background-color: #ffffff;
+  color: var(--text);
+  background-color: var(--surface);
   transition: border-color 0.25s;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
 }
@@ -79,11 +79,11 @@ button {
 }
 
 button:hover {
-  border-color: #396cd8;
+  border-color: var(--brand);
 }
 button:active {
-  border-color: #396cd8;
-  background-color: #e8e8e8;
+  border-color: var(--brand);
+  background-color: var(--panel-2);
 }
 
 input,
@@ -97,20 +97,20 @@ button {
 
 @media (prefers-color-scheme: dark) {
   :root {
-    color: #f6f6f6;
-    background-color: #2f2f2f;
+    color: var(--text);
+    background-color: var(--bg);
   }
 
   a:hover {
-    color: #24c8db;
+    color: var(--brand-2);
   }
 
   input,
   button {
-    color: #ffffff;
-    background-color: #0f0f0f98;
+    color: var(--text);
+    background-color: var(--surface);
   }
   button:active {
-    background-color: #0f0f0f69;
+    background-color: var(--panel);
   }
 }

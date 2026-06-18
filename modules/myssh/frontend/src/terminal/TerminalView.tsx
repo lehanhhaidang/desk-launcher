@@ -223,10 +223,10 @@ export function TerminalView({ hostId, active, onSession, onStatus }: Props) {
   return (
     <div className="relative h-full w-full">
       {searchOpen && (
-        <div className="absolute right-2 top-2 z-20 flex items-center gap-1 rounded-md border border-white/10 bg-[#11141b] px-2 py-1 shadow-lg">
+        <div className="absolute right-2 top-2 z-20 flex items-center gap-1 rounded-md border border-white/10 bg-[var(--panel)] px-2 py-1 shadow-lg">
           <input
             autoFocus
-            className="w-40 bg-transparent text-sm text-[#edf3f7] outline-none"
+            className="w-40 bg-transparent text-sm text-[var(--text)] outline-none"
             placeholder="Find…"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -235,13 +235,13 @@ export function TerminalView({ hostId, active, onSession, onStatus }: Props) {
               if (e.key === 'Escape') setSearchOpen(false)
             }}
           />
-          <button className="text-[#9aa6b6] hover:text-cyan-300" title="Previous" onClick={() => runSearch('prev')}>
+          <button className="text-[var(--text-muted)] hover:text-[var(--brand)]" title="Previous" onClick={() => runSearch('prev')}>
             <ArrowUp className="size-3.5" />
           </button>
-          <button className="text-[#9aa6b6] hover:text-cyan-300" title="Next" onClick={() => runSearch('next')}>
+          <button className="text-[var(--text-muted)] hover:text-[var(--brand)]" title="Next" onClick={() => runSearch('next')}>
             <ArrowDown className="size-3.5" />
           </button>
-          <button className="text-[#9aa6b6] hover:text-[#ffb4ab]" title="Close" onClick={() => setSearchOpen(false)}>
+          <button className="text-[var(--text-muted)] hover:text-[#ffb4ab]" title="Close" onClick={() => setSearchOpen(false)}>
             <X className="size-3.5" />
           </button>
         </div>
@@ -250,7 +250,7 @@ export function TerminalView({ hostId, active, onSession, onStatus }: Props) {
       {closed && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 backdrop-blur-[1px]">
           <button
-            className="flex items-center gap-2 rounded-md border border-cyan-300/30 bg-cyan-300/10 px-4 py-2 text-sm font-medium text-cyan-100 transition hover:bg-cyan-300/20"
+            className="flex items-center gap-2 rounded-md border border-[color-mix(in_oklch,var(--brand)_30%,transparent)] bg-[color-mix(in_oklch,var(--brand)_10%,transparent)] px-4 py-2 text-sm font-medium text-[var(--brand)] transition hover:bg-[color-mix(in_oklch,var(--brand)_20%,transparent)]"
             onClick={() => startRef.current()}
           >
             <RotateCw className="size-4" /> Reconnect

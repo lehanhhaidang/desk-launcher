@@ -1,5 +1,3 @@
-
-import { ThemeProvider as NextThemesProvider } from 'next-themes';
 import type { ReactNode } from 'react';
 
 interface ThemeProviderProps {
@@ -7,20 +5,13 @@ interface ThemeProviderProps {
 }
 
 /**
- * Theme provider wrapper — forces dark mode only.
- * Virtual Comtor uses dark-only design for meeting room use.
+ * Passthrough wrapper. Theming (dark/light/system, accent, font, radius,
+ * motion) is owned by the shared `@desk-launcher/theme` engine, wired at the
+ * window entry (modules-pages/comtor/main.tsx). Kept as a named component so
+ * App.tsx's import is unchanged and a future extraction has an obvious seam.
  */
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  return (
-    <NextThemesProvider
-      attribute="class"
-      defaultTheme="dark"
-      forcedTheme="dark"
-      disableTransitionOnChange
-    >
-      {children}
-    </NextThemesProvider>
-  );
+  return <>{children}</>;
 }
 
 export default ThemeProvider;

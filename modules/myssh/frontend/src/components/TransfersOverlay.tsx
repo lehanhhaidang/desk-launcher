@@ -42,16 +42,16 @@ export function TransfersOverlay() {
         return (
           <div key={t.id} className="myssh-panel rounded-lg border p-3 shadow-xl">
             <div className="mb-1.5 flex items-center justify-between gap-2 text-sm">
-              <span className="truncate text-[#edf3f7]" title={t.name}>
+              <span className="truncate text-[var(--text)]" title={t.name}>
                 {t.name}
               </span>
-              <span className="shrink-0 font-mono text-xs text-[#7c8797]">
+              <span className="shrink-0 font-mono text-xs text-[var(--text-faint)]">
                 {t.error ? 'failed' : t.done ? 'done' : `${pct}%`}
               </span>
             </div>
             <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
               <div
-                className={`h-full transition-all ${t.error ? 'bg-[#ffb4ab]' : 'bg-cyan-300'}`}
+                className={`h-full transition-all ${t.error ? 'bg-[#ffb4ab]' : 'bg-[var(--brand)]'}`}
                 style={{ width: `${t.error ? 100 : pct}%` }}
               />
             </div>

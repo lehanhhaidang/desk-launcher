@@ -21,6 +21,8 @@
       "@modules/*": ["../../modules/*"],
       "@desk-launcher/ui": ["../../packages/ui/src"],
       "@desk-launcher/ui/*": ["../../packages/ui/src/*"],
+      "@desk-launcher/theme": ["../../packages/theme/src"],
+      "@desk-launcher/theme/*": ["../../packages/theme/src/*"],
       "@desk-launcher/tauri-bridge": ["../../packages/tauri-bridge/src"],
       "@desk-launcher/tauri-bridge/*": ["../../packages/tauri-bridge/src/*"],
       "@os/*": ["../../modules/open-sesame/frontend/src/*"],

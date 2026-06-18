@@ -1,6 +1,7 @@
 /* Pull the full shadcn theme (background/foreground/primary/border/ring/etc.)
    from the shared UI package. Each module CSS does the same so windows
-   render consistently. */
+   render consistently. The brand tokens (--brand/--bg/--panel/--text/...)
+   also come from there and are driven by the packages/theme engine. */
 @import "../../../packages/ui/src/theme.css";
 
 html,
@@ -15,54 +16,47 @@ html.dark {
 }
 
 body {
-  background:
-    radial-gradient(circle at 16% 10%, rgba(183, 156, 255, 0.13), transparent 34%),
-    radial-gradient(circle at 84% 0%, rgba(124, 238, 230, 0.1), transparent 32%),
-    linear-gradient(135deg, #101015 0%, #111722 44%, #12111c 100%);
+  background: var(--app-bg);
 }
 
 .launcher-bg {
-  background:
-    radial-gradient(circle at 12% 12%, rgba(183, 156, 255, 0.14), transparent 30%),
-    radial-gradient(circle at 88% 8%, rgba(124, 238, 230, 0.1), transparent 28%),
-    radial-gradient(circle at 58% 110%, rgba(255, 188, 134, 0.06), transparent 32%),
-    linear-gradient(135deg, #101015 0%, #111722 48%, #12111c 100%);
+  background: var(--app-bg);
 }
 
 .launcher-panel {
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.018)),
-    rgba(18, 19, 27, 0.92);
-  border-color: rgba(158, 170, 190, 0.16);
+    linear-gradient(145deg, color-mix(in oklch, var(--text) 6%, transparent), color-mix(in oklch, var(--text) 1.8%, transparent)),
+    var(--panel);
+  border-color: var(--line);
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
 }
 
 .launcher-form-section {
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.048), rgba(255, 255, 255, 0.016)),
-    rgba(17, 18, 27, 0.94);
-  border-color: rgba(158, 170, 190, 0.16);
+    linear-gradient(145deg, color-mix(in oklch, var(--text) 4.8%, transparent), color-mix(in oklch, var(--text) 1.6%, transparent)),
+    var(--panel);
+  border-color: var(--line);
   box-shadow: 0 12px 34px rgba(0, 0, 0, 0.22);
 }
 
 .launcher-card {
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
-    rgba(36, 39, 55, 0.9);
-  border-color: rgba(158, 170, 190, 0.16);
+    linear-gradient(145deg, color-mix(in oklch, var(--text) 6%, transparent), color-mix(in oklch, var(--text) 2%, transparent)),
+    var(--panel-2);
+  border-color: var(--line);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
 }
 
 .launcher-card:hover {
-  border-color: rgba(183, 156, 255, 0.34);
+  border-color: color-mix(in oklch, var(--brand-2) 34%, transparent);
   box-shadow:
-    0 0 34px rgba(124, 238, 230, 0.07),
-    0 0 44px rgba(183, 156, 255, 0.07),
+    0 0 34px color-mix(in oklch, var(--brand) 7%, transparent),
+    0 0 44px color-mix(in oklch, var(--brand-2) 7%, transparent),
     0 16px 38px rgba(0, 0, 0, 0.24);
 }
 
 .launcher-lux-text {
-  background: linear-gradient(135deg, #7ceee6 0%, #d7c8ff 72%, #b79cff 100%);
+  background: linear-gradient(135deg, var(--brand) 0%, color-mix(in oklch, var(--brand) 40%, var(--brand-2)) 72%, var(--brand-2) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -70,17 +64,17 @@ body {
 
 .launcher-modal {
   background:
-    radial-gradient(circle at 18% 0%, rgba(124, 238, 230, 0.08), transparent 30%),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02)),
-    rgba(18, 19, 27, 0.94);
-  border-color: rgba(158, 170, 190, 0.2);
+    radial-gradient(circle at 18% 0%, color-mix(in oklch, var(--brand) 8%, transparent), transparent 30%),
+    linear-gradient(145deg, color-mix(in oklch, var(--text) 7%, transparent), color-mix(in oklch, var(--text) 2%, transparent)),
+    var(--panel);
+  border-color: var(--line);
   box-shadow: 0 34px 110px rgba(0, 0, 0, 0.62);
   animation: launcher-dialog-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .launcher-modal-backdrop {
   background:
-    radial-gradient(circle at 76% 22%, rgba(124, 238, 230, 0.06), transparent 28rem),
+    radial-gradient(circle at 76% 22%, color-mix(in oklch, var(--brand) 6%, transparent), transparent 28rem),
     rgba(1, 2, 6, 0.9);
   animation: launcher-backdrop-in 160ms ease-out;
 }
@@ -109,33 +103,33 @@ body {
   height: 2.5rem;
   width: 100%;
   border-radius: 0.625rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
+  background: color-mix(in oklch, var(--text) 6%, transparent);
   padding: 0 0.75rem;
-  color: #edf3f7;
+  color: var(--text);
   outline: none;
   box-shadow: none;
 }
 
 .launcher-input::placeholder,
 .launcher-textarea::placeholder {
-  color: rgba(174, 184, 199, 0.68);
+  color: var(--text-faint);
 }
 
 .launcher-input:focus,
 .launcher-textarea:focus {
-  border-color: rgba(183, 156, 255, 0.5);
-  box-shadow: 0 0 0 3px rgba(183, 156, 255, 0.16);
+  border-color: color-mix(in oklch, var(--brand-2) 50%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--brand-2) 16%, transparent);
 }
 
 .launcher-textarea {
   width: 100%;
   resize: vertical;
   border-radius: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
+  background: color-mix(in oklch, var(--text) 6%, transparent);
   padding: 0.75rem;
-  color: #edf3f7;
+  color: var(--text);
   outline: none;
   line-height: 1.55;
   font-size: 0.875rem;
@@ -143,8 +137,8 @@ body {
 }
 
 .launcher-primary-button {
-  background: linear-gradient(135deg, #7ceee6 0%, #9be7ff 42%, #b79cff 100%);
-  color: #071413;
+  background: linear-gradient(135deg, var(--brand) 0%, color-mix(in oklch, var(--brand) 45%, var(--brand-2)) 42%, var(--brand-2) 100%);
+  color: #08110f;
 }
 
 *::-webkit-scrollbar {
@@ -152,9 +146,9 @@ body {
   height: 8px;
 }
 *::-webkit-scrollbar-thumb {
-  background: oklch(0.42 0.04 260);
+  background: color-mix(in oklch, var(--text) 25%, transparent);
   border-radius: 4px;
 }
 *::-webkit-scrollbar-track {
-  background: oklch(0.15 0.02 260);
+  background: transparent;
 }

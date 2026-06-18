@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Eye, EyeOff, Loader2, CheckCircle2, AlertCircle, Languages, KeyRound, Sparkles } from 'lucide-react';
+import { Eye, EyeOff, Loader2, CheckCircle2, AlertCircle, Languages, KeyRound, Sparkles, Palette } from 'lucide-react';
+import { ThemePicker } from '@desk-launcher/theme';
 import { Button } from '@cmt/components/ui/button';
 import { Input } from '@cmt/components/ui/input';
 import { Label } from '@cmt/components/ui/label';
@@ -123,6 +124,14 @@ export function SettingsPage() {
           {t.settings.profileDescription ?? 'Configure your API keys and preferences.'}
         </p>
       </div>
+
+      <section className="space-y-4 rounded-2xl border border-border/40 bg-card/40 p-6">
+        <div className="flex items-center gap-2">
+          <Palette className="h-4 w-4 text-primary" />
+          <h2 className="text-base font-semibold">Appearance</h2>
+        </div>
+        <ThemePicker />
+      </section>
 
       <section className="space-y-4 rounded-2xl border border-border/40 bg-card/40 p-6">
         <div className="flex items-center gap-2">
