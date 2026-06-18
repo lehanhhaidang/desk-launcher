@@ -30,8 +30,8 @@
 
   /* Module-local M3-style aliases repointed at the shared engine tokens so
      the whole module recolors with the chosen accent / light-dark mode.
-     Brand → --brand, secondary brand → --brand-2, surfaces → --panel*/--bg,
-     text → --text*, lines → --line. Dark mode stays visually identical. */
+     Brand → --brand, secondary brand → --brand-2, surfaces → --panel/--bg,
+     text → --text, lines → --line. Dark mode stays visually identical. */
   --background: var(--bg);
   --surface: var(--panel);
   --surface-lowest: var(--surface);
