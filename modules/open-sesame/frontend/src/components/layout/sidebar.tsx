@@ -74,14 +74,9 @@ export function Sidebar({ className }: { className?: string }) {
                 <AppearanceButton
                     title="Appearance"
                     className="flex h-10 w-10 items-center justify-center rounded-lg text-[color-mix(in_srgb,var(--on-surface-variant)_62%,transparent)] transition-all duration-200 hover:bg-[rgba(255,255,255,0.06)] hover:text-[var(--primary)]"
-                />
-
-                <button
-                    className="flex h-10 w-10 items-center justify-center rounded-lg text-[color-mix(in_srgb,var(--on-surface-variant)_62%,transparent)] transition-all duration-200 hover:bg-[rgba(255,255,255,0.06)] hover:text-[var(--primary)]"
-                    title="Settings"
                 >
                     <Settings className="h-5 w-5" />
-                </button>
+                </AppearanceButton>
 
                 {account && (
                     <>

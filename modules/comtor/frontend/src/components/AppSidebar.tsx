@@ -8,7 +8,6 @@ import {
   Settings,
   Info,
 } from 'lucide-react';
-import { AppearanceButton } from '@desk-launcher/theme';
 import { Button } from '@cmt/components/ui/button';
 import { useI18n } from '@cmt/lib/i18n';
 import { APP_VERSION } from '@cmt/lib/version';
@@ -59,10 +58,6 @@ export function AppSidebar({ currentView, onNavigate }: AppSidebarProps) {
           <span className="text-lg font-bold tracking-tight">{t.common.appName}</span>
           <span className="text-xs text-muted-foreground">v{APP_VERSION}</span>
         </div>
-        <AppearanceButton
-          title="Appearance"
-          className="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground"
-        />
       </div>
 
       <nav className="flex-1 space-y-1 px-3 py-4">

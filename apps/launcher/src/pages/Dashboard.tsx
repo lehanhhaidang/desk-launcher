@@ -36,7 +36,7 @@ const sidebarItems = [
   { label: 'System Logs', icon: ListTree },
 ]
 
-type Modal = 'settings' | 'scaffold' | 'appearance' | null
+type Modal = 'settings' | 'scaffold' | null
 
 export function Dashboard() {
   const [opening, setOpening] = useState<string | null>(null)
@@ -156,16 +156,6 @@ export function Dashboard() {
               type="button"
               variant="ghost"
               size="icon"
-              onClick={() => setModal('appearance')}
-              className="rounded-full text-[var(--text-muted)] hover:bg-white/[0.07] hover:text-[var(--text)]"
-              title="Appearance"
-            >
-              <Palette className="size-5" aria-hidden="true" />
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
               onClick={() => setModal('settings')}
               className="rounded-full text-[var(--text-muted)] hover:bg-white/[0.07] hover:text-[var(--text)]"
               title="Settings"
@@ -222,26 +212,9 @@ export function Dashboard() {
         </footer>
       </main>
 
-      {modal === 'appearance' && <AppearanceModal onClose={() => setModal(null)} />}
       {modal === 'settings' && <SettingsModal onClose={() => setModal(null)} />}
       {modal === 'scaffold' && <ScaffoldModal onClose={() => setModal(null)} />}
     </div>
-  )
-}
-
-function AppearanceModal({ onClose }: { onClose: () => void }) {
-  return (
-    <ModalShell
-      title="Appearance"
-      eyebrow="Theme"
-      icon={<Palette className="size-5" />}
-      onClose={onClose}
-      description="Customize how Desk Launcher looks. Saved on this device."
-    >
-      <section className="launcher-panel mx-auto w-full max-w-md rounded-xl border p-5">
-        <ThemePicker />
-      </section>
-    </ModalShell>
   )
 }
 
@@ -252,8 +225,23 @@ function SettingsModal({ onClose }: { onClose: () => void }) {
       eyebrow="Launcher AI"
       icon={<KeyRound className="size-5" />}
       onClose={onClose}
-      description="Configure AI credentials used only by Desk Launcher workflows."
+      description="Appearance and AI credentials for Desk Launcher."
     >
+      <section className="launcher-panel mb-4 rounded-xl border p-4">
+        <div className="mb-4 flex items-start gap-3">
+          <div className="flex size-10 items-center justify-center rounded-lg border border-cyan-200/20 bg-cyan-200/10 text-cyan-100">
+            <Palette className="size-5" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-[var(--text)]">Appearance</h3>
+            <p className="mt-1 text-sm leading-6 text-[var(--text-muted)]">
+              Theme, accent, background and typography. Saved on this device.
+            </p>
+          </div>
+        </div>
+        <ThemePicker />
+      </section>
+
       <div className="grid min-h-0 gap-4 lg:grid-cols-[360px_minmax(0,1fr)]">
         <section className="launcher-panel rounded-xl border p-4">
           <div className="mb-4 flex items-start gap-3">
