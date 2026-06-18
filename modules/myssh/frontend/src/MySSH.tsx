@@ -125,6 +125,7 @@ export default function MySSH() {
   }, [filtered])
 
   const selected = hosts.find((h) => h.id === selectedId) ?? null
+  const selectedHasTabs = tabs.some((t) => t.hostId === selectedId)
 
   const openNew = () => {
     setEditing(null)
@@ -396,8 +397,12 @@ export default function MySSH() {
 
       {/* Main */}
       <main className="flex flex-1 flex-col">
-        {tabs.length > 0 ? (
-          <>
+        {/* The workspace stays mounted whenever any session exists, so other
+            hosts' terminals keep streaming in the background; it's hidden when
+            the selected host has no tabs, and that host's own detail shows
+            instead — connecting another host never collapses this one's view. */}
+        {tabs.length > 0 && (
+          <div className={selectedHasTabs ? 'flex min-h-0 flex-1 flex-col' : 'hidden'}>
             {headerCollapsed ? (
               <div className="flex items-center gap-2 border-b border-white/10 px-4 py-1.5">
                 <button
@@ -486,8 +491,10 @@ export default function MySSH() {
                 onManageCommands={manageCommands}
               />
             </div>
-          </>
-        ) : selected ? (
+          </div>
+        )}
+        {!selectedHasTabs &&
+          (selected ? (
           <div className="flex h-full flex-col p-8">
             <div className="myssh-panel rounded-xl border p-6">
               <div className="mb-4 flex items-start justify-between">
@@ -531,7 +538,7 @@ export default function MySSH() {
             <Server className="mb-4 size-12 opacity-40" />
             <p className="text-sm">Select a host to see its details, or create a new one.</p>
           </div>
-        )}
+        ))}
       </main>
 
       <HostDialog
