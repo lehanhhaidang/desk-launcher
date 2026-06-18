@@ -169,6 +169,29 @@
     --line: rgba(158, 170, 190, 0.16);
 }
 
+/* Page background blend. The engine sets data-bg (aurora|vivid|flat) on
+   <html>; every app/module page background consumes var(--app-bg), so the
+   accent gradient mixing is controlled centrally. */
+:root {
+    --app-bg:
+        radial-gradient(circle at 16% 8%, color-mix(in oklch, var(--brand-2) 13%, transparent), transparent 34%),
+        radial-gradient(circle at 84% 2%, color-mix(in oklch, var(--brand) 11%, transparent), transparent 32%),
+        radial-gradient(circle at 58% 112%, color-mix(in oklch, var(--brand) 6%, transparent), transparent 38%),
+        linear-gradient(135deg, var(--bg) 0%, var(--surface) 48%, var(--bg) 100%);
+}
+
+[data-bg="vivid"] {
+    --app-bg:
+        radial-gradient(circle at 10% 4%, color-mix(in oklch, var(--brand) 42%, transparent), transparent 48%),
+        radial-gradient(circle at 92% 6%, color-mix(in oklch, var(--brand-2) 40%, transparent), transparent 46%),
+        radial-gradient(circle at 62% 114%, color-mix(in oklch, var(--brand-2) 26%, transparent), transparent 54%),
+        linear-gradient(135deg, var(--bg) 0%, color-mix(in oklch, var(--brand) 12%, var(--surface)) 50%, var(--bg) 100%);
+}
+
+[data-bg="flat"] {
+    --app-bg: var(--bg);
+}
+
 /* Reduce motion — engine sets data-reduce-motion on <html>. */
 [data-reduce-motion="true"] *,
 [data-reduce-motion="true"] *::before,

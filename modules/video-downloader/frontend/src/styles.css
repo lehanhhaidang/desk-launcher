@@ -39,10 +39,7 @@ body {
   min-height: 100vh;
   overflow: auto;
   padding: 34px 24px;
-  background:
-    radial-gradient(circle at 14% 0%, color-mix(in oklch, var(--brand) 12%, transparent), transparent 28rem),
-    radial-gradient(circle at 96% 4%, color-mix(in oklch, var(--brand-2) 10%, transparent), transparent 26rem),
-    linear-gradient(135deg, var(--bg) 0%, var(--surface) 48%, var(--bg) 100%);
+  background: var(--app-bg);
 }
 
 .vd-page {

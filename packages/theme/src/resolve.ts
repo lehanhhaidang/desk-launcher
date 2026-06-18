@@ -79,6 +79,7 @@ export interface ResolvedTheme {
   vars: Record<string, string>
   rootFontSize: string
   reduceMotion: boolean
+  background: ThemeConfig['background']
 }
 
 /** Pure: turn a config into everything the apply step needs. Unit-tested. */
@@ -94,5 +95,6 @@ export function resolve(cfg: ThemeConfig): ResolvedTheme {
     },
     rootFontSize: FONT_SIZES[cfg.fontSize] ?? FONT_SIZES.md,
     reduceMotion: cfg.reduceMotion,
+    background: cfg.background ?? 'aurora',
   }
 }

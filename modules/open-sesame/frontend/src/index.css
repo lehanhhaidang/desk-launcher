@@ -102,10 +102,7 @@ body,
   min-height: 100%;
   margin: 0;
   overflow: hidden;
-  background:
-    radial-gradient(circle at 16% 10%, color-mix(in oklch, var(--brand-2) 13%, transparent), transparent 34%),
-    radial-gradient(circle at 84% 0%, color-mix(in oklch, var(--brand) 10%, transparent), transparent 32%),
-    linear-gradient(135deg, var(--bg) 0%, var(--surface) 44%, var(--bg) 100%);
+  background: var(--app-bg);
 }
 
 button,
@@ -120,10 +117,7 @@ button {
 }
 
 .app-bg {
-  background:
-    radial-gradient(circle at 18% 12%, color-mix(in oklch, var(--brand-2) 12%, transparent), transparent 30%),
-    radial-gradient(circle at 92% 16%, color-mix(in oklch, var(--brand) 9%, transparent), transparent 28%),
-    linear-gradient(135deg, var(--bg) 0%, var(--surface) 50%, var(--bg) 100%);
+  background: var(--app-bg);
 }
 
 .soft-panel {

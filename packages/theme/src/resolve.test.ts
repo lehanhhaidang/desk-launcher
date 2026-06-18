@@ -59,6 +59,7 @@ describe('resolve', () => {
     expect(r.vars['--font-sans']).toContain('Quicksand')
     expect(r.rootFontSize).toBe('16px')
     expect(r.reduceMotion).toBe(false)
+    expect(r.background).toBe('aurora')
   })
 
   it('scales font size and radius from config', () => {

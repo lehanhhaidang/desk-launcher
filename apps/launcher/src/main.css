@@ -16,18 +16,11 @@ html.dark {
 }
 
 body {
-  background:
-    radial-gradient(circle at 16% 10%, color-mix(in oklch, var(--brand-2) 13%, transparent), transparent 34%),
-    radial-gradient(circle at 84% 0%, color-mix(in oklch, var(--brand) 10%, transparent), transparent 32%),
-    linear-gradient(135deg, var(--bg) 0%, var(--surface) 48%, var(--bg) 100%);
+  background: var(--app-bg);
 }
 
 .launcher-bg {
-  background:
-    radial-gradient(circle at 12% 12%, color-mix(in oklch, var(--brand-2) 14%, transparent), transparent 30%),
-    radial-gradient(circle at 88% 8%, color-mix(in oklch, var(--brand) 10%, transparent), transparent 28%),
-    radial-gradient(circle at 58% 110%, color-mix(in oklch, var(--brand) 6%, transparent), transparent 32%),
-    linear-gradient(135deg, var(--bg) 0%, var(--surface) 48%, var(--bg) 100%);
+  background: var(--app-bg);
 }
 
 .launcher-panel {

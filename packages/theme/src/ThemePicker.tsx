@@ -1,6 +1,7 @@
 import { useTheme } from './provider'
 import {
   ACCENT_PRESETS,
+  type ThemeBackground,
   type ThemeFont,
   type ThemeFontSize,
   type ThemeMode,
@@ -22,6 +23,12 @@ const SIZES: { value: ThemeFontSize; label: string }[] = [
   { value: 'sm', label: 'Small' },
   { value: 'md', label: 'Medium' },
   { value: 'lg', label: 'Large' },
+]
+
+const BACKGROUNDS: { value: ThemeBackground; label: string }[] = [
+  { value: 'aurora', label: 'Aurora' },
+  { value: 'vivid', label: 'Vivid' },
+  { value: 'flat', label: 'Flat' },
 ]
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
@@ -118,6 +125,14 @@ export function ThemePicker() {
             />
           </label>
         </div>
+      </Field>
+
+      <Field label="Background">
+        <Segmented
+          options={BACKGROUNDS}
+          value={theme.background}
+          onChange={(background) => setTheme({ background })}
+        />
       </Field>
 
       <Field label="Font">

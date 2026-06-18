@@ -10,5 +10,6 @@ export {
   type ThemeMode,
   type ThemeFont,
   type ThemeFontSize,
+  type ThemeBackground,
 } from './tokens'
 export { resolve, resolveMode, deriveAccents, toOklch } from './resolve'

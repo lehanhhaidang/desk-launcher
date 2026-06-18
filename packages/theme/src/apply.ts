@@ -14,6 +14,7 @@ export function applyTheme(cfg: ThemeConfig): void {
   root.classList.toggle('dark', r.mode === 'dark')
   for (const [k, v] of Object.entries(r.vars)) root.style.setProperty(k, v)
   root.style.fontSize = r.rootFontSize
+  root.setAttribute('data-bg', r.background)
   if (r.reduceMotion) root.setAttribute('data-reduce-motion', 'true')
   else root.removeAttribute('data-reduce-motion')
 }
