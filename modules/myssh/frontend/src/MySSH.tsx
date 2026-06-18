@@ -203,8 +203,9 @@ export default function MySSH() {
   const selectHost = useCallback(
     (id: string) => {
       setSelectedId(id)
-      const tab = tabs.filter((t) => (t.kind === 'terminal' || t.kind === 'files') && t.hostId === id).at(-1)
-      if (tab) setActiveTab(tab.key)
+      // Show this host's own tabs: activate its last tab, or none if it has none.
+      const hostTabs = tabs.filter((t) => t.hostId === id)
+      setActiveTab(hostTabs.at(-1)?.key ?? null)
     },
     [tabs],
   )
@@ -213,7 +214,7 @@ export default function MySSH() {
     (key: string) => {
       setActiveTab(key)
       const tab = tabs.find((t) => t.key === key)
-      if (tab && (tab.kind === 'terminal' || tab.kind === 'files')) setSelectedId(tab.hostId)
+      if (tab) setSelectedId(tab.hostId)
     },
     [tabs],
   )
@@ -228,19 +229,27 @@ export default function MySSH() {
     path: string
     name: string
     sftpId?: string
+    hostId: string
   }) => {
     const key = crypto.randomUUID()
     setTabs((t) => [
       ...t,
-      { kind: 'preview', key, label: file.name, origin: file.origin, path: file.path, sftpId: file.sftpId },
+      { kind: 'preview', key, hostId: file.hostId, label: file.name, origin: file.origin, path: file.path, sftpId: file.sftpId },
     ])
     setActiveTab(key)
+    setSelectedId(file.hostId)
   }
 
   const removeTab = (key: string) => {
     setTabs((prev) => {
+      const closing = prev.find((t) => t.key === key)
       const next = prev.filter((t) => t.key !== key)
-      setActiveTab((cur) => (cur === key ? (next.at(-1)?.key ?? null) : cur))
+      // Fall back to another tab of the same host (stay on this host), else none.
+      setActiveTab((cur) => {
+        if (cur !== key) return cur
+        const sameHost = closing ? next.filter((t) => t.hostId === closing.hostId) : []
+        return sameHost.at(-1)?.key ?? null
+      })
       return next
     })
     setTabStatus((s) => {
@@ -465,6 +474,7 @@ export default function MySSH() {
             <div className="min-h-0 flex-1">
               <Workspace
                 tabs={tabs}
+                hostId={selectedId}
                 activeKey={activeTab}
                 onActivate={activateTab}
                 onClose={closeTab}

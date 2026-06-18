@@ -10,6 +10,7 @@ export type WorkspaceTab =
   | {
       kind: 'preview'
       key: string
+      hostId: string
       label: string
       origin: 'local' | 'remote'
       path: string
@@ -18,6 +19,8 @@ export type WorkspaceTab =
 
 interface Props {
   tabs: WorkspaceTab[]
+  /** Only this host's tabs show in the bar; other hosts' sessions stay mounted. */
+  hostId: string | null
   activeKey: string | null
   onActivate: (key: string) => void
   onClose: (key: string) => void
@@ -30,6 +33,7 @@ interface Props {
     path: string
     name: string
     sftpId?: string
+    hostId: string
   }) => void
   /** Open the snippets manager scoped to a host (from the terminal menu). */
   onManageCommands?: (hostId: string) => void
@@ -37,6 +41,7 @@ interface Props {
 
 export function Workspace({
   tabs,
+  hostId,
   activeKey,
   onActivate,
   onClose,
@@ -50,6 +55,9 @@ export function Workspace({
   const [editingKey, setEditingKey] = useState<string | null>(null)
   const [draft, setDraft] = useState('')
 
+  // The bar shows only the selected host's tabs; all tabs stay mounted below.
+  const barTabs = tabs.filter((t) => t.hostId === hostId)
+
   const commitEdit = () => {
     if (editingKey) {
       const name = draft.trim()
@@ -61,7 +69,7 @@ export function Workspace({
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-1 overflow-x-auto border-b border-white/10 bg-black/20 px-2 py-1.5">
-        {tabs.map((tab) => (
+        {barTabs.map((tab) => (
           <div
             key={tab.key}
             onClick={() => onActivate(tab.key)}
@@ -159,7 +167,7 @@ export function Workspace({
                   hostId={tab.hostId}
                   hostLabel={tab.label}
                   active={visible}
-                  onPreview={onPreview}
+                  onPreview={(f) => onPreview?.({ ...f, hostId: tab.hostId })}
                 />
               ) : (
                 <PreviewTab
@@ -172,6 +180,12 @@ export function Workspace({
             </div>
           )
         })}
+
+        {barTabs.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-sm text-[var(--text-faint)]">
+            No open sessions for this host — use Connect or Files above.
+          </div>
+        )}
       </div>
     </div>
   )
