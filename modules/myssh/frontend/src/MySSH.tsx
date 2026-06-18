@@ -383,7 +383,7 @@ export default function MySSH() {
             hosts={grouped.get(null) ?? []}
             selectedId={selectedId}
             connectedIds={connectedHostIds}
-            onSelect={setSelectedId}
+            onSelect={selectHost}
             onConnect={connect}
           />
           {hosts.length === 0 && (
