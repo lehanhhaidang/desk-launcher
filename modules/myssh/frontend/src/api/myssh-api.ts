@@ -46,12 +46,15 @@ export interface Snippet {
   id: string
   name: string
   command: string
+  /** null = available on every host. */
+  hostId: string | null
   createdAt: number
 }
 
 export interface SnippetInput {
   name: string
   command: string
+  hostId?: string | null
 }
 
 export interface Forward {

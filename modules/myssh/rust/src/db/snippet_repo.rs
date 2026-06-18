@@ -8,6 +8,7 @@ fn row_to_snippet(row: &Row) -> rusqlite::Result<Snippet> {
         id: row.get("id")?,
         name: row.get("name")?,
         command: row.get("command")?,
+        host_id: row.get("host_id")?,
         created_at: row.get("created_at")?,
     })
 }
@@ -44,8 +45,8 @@ pub fn create(conn: &Connection, input: SnippetInput) -> AppResult<Snippet> {
     validate(&input)?;
     let id = uuid::Uuid::new_v4().to_string();
     conn.execute(
-        "INSERT INTO snippets (id, name, command, created_at) VALUES (?1, ?2, ?3, ?4)",
-        params![id, input.name.trim(), input.command, now_unix()],
+        "INSERT INTO snippets (id, name, command, host_id, created_at) VALUES (?1, ?2, ?3, ?4, ?5)",
+        params![id, input.name.trim(), input.command, input.host_id, now_unix()],
     )?;
     get(conn, &id)
 }
@@ -54,8 +55,8 @@ pub fn update(conn: &Connection, id: &str, input: SnippetInput) -> AppResult<Sni
     validate(&input)?;
     get(conn, id)?;
     conn.execute(
-        "UPDATE snippets SET name = ?2, command = ?3 WHERE id = ?1",
-        params![id, input.name.trim(), input.command],
+        "UPDATE snippets SET name = ?2, command = ?3, host_id = ?4 WHERE id = ?1",
+        params![id, input.name.trim(), input.command, input.host_id],
     )?;
     get(conn, id)
 }
@@ -80,14 +81,22 @@ mod tests {
         let conn = mem();
         let s = create(
             &conn,
-            SnippetInput { name: "tail log".into(), command: "tail -f /var/log/syslog".into() },
+            SnippetInput {
+                name: "tail log".into(),
+                command: "tail -f /var/log/syslog".into(),
+                host_id: None,
+            },
         )
         .unwrap();
         assert_eq!(s.name, "tail log");
         let updated = update(
             &conn,
             &s.id,
-            SnippetInput { name: "tail log".into(), command: "tail -n 100 /var/log/syslog".into() },
+            SnippetInput {
+                name: "tail log".into(),
+                command: "tail -n 100 /var/log/syslog".into(),
+                host_id: None,
+            },
         )
         .unwrap();
         assert_eq!(updated.command, "tail -n 100 /var/log/syslog");
@@ -97,11 +106,37 @@ mod tests {
     }
 
     #[test]
+    fn host_scoped_snippet_round_trips() {
+        let conn = mem();
+        let s = create(
+            &conn,
+            SnippetInput {
+                name: "restart".into(),
+                command: "sudo systemctl restart app".into(),
+                host_id: Some("host-123".into()),
+            },
+        )
+        .unwrap();
+        assert_eq!(s.host_id.as_deref(), Some("host-123"));
+        // Clearing the host scope makes it global.
+        let updated = update(
+            &conn,
+            &s.id,
+            SnippetInput { name: "restart".into(), command: s.command.clone(), host_id: None },
+        )
+        .unwrap();
+        assert_eq!(updated.host_id, None);
+    }
+
+    #[test]
     fn blank_command_rejected() {
         let conn = mem();
-        let err = create(&conn, SnippetInput { name: "x".into(), command: "  ".into() })
-            .err()
-            .unwrap();
+        let err = create(
+            &conn,
+            SnippetInput { name: "x".into(), command: "  ".into(), host_id: None },
+        )
+        .err()
+        .unwrap();
         assert_eq!(err.error_kind(), "validation");
     }
 }

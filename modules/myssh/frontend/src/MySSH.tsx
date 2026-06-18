@@ -58,6 +58,7 @@ export default function MySSH() {
   const [tabStatus, setTabStatus] = useState<Record<string, ConnStatus>>({})
   const [headerCollapsed, setHeaderCollapsed] = useState(false)
   const [snippetsOpen, setSnippetsOpen] = useState(false)
+  const [snippetsHostId, setSnippetsHostId] = useState<string | null>(null)
   const [forwardsOpen, setForwardsOpen] = useState(false)
   const [knownHostsOpen, setKnownHostsOpen] = useState(false)
   const sessionMap = useRef<Map<string, string>>(new Map())
@@ -185,6 +186,7 @@ export default function MySSH() {
     const key = crypto.randomUUID()
     setTabs((t) => [...t, { kind: 'terminal', key, hostId: host.id, label: host.label }])
     setActiveTab(key)
+    setSelectedId(host.id)
     setHeaderCollapsed(true)
   }
 
@@ -192,8 +194,34 @@ export default function MySSH() {
     const key = crypto.randomUUID()
     setTabs((t) => [...t, { kind: 'files', key, hostId: host.id, label: host.label }])
     setActiveTab(key)
+    setSelectedId(host.id)
     setHeaderCollapsed(true)
   }
+
+  // Keep the top header/tab and the selected sidebar card in sync, so switching
+  // between hosts never leaves the tab showing a different SSH than the header.
+  const selectHost = useCallback(
+    (id: string) => {
+      setSelectedId(id)
+      const tab = tabs.filter((t) => (t.kind === 'terminal' || t.kind === 'files') && t.hostId === id).at(-1)
+      if (tab) setActiveTab(tab.key)
+    },
+    [tabs],
+  )
+
+  const activateTab = useCallback(
+    (key: string) => {
+      setActiveTab(key)
+      const tab = tabs.find((t) => t.key === key)
+      if (tab && (tab.kind === 'terminal' || tab.kind === 'files')) setSelectedId(tab.hostId)
+    },
+    [tabs],
+  )
+
+  const manageCommands = useCallback((hostId: string) => {
+    setSnippetsHostId(hostId)
+    setSnippetsOpen(true)
+  }, [])
 
   const openPreview = (file: {
     origin: 'local' | 'remote'
@@ -273,7 +301,15 @@ export default function MySSH() {
             <Button size="icon-sm" variant="ghost" title="Known hosts" onClick={() => setKnownHostsOpen(true)}>
               <ShieldCheck className="size-4" />
             </Button>
-            <Button size="icon-sm" variant="ghost" title="Snippets" onClick={() => setSnippetsOpen(true)}>
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              title="Snippets"
+              onClick={() => {
+                setSnippetsHostId(null)
+                setSnippetsOpen(true)
+              }}
+            >
               <Code2 className="size-4" />
             </Button>
             <Button size="icon-sm" variant="ghost" title="New group" onClick={() => setNewGroupOpen(true)}>
@@ -327,7 +363,7 @@ export default function MySSH() {
                 hosts={list}
                 selectedId={selectedId}
                 connectedIds={connectedHostIds}
-                onSelect={setSelectedId}
+                onSelect={selectHost}
                 onConnect={connect}
                 onDeleteGroup={() => onDeleteGroup(group)}
               />
@@ -430,13 +466,14 @@ export default function MySSH() {
               <Workspace
                 tabs={tabs}
                 activeKey={activeTab}
-                onActivate={setActiveTab}
+                onActivate={activateTab}
                 onClose={closeTab}
                 onRename={renameTab}
                 onSessionForTab={registerSession}
                 onStatusForTab={registerStatus}
                 tabStatus={tabStatus}
                 onPreview={openPreview}
+                onManageCommands={manageCommands}
               />
             </div>
           </>
@@ -500,6 +537,8 @@ export default function MySSH() {
         open={snippetsOpen}
         onClose={() => setSnippetsOpen(false)}
         onRun={runSnippet}
+        hosts={hosts}
+        defaultHostId={snippetsHostId}
       />
 
       <ForwardsPanel open={forwardsOpen} onClose={() => setForwardsOpen(false)} hosts={hosts} />

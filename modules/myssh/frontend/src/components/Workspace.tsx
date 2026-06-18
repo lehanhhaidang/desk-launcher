@@ -31,6 +31,8 @@ interface Props {
     name: string
     sftpId?: string
   }) => void
+  /** Open the snippets manager scoped to a host (from the terminal menu). */
+  onManageCommands?: (hostId: string) => void
 }
 
 export function Workspace({
@@ -43,6 +45,7 @@ export function Workspace({
   onStatusForTab,
   tabStatus,
   onPreview,
+  onManageCommands,
 }: Props) {
   const [editingKey, setEditingKey] = useState<string | null>(null)
   const [draft, setDraft] = useState('')
@@ -148,6 +151,7 @@ export function Workspace({
                     active={visible}
                     onSession={(sid) => onSessionForTab?.(tab.key, sid)}
                     onStatus={(s) => onStatusForTab?.(tab.key, s)}
+                    onManageCommands={onManageCommands}
                   />
                 </div>
               ) : tab.kind === 'files' ? (
