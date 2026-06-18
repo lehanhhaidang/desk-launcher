@@ -1,4 +1,5 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { ThemePicker } from './ThemePicker'
 
 function PaletteIcon() {
@@ -40,6 +41,49 @@ export function AppearanceButton({
   title?: string
 }) {
   const [open, setOpen] = useState(false)
+
+  // Close on Escape while open.
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open])
+
+  // Portal the overlay to <body> so a `position: fixed` panel can't be trapped
+  // by an ancestor with transform/filter/backdrop-filter (which is true of most
+  // module headers). Without this the popover renders clipped or mispositioned.
+  const overlay =
+    open && typeof document !== 'undefined'
+      ? createPortal(
+          <div
+            className="fixed inset-0 z-[2147483000] flex justify-end"
+            onClick={() => setOpen(false)}
+          >
+            <div className="absolute inset-0 bg-black/50" />
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="relative m-4 mt-16 h-fit w-80 max-w-[90vw] overflow-y-auto rounded-xl border p-5 shadow-2xl"
+              style={{
+                maxHeight: 'calc(100vh - 5rem)',
+                borderColor: 'var(--line)',
+                background: 'var(--panel)',
+                backdropFilter: 'blur(12px)',
+                color: 'var(--text)',
+              }}
+            >
+              <div className="mb-4 text-sm font-semibold" style={{ color: 'var(--text)' }}>
+                Appearance
+              </div>
+              <ThemePicker />
+            </div>
+          </div>,
+          document.body,
+        )
+      : null
+
   return (
     <>
       <button
@@ -55,31 +99,7 @@ export function AppearanceButton({
       >
         {children ?? <PaletteIcon />}
       </button>
-
-      {open && (
-        <div
-          className="fixed inset-0 z-[1000] flex justify-end"
-          onClick={() => setOpen(false)}
-        >
-          <div className="absolute inset-0 bg-black/50" />
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="relative m-4 mt-16 h-fit w-80 max-w-[90vw] overflow-y-auto rounded-xl border p-5 shadow-2xl"
-            style={{
-              maxHeight: 'calc(100vh - 5rem)',
-              borderColor: 'var(--line)',
-              background: 'var(--panel)',
-              backdropFilter: 'blur(12px)',
-              color: 'var(--text)',
-            }}
-          >
-            <div className="mb-4 text-sm font-semibold" style={{ color: 'var(--text)' }}>
-              Appearance
-            </div>
-            <ThemePicker />
-          </div>
-        </div>
-      )}
+      {overlay}
     </>
   )
 }
