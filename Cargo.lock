@@ -6849,6 +6849,7 @@ dependencies = [
  "dirs 5.0.1",
  "git2",
  "keyring 2.3.3",
+ "launcher-backup",
  "launcher-paths",
  "log",
  "notify",
