@@ -5,6 +5,7 @@
 //! plugin via `app.manage::<AppState>()` so it stays isolated from other
 //! modules.
 
+pub mod backup;
 pub mod commands;
 pub mod db;
 pub mod error;

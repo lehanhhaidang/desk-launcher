@@ -29,6 +29,11 @@ tauri-plugin-opener = "2"
 
 # Internal shared crates
 launcher-paths = { path = "../../../crates/launcher-paths" }
+launcher-backup = { path = "../../../crates/launcher-backup" }
+
+# Backup: machine-bound auto-key storage + entropy
+keyring = "3"
+getrandom = "0.2"
 
 # Modules — crate names follow Tauri's `tauri-plugin-*` convention so the
 # permission system auto-strips the prefix; capabilities reference them as

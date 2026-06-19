@@ -25,6 +25,7 @@ uuid = { version = "1", features = ["v4"] }
 keyring = "2"
 
 launcher-paths = { path = "../../../crates/launcher-paths" }
+launcher-backup = { path = "../../../crates/launcher-backup" }
 # Use the `ring` crypto backend instead of the default `aws-lc-rs`, which pulls
 # `aws-lc-sys` and requires NASM to assemble on Windows (not available in CI).
 russh = { version = "0.61.2", default-features = false, features = ["ring", "flate2", "rsa"] }

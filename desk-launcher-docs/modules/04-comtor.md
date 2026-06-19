@@ -13,6 +13,7 @@ Virtual Comtor is a real-time Japanese ⇄ Vietnamese meeting interpreter packag
 - **Transcript export**: client builds an `.xlsx` (via the `xlsx` lib) or `.csv` workbook in JS, then `export_xlsx` shows a native save dialog and writes the bytes to the chosen path.
 - **Secure key storage**: Soniox + OpenAI keys live in the OS keyring (service `virtual_comtor`), never in SQLite; Settings page can set/test/clear each key. App gates first run on a Soniox key being present.
 - **Trilingual UI (vi/en/ja)**: React context i18n with locale persisted to `localStorage` (`vcomtor_locale`) and mirrored into `settings.json` prefs.
+- **Appearance**: themeable via the shared `@desk-launcher/theme` engine — `<ThemePicker>` in the Settings page; per-app `appId` `comtor` (wired in `modules-pages/comtor/main.tsx`). The module's own `components/ThemeProvider.tsx` is now a **passthrough shim** kept for back-compat. See [07-shared-infra](./07-shared-infra.md).
 
 ---
 
@@ -28,6 +29,7 @@ Virtual Comtor is a real-time Japanese ⇄ Vietnamese meeting interpreter packag
 | `modules/comtor/rust/src/settings.rs` | Keyring-backed API keys + JSON prefs. Commands `get_settings`, `get/set/clear_soniox_key`, `get/set/clear_openai_key`, `get/set_prefs`. Keyring service = `virtual_comtor`; prefs in `settings.json`. |
 | `modules/comtor/rust/src/export.rs` | Single async command `export_xlsx`: opens a `tauri-plugin-dialog` save dialog (filter `*.xlsx`), writes the provided byte array to the chosen path; returns the path or `None` if cancelled. Used for both XLSX and CSV. |
 | `modules/comtor/rust/src/error.rs` | `AppError` enum (`Db`/`Io`/`Json`/`Keyring`/`NotFound`/`Invalid`/`Internal`) with `Serialize` to a string; `AppResult<T>` alias. |
+| `modules/comtor/rust/src/backup.rs` | `export_data(ExportOptions) -> Result<ModuleExport, BackupError>` — snapshots `vcomtor.db` via `dbsnap` and reads the Soniox/OpenAI API keys from the keyring (service `virtual_comtor`); when `include_heavy` is set, also bundles the `.webm` audio files from the module `audio/` dir. `import_data(ModuleImport, ImportMode) -> Result<(), BackupError>` — restores the DB via `dbsnap::restore` and writes API keys back to the keyring. Consumed by the launcher host backup orchestrator. |
 
 ### DB / Storage
 | File | Description |
@@ -120,7 +122,7 @@ Virtual Comtor is a real-time Japanese ⇄ Vietnamese meeting interpreter packag
 - `modules/comtor/frontend/src/lib/i18n/{index.tsx,en.ts,ja.ts,vi.ts,types.ts}` — React-context i18n; default `vi`, locale persisted to `localStorage['vcomtor_locale']`.
 - `modules/comtor/frontend/src/lib/{version.ts,changelog.ts,utils.ts}` — App version `0.1.0`, changelog seed entries, `cn()` class helper.
 - `modules/comtor/frontend/src/App.tsx` / `main.tsx` — Shell with sidebar nav + first-run Soniox gate; providers (Theme, I18n, ErrorBoundary); bundles Quicksand fonts (Vietnamese subset).
-- `modules/comtor/frontend/src/components/*` — `AppSidebar`, `LanguageSwitcher`, `ThemeProvider`, `ErrorBoundary`, and `ui/*` primitives.
+- `modules/comtor/frontend/src/components/*` — `AppSidebar`, `LanguageSwitcher`, `ThemeProvider` (passthrough shim — theming is owned by the shared `@desk-launcher/theme` engine), `ErrorBoundary`, and `ui/*` primitives.
 
 ---
 
@@ -194,4 +196,4 @@ Virtual Comtor is a real-time Japanese ⇄ Vietnamese meeting interpreter packag
 - [07-shared-infra](./07-shared-infra.md) — launcher-paths, shared UI
 
 ---
-_Last updated: 2026-06-05 · Synced: desk-launcher@acbb5c5 · Format: v1_
+_Last updated: 2026-06-19 · Synced: desk-launcher@43187ec · Format: v1_

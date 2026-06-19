@@ -12,6 +12,7 @@ The Markdown Converter is a pure-Rust Tauri plugin that converts Office, PDF, HT
 - **Batch-to-disk conversion**: `convert_batch` writes one `.md` per input into an output folder with collision-safe `-1`, `-2` suffixes (unless overwrite is set).
 - **Drag-and-drop + folder recursion**: drop files or whole folders; the frontend recurses directories and filters to supported extensions before invoking.
 - **Encoding-aware plain text**: strips UTF-8 BOM, falls back to Windows-1252 for non-UTF-8 byte streams.
+- **Appearance**: themeable via the shared `@desk-launcher/theme` engine — an `<AppearanceButton>` in the header; per-app `appId` `md-converter`. See [07-shared-infra](./07-shared-infra.md).
 
 ---
 
@@ -147,4 +148,4 @@ Stateless — there is no SQLite, no `tauri-plugin-sql`, and no in-memory plugin
 - [07-shared-infra](./07-shared-infra.md) — shared UI primitives (`@desk-launcher/ui`)
 
 ---
-_Last updated: 2026-06-05 · Synced: desk-launcher@acbb5c5 · Format: v1_
+_Last updated: 2026-06-19 · Synced: desk-launcher@8351e8c · Format: v1_
