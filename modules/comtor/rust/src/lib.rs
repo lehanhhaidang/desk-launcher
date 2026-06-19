@@ -4,6 +4,7 @@
 //! DB connection is managed inside the plugin via `app.manage::<DbState>()`
 //! so it stays isolated from other modules.
 
+pub mod backup;
 mod audio;
 mod db;
 mod error;

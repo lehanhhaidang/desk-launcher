@@ -6724,6 +6724,7 @@ version = "0.1.0"
 dependencies = [
  "dirs 5.0.1",
  "keyring 3.6.3",
+ "launcher-backup",
  "launcher-paths",
  "log",
  "rusqlite",
