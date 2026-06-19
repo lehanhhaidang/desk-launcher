@@ -1,17 +1,20 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { Terminal as XTerm } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import { SearchAddon } from '@xterm/addon-search'
 import type { UnlistenFn } from '@tauri-apps/api/event'
-import { ArrowDown, ArrowUp, RotateCw, X } from 'lucide-react'
+import { ArrowDown, ArrowUp, ClipboardPaste, Copy, RotateCw, Settings2, X } from 'lucide-react'
 import '@xterm/xterm/css/xterm.css'
 import {
   closeSession,
+  listSnippets,
   onSessionData,
   onSessionExit,
   openSession,
   resizeSession,
   sendInput,
+  type Snippet,
 } from '../api/myssh-api'
 
 export type ConnStatus = 'connecting' | 'connected' | 'closed'
@@ -25,6 +28,8 @@ interface Props {
   onSession?: (sessionId: string | null) => void
   /** Reports the connection status for the tab indicator. */
   onStatus?: (status: ConnStatus) => void
+  /** Open the snippets manager scoped to this host (from the right-click menu). */
+  onManageCommands?: (hostId: string) => void
 }
 
 const encoder = new TextEncoder()
@@ -32,7 +37,7 @@ const MIN_FONT = 8
 const MAX_FONT = 28
 const DEFAULT_FONT = 13
 
-export function TerminalView({ hostId, active, onSession, onStatus }: Props) {
+export function TerminalView({ hostId, active, onSession, onStatus, onManageCommands }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const termRef = useRef<XTerm | null>(null)
   const fitRef = useRef<FitAddon | null>(null)
@@ -50,6 +55,30 @@ export function TerminalView({ hostId, active, onSession, onStatus }: Props) {
   const [closed, setClosed] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+  const [menu, setMenu] = useState<{ x: number; y: number } | null>(null)
+  const [commands, setCommands] = useState<Snippet[]>([])
+  // Bridges to the terminal's copy/paste/insert helpers (defined inside the
+  // session effect) so the React-rendered context menu can call them.
+  const copyRef = useRef<() => boolean>(() => false)
+  const pasteRef = useRef<() => void>(() => {})
+  const insertRef = useRef<(text: string) => void>(() => {})
+
+  const loadCommands = useCallback(() => {
+    listSnippets()
+      .then((all) => setCommands(all.filter((s) => s.hostId === hostId || s.hostId == null)))
+      .catch(() => {})
+  }, [hostId])
+
+  // Refresh commands each time the menu opens; close it on Escape.
+  useEffect(() => {
+    if (!menu) return
+    loadCommands()
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenu(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [menu, loadCommands])
 
   useEffect(() => {
     const container = containerRef.current
@@ -89,6 +118,16 @@ export function TerminalView({ hostId, active, onSession, onStatus }: Props) {
         })
         .catch(() => {})
     }
+    // Type text onto the prompt (no trailing newline) through the same path as
+    // paste, so it works whenever paste does. Bracketed paste keeps it on the
+    // prompt for the user to review and press Enter.
+    const insertText = (text: string) => {
+      term.paste(text)
+      term.focus()
+    }
+    copyRef.current = copySelection
+    pasteRef.current = pasteClipboard
+    insertRef.current = insertText
 
     // Ctrl/Cmd+Shift+C copy, +V paste, +F search; Ctrl +/-/0 font zoom.
     term.attachCustomKeyEventHandler((e) => {
@@ -104,8 +143,10 @@ export function TerminalView({ hostId, active, onSession, onStatus }: Props) {
         if (copySelection()) return false
         return true
       }
-      if (mod && e.shiftKey && e.code === 'KeyV') {
-        pasteClipboard()
+      // Paste on Ctrl/Cmd+V. Returning false makes xterm ignore the key without
+      // calling preventDefault, so the browser's native paste fires exactly once
+      // — calling term.paste here as well would double it.
+      if (mod && e.code === 'KeyV') {
         return false
       }
       if (mod && e.shiftKey && e.code === 'KeyF') {
@@ -131,10 +172,10 @@ export function TerminalView({ hostId, active, onSession, onStatus }: Props) {
       return true
     })
 
-    // Right-click: copy selection if any, else paste.
+    // Right-click opens the command menu (copy/paste + this host's commands).
     const onContext = (ev: MouseEvent) => {
       ev.preventDefault()
-      if (!copySelection()) pasteClipboard()
+      setMenu({ x: ev.clientX, y: ev.clientY })
     }
     container.addEventListener('contextmenu', onContext)
 
@@ -259,7 +300,122 @@ export function TerminalView({ hostId, active, onSession, onStatus }: Props) {
       )}
 
       <div ref={containerRef} className="myssh-term h-full w-full" />
+
+      {menu &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[1000]"
+            onClick={() => setMenu(null)}
+            onContextMenu={(e) => {
+              e.preventDefault()
+              setMenu(null)
+            }}
+          >
+            <div
+              className="absolute min-w-56 max-w-72 overflow-hidden rounded-lg border py-1 text-sm shadow-2xl"
+              style={{
+                left: Math.max(4, Math.min(menu.x, window.innerWidth - 244)),
+                top: Math.max(4, Math.min(menu.y, window.innerHeight - 340)),
+                borderColor: 'var(--line)',
+                background: 'var(--panel)',
+                backdropFilter: 'blur(12px)',
+                color: 'var(--text)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MenuItem
+                icon={<Copy className="size-3.5" />}
+                disabled={!termRef.current?.hasSelection()}
+                onClick={() => {
+                  copyRef.current()
+                  setMenu(null)
+                }}
+              >
+                Copy
+              </MenuItem>
+              <MenuItem
+                icon={<ClipboardPaste className="size-3.5" />}
+                onClick={() => {
+                  pasteRef.current()
+                  setMenu(null)
+                }}
+              >
+                Paste
+              </MenuItem>
+
+              <div className="my-1 border-t" style={{ borderColor: 'var(--line)' }} />
+              <div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-faint)]">
+                Commands
+              </div>
+              <div className="max-h-56 overflow-y-auto">
+                {commands.length === 0 ? (
+                  <div className="px-3 py-2 text-xs text-[var(--text-faint)]">No saved commands</div>
+                ) : (
+                  commands.map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => {
+                        insertRef.current(s.command)
+                        setMenu(null)
+                      }}
+                      className="flex w-full flex-col items-start gap-0.5 px-3 py-1.5 text-left transition hover:bg-white/5"
+                    >
+                      <span className="flex w-full items-center gap-2">
+                        <span className="truncate font-medium">{s.name}</span>
+                        {s.hostId == null && (
+                          <span className="ml-auto shrink-0 rounded bg-white/10 px-1 text-[9px] uppercase tracking-wide text-[var(--text-faint)]">
+                            all
+                          </span>
+                        )}
+                      </span>
+                      <span className="w-full truncate font-mono text-xs text-[var(--text-faint)]">
+                        {s.command}
+                      </span>
+                    </button>
+                  ))
+                )}
+              </div>
+
+              <div className="my-1 border-t" style={{ borderColor: 'var(--line)' }} />
+              <MenuItem
+                icon={<Settings2 className="size-3.5" />}
+                onClick={() => {
+                  onManageCommands?.(hostId)
+                  setMenu(null)
+                }}
+              >
+                Manage commands…
+              </MenuItem>
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
+  )
+}
+
+function MenuItem({
+  children,
+  onClick,
+  icon,
+  disabled,
+}: {
+  children: ReactNode
+  onClick: () => void
+  icon?: ReactNode
+  disabled?: boolean
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition hover:bg-white/5 disabled:opacity-40 disabled:hover:bg-transparent"
+    >
+      {icon}
+      <span>{children}</span>
+    </button>
   )
 }
 

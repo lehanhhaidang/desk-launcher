@@ -58,6 +58,7 @@ export default function MySSH() {
   const [tabStatus, setTabStatus] = useState<Record<string, ConnStatus>>({})
   const [headerCollapsed, setHeaderCollapsed] = useState(false)
   const [snippetsOpen, setSnippetsOpen] = useState(false)
+  const [snippetsHostId, setSnippetsHostId] = useState<string | null>(null)
   const [forwardsOpen, setForwardsOpen] = useState(false)
   const [knownHostsOpen, setKnownHostsOpen] = useState(false)
   const sessionMap = useRef<Map<string, string>>(new Map())
@@ -124,6 +125,7 @@ export default function MySSH() {
   }, [filtered])
 
   const selected = hosts.find((h) => h.id === selectedId) ?? null
+  const selectedHasTabs = tabs.some((t) => t.hostId === selectedId)
 
   const openNew = () => {
     setEditing(null)
@@ -185,6 +187,7 @@ export default function MySSH() {
     const key = crypto.randomUUID()
     setTabs((t) => [...t, { kind: 'terminal', key, hostId: host.id, label: host.label }])
     setActiveTab(key)
+    setSelectedId(host.id)
     setHeaderCollapsed(true)
   }
 
@@ -192,27 +195,62 @@ export default function MySSH() {
     const key = crypto.randomUUID()
     setTabs((t) => [...t, { kind: 'files', key, hostId: host.id, label: host.label }])
     setActiveTab(key)
+    setSelectedId(host.id)
     setHeaderCollapsed(true)
   }
+
+  // Keep the top header/tab and the selected sidebar card in sync, so switching
+  // between hosts never leaves the tab showing a different SSH than the header.
+  const selectHost = useCallback(
+    (id: string) => {
+      setSelectedId(id)
+      // Show this host's own tabs: activate its last tab, or none if it has none.
+      const hostTabs = tabs.filter((t) => t.hostId === id)
+      setActiveTab(hostTabs.at(-1)?.key ?? null)
+    },
+    [tabs],
+  )
+
+  const activateTab = useCallback(
+    (key: string) => {
+      setActiveTab(key)
+      const tab = tabs.find((t) => t.key === key)
+      if (tab) setSelectedId(tab.hostId)
+    },
+    [tabs],
+  )
+
+  const manageCommands = useCallback((hostId: string) => {
+    setSnippetsHostId(hostId)
+    setSnippetsOpen(true)
+  }, [])
 
   const openPreview = (file: {
     origin: 'local' | 'remote'
     path: string
     name: string
     sftpId?: string
+    hostId: string
   }) => {
     const key = crypto.randomUUID()
     setTabs((t) => [
       ...t,
-      { kind: 'preview', key, label: file.name, origin: file.origin, path: file.path, sftpId: file.sftpId },
+      { kind: 'preview', key, hostId: file.hostId, label: file.name, origin: file.origin, path: file.path, sftpId: file.sftpId },
     ])
     setActiveTab(key)
+    setSelectedId(file.hostId)
   }
 
   const removeTab = (key: string) => {
     setTabs((prev) => {
+      const closing = prev.find((t) => t.key === key)
       const next = prev.filter((t) => t.key !== key)
-      setActiveTab((cur) => (cur === key ? (next.at(-1)?.key ?? null) : cur))
+      // Fall back to another tab of the same host (stay on this host), else none.
+      setActiveTab((cur) => {
+        if (cur !== key) return cur
+        const sameHost = closing ? next.filter((t) => t.hostId === closing.hostId) : []
+        return sameHost.at(-1)?.key ?? null
+      })
       return next
     })
     setTabStatus((s) => {
@@ -273,7 +311,15 @@ export default function MySSH() {
             <Button size="icon-sm" variant="ghost" title="Known hosts" onClick={() => setKnownHostsOpen(true)}>
               <ShieldCheck className="size-4" />
             </Button>
-            <Button size="icon-sm" variant="ghost" title="Snippets" onClick={() => setSnippetsOpen(true)}>
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              title="Snippets"
+              onClick={() => {
+                setSnippetsHostId(null)
+                setSnippetsOpen(true)
+              }}
+            >
               <Code2 className="size-4" />
             </Button>
             <Button size="icon-sm" variant="ghost" title="New group" onClick={() => setNewGroupOpen(true)}>
@@ -327,7 +373,7 @@ export default function MySSH() {
                 hosts={list}
                 selectedId={selectedId}
                 connectedIds={connectedHostIds}
-                onSelect={setSelectedId}
+                onSelect={selectHost}
                 onConnect={connect}
                 onDeleteGroup={() => onDeleteGroup(group)}
               />
@@ -338,7 +384,7 @@ export default function MySSH() {
             hosts={grouped.get(null) ?? []}
             selectedId={selectedId}
             connectedIds={connectedHostIds}
-            onSelect={setSelectedId}
+            onSelect={selectHost}
             onConnect={connect}
           />
           {hosts.length === 0 && (
@@ -351,8 +397,12 @@ export default function MySSH() {
 
       {/* Main */}
       <main className="flex flex-1 flex-col">
-        {tabs.length > 0 ? (
-          <>
+        {/* The workspace stays mounted whenever any session exists, so other
+            hosts' terminals keep streaming in the background; it's hidden when
+            the selected host has no tabs, and that host's own detail shows
+            instead — connecting another host never collapses this one's view. */}
+        {tabs.length > 0 && (
+          <div className={selectedHasTabs ? 'flex min-h-0 flex-1 flex-col' : 'hidden'}>
             {headerCollapsed ? (
               <div className="flex items-center gap-2 border-b border-white/10 px-4 py-1.5">
                 <button
@@ -429,18 +479,22 @@ export default function MySSH() {
             <div className="min-h-0 flex-1">
               <Workspace
                 tabs={tabs}
+                hostId={selectedId}
                 activeKey={activeTab}
-                onActivate={setActiveTab}
+                onActivate={activateTab}
                 onClose={closeTab}
                 onRename={renameTab}
                 onSessionForTab={registerSession}
                 onStatusForTab={registerStatus}
                 tabStatus={tabStatus}
                 onPreview={openPreview}
+                onManageCommands={manageCommands}
               />
             </div>
-          </>
-        ) : selected ? (
+          </div>
+        )}
+        {!selectedHasTabs &&
+          (selected ? (
           <div className="flex h-full flex-col p-8">
             <div className="myssh-panel rounded-xl border p-6">
               <div className="mb-4 flex items-start justify-between">
@@ -484,7 +538,7 @@ export default function MySSH() {
             <Server className="mb-4 size-12 opacity-40" />
             <p className="text-sm">Select a host to see its details, or create a new one.</p>
           </div>
-        )}
+        ))}
       </main>
 
       <HostDialog
@@ -500,6 +554,8 @@ export default function MySSH() {
         open={snippetsOpen}
         onClose={() => setSnippetsOpen(false)}
         onRun={runSnippet}
+        hosts={hosts}
+        defaultHostId={snippetsHostId}
       />
 
       <ForwardsPanel open={forwardsOpen} onClose={() => setForwardsOpen(false)} hosts={hosts} />

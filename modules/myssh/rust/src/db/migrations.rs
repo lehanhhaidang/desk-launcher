@@ -65,6 +65,9 @@ pub fn run(conn: &Connection) -> AppResult<()> {
     // v3: optional ProxyJump host on hosts.
     let _ = conn.execute_batch("ALTER TABLE hosts ADD COLUMN jump_host_id TEXT;");
 
+    // v4: optional per-host scoping for snippets (NULL = available on every host).
+    let _ = conn.execute_batch("ALTER TABLE snippets ADD COLUMN host_id TEXT;");
+
     Ok(())
 }
 

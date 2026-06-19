@@ -7,6 +7,7 @@ import {
   deleteSnippet,
   listSnippets,
   updateSnippet,
+  type Host,
   type Snippet,
 } from '../api/myssh-api'
 
@@ -15,16 +16,20 @@ interface Props {
   onClose: () => void
   /** Send a snippet's command to the active session. */
   onRun: (command: string) => void
+  hosts: Host[]
+  /** Pre-select this host in the add form (when opened from a host terminal). */
+  defaultHostId?: string | null
 }
 
 const inputClass =
   'w-full rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-[var(--text)] outline-none transition focus:border-[color-mix(in_oklch,var(--brand)_40%,transparent)]'
 
-export function SnippetsPanel({ open, onClose, onRun }: Props) {
+export function SnippetsPanel({ open, onClose, onRun, hosts, defaultHostId = null }: Props) {
   const [snippets, setSnippets] = useState<Snippet[]>([])
   const [editingId, setEditingId] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [command, setCommand] = useState('')
+  const [hostId, setHostId] = useState<string | null>(defaultHostId)
 
   const refresh = () => {
     listSnippets()
@@ -33,21 +38,29 @@ export function SnippetsPanel({ open, onClose, onRun }: Props) {
   }
 
   useEffect(() => {
-    if (open) refresh()
-  }, [open])
+    if (open) {
+      refresh()
+      setHostId(defaultHostId)
+    }
+  }, [open, defaultHostId])
 
   if (!open) return null
+
+  const hostName = (id: string | null) =>
+    id == null ? 'All hosts' : hosts.find((h) => h.id === id)?.label ?? 'Unknown host'
 
   const resetForm = () => {
     setEditingId(null)
     setName('')
     setCommand('')
+    setHostId(defaultHostId)
   }
 
   const startEdit = (s: Snippet) => {
     setEditingId(s.id)
     setName(s.name)
     setCommand(s.command)
+    setHostId(s.hostId)
   }
 
   const save = async () => {
@@ -56,8 +69,8 @@ export function SnippetsPanel({ open, onClose, onRun }: Props) {
       return
     }
     try {
-      if (editingId) await updateSnippet(editingId, { name: name.trim(), command })
-      else await createSnippet({ name: name.trim(), command })
+      if (editingId) await updateSnippet(editingId, { name: name.trim(), command, hostId })
+      else await createSnippet({ name: name.trim(), command, hostId })
       resetForm()
       refresh()
     } catch (e) {
@@ -95,7 +108,12 @@ export function SnippetsPanel({ open, onClose, onRun }: Props) {
                 className="flex items-center gap-3 border-b border-white/5 px-3 py-2 last:border-0"
               >
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-medium">{s.name}</div>
+                  <div className="flex items-center gap-2">
+                    <span className="truncate text-sm font-medium">{s.name}</span>
+                    <span className="shrink-0 rounded bg-white/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-[var(--text-faint)]">
+                      {hostName(s.hostId)}
+                    </span>
+                  </div>
                   <div className="truncate font-mono text-xs text-[var(--text-faint)]">{s.command}</div>
                 </div>
                 <button
@@ -125,6 +143,18 @@ export function SnippetsPanel({ open, onClose, onRun }: Props) {
         </div>
 
         <div className="space-y-2">
+          <select
+            className={inputClass}
+            value={hostId ?? ''}
+            onChange={(e) => setHostId(e.target.value || null)}
+          >
+            <option value="">All hosts</option>
+            {hosts.map((h) => (
+              <option key={h.id} value={h.id}>
+                {h.label}
+              </option>
+            ))}
+          </select>
           <input
             className={inputClass}
             placeholder="Snippet name"
