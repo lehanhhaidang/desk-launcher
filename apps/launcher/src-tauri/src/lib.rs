@@ -26,6 +26,10 @@ pub fn run() {
             window_manager::close_module,
             window_manager::list_open_modules,
             module_registry::list_modules,
+            backup::backup_plan,
+            backup::backup_export,
+            backup::backup_preview,
+            backup::backup_import_apply,
         ])
         .setup(|app| {
             log::info!("Desk Launcher booting");
