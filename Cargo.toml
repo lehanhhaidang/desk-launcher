@@ -3,6 +3,7 @@ resolver = "2"
 members = [
   "apps/launcher/src-tauri",
   "crates/launcher-paths",
+  "crates/launcher-backup",
   "modules/myssh/rust",
   "modules/open-sesame/rust",
   "modules/comtor/rust",
