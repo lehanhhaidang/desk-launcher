@@ -14,3 +14,4 @@ chacha20poly1305 = "0.10"
 tar = "0.4"
 sha2 = "0.10"
 getrandom = "0.2"
+rusqlite = { version = "0.32", features = ["bundled"] }

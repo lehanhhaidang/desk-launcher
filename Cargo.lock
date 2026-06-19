@@ -3402,6 +3402,7 @@ dependencies = [
  "argon2 0.5.3",
  "chacha20poly1305",
  "getrandom 0.2.17",
+ "rusqlite",
  "serde",
  "serde_json",
  "sha2 0.10.9",
@@ -6823,6 +6824,7 @@ name = "tauri-plugin-myssh"
 version = "0.1.0"
 dependencies = [
  "keyring 2.3.3",
+ "launcher-backup",
  "launcher-paths",
  "log",
  "rusqlite",
