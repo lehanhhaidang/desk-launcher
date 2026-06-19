@@ -21,19 +21,21 @@
       "@modules/*": ["../../modules/*"],
       "@desk-launcher/ui": ["../../packages/ui/src"],
       "@desk-launcher/ui/*": ["../../packages/ui/src/*"],
+      "@desk-launcher/theme": ["../../packages/theme/src"],
+      "@desk-launcher/theme/*": ["../../packages/theme/src/*"],
       "@desk-launcher/tauri-bridge": ["../../packages/tauri-bridge/src"],
       "@desk-launcher/tauri-bridge/*": ["../../packages/tauri-bridge/src/*"],
       "@os/*": ["../../modules/open-sesame/frontend/src/*"],
       "@cmt/*": ["../../modules/comtor/frontend/src/*"],
       "@vid/*": ["../../modules/video-downloader/frontend/src/*"],
       "@mdc/*": ["../../modules/md-converter/frontend/src/*"],
-      "@pk/*": ["../../modules/port-killer/frontend/src/*"]
+      "@myssh/*": ["../../modules/myssh/frontend/src/*"]
     }
   },
   "include": [
     "src",
     "modules-pages",
-    "../../modules/port-killer/frontend/src",
+    "../../modules/myssh/frontend/src",
     "../../modules/open-sesame/frontend/src",
     "../../modules/comtor/frontend/src",
     "../../modules/video-downloader/frontend/src",

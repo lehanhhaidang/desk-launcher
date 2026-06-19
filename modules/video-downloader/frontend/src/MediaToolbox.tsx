@@ -15,6 +15,7 @@ import {
   Radio,
   Sparkles,
 } from 'lucide-react'
+import { AppearanceButton } from '@desk-launcher/theme'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui'
 import { CaptureTab } from './features/capture/CaptureTab'
 import { ImagesTab } from './features/images/ImagesTab'
@@ -36,9 +37,12 @@ export default function MediaToolbox() {
     <div className="vd-shell">
       <div className="vd-page">
         <aside className="vd-side">
-          <div className="vd-kicker">
-            <Radio className="size-3.5 shrink-0" />
-            <span>Local media suite</span>
+          <div className="vd-side-head">
+            <div className="vd-kicker">
+              <Radio className="size-3.5 shrink-0" />
+              <span>Local media suite</span>
+            </div>
+            <AppearanceButton className="vd-appearance-button" />
           </div>
           <div>
             <h1 className="vd-title">Media Toolbox</h1>

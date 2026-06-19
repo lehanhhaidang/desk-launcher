@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-start-forward"
+description = "Enables the start_forward command without any pre-configured scope."
+commands.allow = ["start_forward"]
+
+[[permission]]
+identifier = "deny-start-forward"
+description = "Denies the start_forward command without any pre-configured scope."
+commands.deny = ["start_forward"]

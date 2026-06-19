@@ -5,8 +5,8 @@
 **Desk Launcher** is a Windows-first **Tauri 2** desktop application that hosts multiple standalone tool modules from a single dashboard. It runs as **one OS process** that links every module's Rust plugin at compile time and spawns each tool into its own isolated `WebviewWindow` (its own JS bundle, route tree, UI state, scoped Tauri capabilities, and local data). Modules never talk to each other — shared code lives in `packages/` (frontend) or `crates/` (Rust).
 
 ### Main technologies
-- **Backend**: Rust (edition 2021, rust-version 1.77.2), Tauri 2.10, one `tauri-plugin-<id>` crate per module. Key libs per module: `netstat2`+`sysinfo` (Port Killer), `rusqlite`+`git2`+`oauth2`+`keyring` (Open Sesame), `rusqlite`+`keyring` (Comtor), `image` crate + `yt-dlp`/`ffmpeg` sidecars (Video Downloader), `calamine`+`zip`+`quick-xml`+`htmd`+`pdf-extract` (Markdown Converter).
-- **Frontend**: React 19, TypeScript, Vite multi-page build (one HTML entry per window), Tailwind CSS v4, shared `@desk-launcher/ui` (shadcn/Radix) + `@desk-launcher/tauri-bridge` packages. Zustand for state in larger modules.
+- **Backend**: Rust (edition 2021, rust-version 1.77.2), Tauri 2.10, one `tauri-plugin-<id>` crate per module. Key libs per module: `russh`+`xterm.js`+`rusqlite`+`keyring` (MySSH), `rusqlite`+`git2`+`oauth2`+`keyring` (Open Sesame), `rusqlite`+`keyring` (Comtor), `image` crate + `yt-dlp`/`ffmpeg` sidecars (Video Downloader), `calamine`+`zip`+`quick-xml`+`htmd`+`pdf-extract` (Markdown Converter).
+- **Frontend**: React 19, TypeScript, Vite multi-page build (one HTML entry per window), Tailwind CSS v4, shared `@desk-launcher/ui` (shadcn/Radix) + `@desk-launcher/tauri-bridge` + `@desk-launcher/theme` (per-app theme engine) packages. Zustand for state in larger modules.
 - **Database**: Per-module SQLite via `rusqlite` (Open Sesame, Comtor); other modules are stateless or persist to files / browser `localStorage`. Each module's data lives under `%APPDATA%\io.desklauncher\modules\<id>\` (resolved by the `launcher-paths` crate). Secrets (API keys, OAuth tokens) live in the OS **keyring**, never in the DB.
 - **Deployment**: NSIS installer built via `npm run build` (output under `apps/launcher/src-tauri/target/release/bundle/nsis/`). WebView2 runtime required.
 
@@ -31,6 +31,7 @@ Single git repo (monorepo) rooted at `C:\desk-launcher`. npm workspaces cover `a
 - Compile-time plugin aggregation + startup registration of all module plugins (`lib.rs`)
 - Open-or-focus: re-opening a live module focuses/unminimizes it instead of duplicating the window
 - Dual hand-synced registry: `module_registry.rs` (Rust window specs) ↔ `registry.ts` (TS dashboard metadata)
+- Backup export/import: Settings modal Backup panel (Export/Import wizards) backed by `backup_plan`/`backup_export`/`backup_preview`/`backup_import_apply` host commands; produces passphrase-encrypted `.dlbak` bundles via `crates/launcher-backup`
 
 **Main Host Commands**:
 | Command | Params | Description |
@@ -46,32 +47,34 @@ Single git repo (monorepo) rooted at `C:\desk-launcher`. npm workspaces cover `a
 
 **Database**: none (host owns no storage; modules own their own)
 
-**Related**: [02-port-killer](./02-port-killer.md), [03-open-sesame](./03-open-sesame.md), [04-comtor](./04-comtor.md), [05-video-downloader](./05-video-downloader.md), [06-md-converter](./06-md-converter.md), [07-shared-infra](./07-shared-infra.md)
+**Related**: [02-myssh](./02-myssh.md), [03-open-sesame](./03-open-sesame.md), [04-comtor](./04-comtor.md), [05-video-downloader](./05-video-downloader.md), [06-md-converter](./06-md-converter.md), [07-shared-infra](./07-shared-infra.md)
 
 ---
 
-### 02. Port Killer
+### 02. MySSH
 
-**Description**: Lists listening/established TCP+UDP sockets (with owning PID/process name), labels and groups them, and bulk-kills stuck processes — with a frontend guard against terminating critical Windows system processes. Ships a complete SSH Tunnel Manager UI, but the Rust tunnel/ssh commands are currently stubs pending a planned implementation. The Rust backend is stateless; only the frontend persists (browser `localStorage`).
+**Description**: A Termius-style SSH client — manage saved hosts (folders, tags, search), open real interactive terminals over `russh` rendered with `xterm.js`, run multiple session tabs, store command snippets, and create local port forwards. Host metadata is in SQLite; passwords/passphrases are in the OS keyring. Replaces the earlier Port Killer module.
 
 **Key Features**:
-- Live port scan via `netstat2` + `sysinfo` (TCP LISTEN/ESTABLISHED + all UDP), deduped by (pid, port)
-- Bulk/single process kill with per-PID success/error reporting
-- Frontend-only system-process safety list (~30 Windows names + PIDs 0 & 4)
-- Per-port labels/groups and named profiles persisted in `localStorage`
-- SSH Tunnel Manager UI (create/start/stop/edit/delete) — **backend currently stubbed**
+- Host CRUD with folders + tags + search; password, key, ssh-agent, or keyboard-interactive (OTP/2FA) auth (secrets in keyring)
+- Embedded interactive PTY shell via `russh` (0.61, `ring` backend) streamed to `xterm.js`
+- Per-host tab bar (all sessions kept mounted so background tabs keep streaming); chunked SFTP transfers with progress
+- TOFU host-key verification (`known_hosts`): first key trusted & stored, changed key rejected
+- Command snippets sent to the active session; local port forwarding (`direct-tcpip`)
 
-**Main API Endpoints** (`plugin:port-killer|<command>`):
-| Command | Description |
+**Main API Endpoints** (`plugin:myssh|<command>`):
+| Group | Commands |
 |---|---|
-| `list_ports` | Enumerate IPv4/IPv6 TCP+UDP sockets with PID/name |
-| `kill_ports` | Kill a list of PIDs, return per-PID results |
-| `create/update/delete/start/stop/list_tunnels`, `list_ssh_keys` | SSH tunnel CRUD+control — **all stubs today** |
+| Hosts / Groups | `list/create/update/delete_host`, `list/create/delete_group` |
+| Sessions | `open_session`, `send_input`, `resize_session`, `close_session` |
+| Snippets / Forwards | `list/create/update/delete_snippet`, `list/create/delete/start/stop_forward` |
+
+**Events (Rust → frontend)**: `myssh://data/<id>` (output), `myssh://exit/<id>` (ended)
 
 **Frontend Pages**:
-- `PortKiller.tsx` — single window, two tabs: **Ports** (metrics, actions, profile manager, paginated table) and **SSH Tunnels** (tunnel cards + add/edit dialog)
+- `MySSH.tsx` — host sidebar + terminal workspace (tabs), with snippet and port-forward panels
 
-**Database**: in-memory only (no DB/managed state); frontend uses `localStorage` keys `port-killer-configs`, `port-killer-profiles`
+**Database**: SQLite `myssh.db` (`hosts`, `groups`, `snippets`, `port_forwards`, `known_hosts`); secrets in OS keyring; live sessions/forwards in memory
 
 **Related**: [01-launcher-host](./01-launcher-host.md), [07-shared-infra](./07-shared-infra.md)
 
@@ -190,21 +193,25 @@ Single git repo (monorepo) rooted at `C:\desk-launcher`. npm workspaces cover `a
 
 ### 07. Shared Packages & Infrastructure
 
-**Description**: The cross-cutting foundation (not a business domain) every module builds on: shared React UI primitives (`packages/ui`), a Tauri/HTTP bridge helper (`packages/tauri-bridge`), the `launcher-paths` Rust crate that gives each module its own isolated data dir, and the build/sidecar tooling. This is the concrete realization of the README rule "Modules never talk to each other; shared code lives in `packages/` or `crates/`."
+**Description**: The cross-cutting foundation (not a business domain) every module builds on: shared React UI primitives (`packages/ui`), a Tauri/HTTP bridge helper (`packages/tauri-bridge`), the shared theme engine (`packages/theme`), the `launcher-paths` Rust crate that gives each module its own isolated data dir, the `launcher-backup` Rust crate (backup bundle types, Argon2id+XChaCha20-Poly1305 crypto, tar archive, and SQLite dbsnap), and the build/sidecar tooling. This is the concrete realization of the README rule "Modules never talk to each other; shared code lives in `packages/` or `crates/`."
 
 **Key Features**:
 - Shared shadcn/Radix UI primitives + `cn` util + central `theme.css`, consumed via the `@desk-launcher/ui` alias
 - `@desk-launcher/tauri-bridge`: `apiRequest`, `apiDownload`, runtime-detected `API_BASE_URL`
+- `@desk-launcher/theme`: per-app theme engine (dark/light/system, accent, background blend, font/size/radius/motion); each app themes itself via its own `appId` (`localStorage["theme:"+appId]`)
 - `launcher-paths`: per-module `%APPDATA%\io.desklauncher\modules\<id>\` isolation, auto-created
+- `launcher-backup`: bundle types (`ModuleExport`/`ModuleImport`/`BackupManifest`/etc.), `seal_with_passphrase`/`open_with_passphrase`/`seal_with_key`/`open_with_key` crypto (Argon2id + XChaCha20-Poly1305), `write_bundle(manifest, files, key)`/`read_bundle(bytes, key)`, and `dbsnap::snapshot`/`dbsnap::restore` (SQLite `VACUUM INTO` + online backup API)
 - `ensure-sidecars.mjs` downloads `yt-dlp.exe` + `ffmpeg.exe` (target-triple suffix), gated by `SKIP_SIDECARS`, run before every dev/build
 - Frontend packages are source-only (no `package.json`); wired purely by Vite path aliases
 
 **Shared Surface**:
 - `@desk-launcher/ui` → `cn`, `Button`, `Input`, `Card*`, `Badge`, `LoadingSpinner`, `Select*`, `Tabs*`
 - `@desk-launcher/tauri-bridge` → `apiRequest<T>`, `apiDownload`, `API_BASE_URL`
+- `@desk-launcher/theme` → `ThemeProvider`, `useTheme`, `ThemePicker`, `AppearanceButton`, `applyThemeFromStorage`, `DEFAULT_THEME`
 - `launcher-paths` → `launcher_data_dir()`, `module_data_dir(id)`, `module_data_file(id, name)`, `LAUNCHER_IDENTIFIER`, `PathError`
+- `launcher-backup` → `write_bundle(manifest, files, key)`, `read_bundle(bytes, key)`, `seal_with_passphrase`/`open_with_passphrase`/`seal_with_key`/`open_with_key`, `dbsnap::snapshot`/`dbsnap::restore`, `ModuleExport`/`ModuleImport`/`BackupManifest`/`ExportOptions`/`ImportMode`/`BundleKey`
 
-**Consumed by**: `launcher-paths` → host, Comtor, Open Sesame, Video Downloader (not Port Killer / MD Converter). UI → all frontends. Sidecars → Video Downloader only.
+**Consumed by**: `launcher-paths` → host, Comtor, Open Sesame, Video Downloader, MySSH (not MD Converter). `launcher-backup` → host + MySSH + Open Sesame + Comtor. UI + theme → host + all five module frontends. Sidecars → Video Downloader only.
 
 **Related**: all modules
 
@@ -217,9 +224,9 @@ Single git repo (monorepo) rooted at `C:\desk-launcher`. npm workspaces cover `a
 |---|---|---|
 | SQLite `vcomtor.db` | Virtual Comtor | `projects`, `meetings`, `transcript_entries`, `app_meta` |
 | SQLite (Open Sesame) | Open Sesame | `settings`, `accounts`, `workspaces`, `doc_sets`, `sync_logs`, `file_meta`, `drive_file_state`, `_migrations` |
-| OS keyring | Comtor (`virtual_comtor`), Open Sesame | API keys (Soniox/OpenAI), GitHub OAuth tokens |
+| SQLite `myssh.db` | MySSH | `hosts`, `groups`, `snippets`, `port_forwards`, `known_hosts` |
+| OS keyring | Comtor (`virtual_comtor`), Open Sesame, MySSH | API keys (Soniox/OpenAI), GitHub OAuth tokens, SSH passwords/passphrases |
 | Filesystem | Comtor (`.webm`), Video Downloader (downloads/output), Open Sesame (git mirrors) | Per-module data under `%APPDATA%\io.desklauncher\modules\<id>\` |
-| Browser `localStorage` | Port Killer (frontend) | `port-killer-configs`, `port-killer-profiles` |
 
 All on-disk module data is namespaced under `%APPDATA%\io.desklauncher\modules\<id>\` via the `launcher-paths` crate.
 
@@ -227,7 +234,7 @@ All on-disk module data is namespaced under `%APPDATA%\io.desklauncher\modules\<
 | Window label | Entry HTML | Purpose |
 |---|---|---|
 | `launcher` | `index.html` | Dashboard (module grid) |
-| `port-killer` | `modules-pages/port-killer/index.html` | Port Killer |
+| `myssh` | `modules-pages/myssh/index.html` | MySSH |
 | `open-sesame` | `modules-pages/open-sesame/index.html` | Open Sesame |
 | `comtor` | `modules-pages/comtor/index.html` | Virtual Comtor |
 | `video-downloader` | `modules-pages/video-downloader/index.html` | Video Downloader |
@@ -251,4 +258,4 @@ _Qualitative size, not a live tally._
 Buckets: small ≈ <10 · medium ≈ 10–40 · large ≈ 40+.
 
 ---
-_Last updated: 2026-06-05 · Synced: desk-launcher@acbb5c5 · Format: v1_
+_Last updated: 2026-06-19 · Synced: desk-launcher@43187ec · Format: v1_

@@ -31,6 +31,7 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
       '@modules': path.resolve(__dirname, '../../modules'),
       '@desk-launcher/ui': path.resolve(__dirname, '../../packages/ui/src'),
+      '@desk-launcher/theme': path.resolve(__dirname, '../../packages/theme/src'),
       '@desk-launcher/tauri-bridge': path.resolve(__dirname, '../../packages/tauri-bridge/src'),
       // Module-internal aliases — each module gets its own short prefix so
       // its existing `@/` imports can be sed'd to `@<module>/` without
@@ -39,7 +40,7 @@ export default defineConfig({
       '@cmt': path.resolve(__dirname, '../../modules/comtor/frontend/src'),
       '@vid': path.resolve(__dirname, '../../modules/video-downloader/frontend/src'),
       '@mdc': path.resolve(__dirname, '../../modules/md-converter/frontend/src'),
-      '@pk': path.resolve(__dirname, '../../modules/port-killer/frontend/src'),
+      '@myssh': path.resolve(__dirname, '../../modules/myssh/frontend/src'),
     },
   },
   build: {
@@ -48,7 +49,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         launcher: resolve(__dirname, 'index.html'),
-        'port-killer': resolve(__dirname, 'modules-pages/port-killer/index.html'),
+        myssh: resolve(__dirname, 'modules-pages/myssh/index.html'),
         'open-sesame': resolve(__dirname, 'modules-pages/open-sesame/index.html'),
         comtor: resolve(__dirname, 'modules-pages/comtor/index.html'),
         'video-downloader': resolve(__dirname, 'modules-pages/video-downloader/index.html'),

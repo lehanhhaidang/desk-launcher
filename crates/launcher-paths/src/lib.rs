@@ -17,7 +17,7 @@
 //! ├── modules\
 //! │   ├── comtor\        # vcomtor.db, audio\, settings.json
 //! │   ├── open-sesame\   # data.db
-//! │   ├── port-killer\
+//! │   ├── myssh\         # myssh.db
 //! │   └── ...
 //! └── launcher.toml      # launcher-level settings, migration markers
 //! ```

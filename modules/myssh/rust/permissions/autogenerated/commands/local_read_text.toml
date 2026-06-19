@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-local-read-text"
+description = "Enables the local_read_text command without any pre-configured scope."
+commands.allow = ["local_read_text"]
+
+[[permission]]
+identifier = "deny-local-read-text"
+description = "Denies the local_read_text command without any pre-configured scope."
+commands.deny = ["local_read_text"]

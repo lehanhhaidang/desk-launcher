@@ -10,7 +10,7 @@ The backend is written in Rust. The frontend uses React 19, TypeScript, Vite mul
 
 | Module | What it does | Stack |
 | --- | --- | --- |
-| **Port Killer** | Lists listening TCP/UDP ports, cleans up stuck processes, and includes SSH tunnel management UI. | `netstat2` + `sysinfo` |
+| **MySSH** | Termius-style SSH client: managed hosts (password/key/agent auth, ProxyJump), multi-tab interactive terminals, command snippets, local/remote/dynamic port forwarding, and an SFTP file browser. | `russh` + `russh-sftp` + `xterm.js` + `rusqlite` + `keyring` |
 | **Open Sesame** | Project documentation workspace with workspaces, doc sets, file tree browsing, Markdown preview, GitHub device-flow OAuth, and git sync. | `rusqlite` + `git2` + `oauth2` + `keyring` |
 | **Virtual Comtor** | Real-time Japanese/Vietnamese meeting interpreter with Soniox + OpenAI, transcripts, summaries, audio storage, and `.xlsx` export. | `rusqlite` + `keyring` |
 | **Video Downloader** | Downloads video/audio from YouTube, TikTok, Bilibili, and other supported sites through bundled `yt-dlp.exe` and `ffmpeg.exe`. | Tauri sidecars |
@@ -36,7 +36,7 @@ desk-launcher/
 |           `-- binaries/            # yt-dlp.exe, ffmpeg.exe; gitignored
 |
 |-- modules/                         # Self-contained modules
-|   |-- port-killer/
+|   |-- myssh/
 |   |   |-- frontend/src/            # React UI, API wrappers, components
 |   |   `-- rust/                    # Tauri plugin crate
 |   |       |-- src/lib.rs           # pub fn init() -> TauriPlugin<Wry>
@@ -65,11 +65,11 @@ desk-launcher/
                               |
         +---------+------------+-----------+
         v         v            v           v
-   Launcher    Port         Open       Video
-   window     Killer       Sesame    Downloader
-   (dash)     window        window     window
+   Launcher    MySSH        Open       Video
+   window      window      Sesame    Downloader
+   (dash)        |          window     window
        |         |            |           |
-   launcher  port-killer  open-sesame  video-downloader
+   launcher    myssh     open-sesame  video-downloader
    Vite       Vite          Vite         Vite
    entry      entry         entry        entry
 ```
@@ -130,7 +130,7 @@ The Vite root is `apps/launcher/`, while module source code lives outside that d
 
 ### Conventions
 
-- **Module ID**: lowercase kebab-case (`port-killer`). Used as the Rust plugin name, Tauri window label, data dir name, and Vite entry key. **Same string, everywhere.**
+- **Module ID**: lowercase kebab-case (`myssh`). Used as the Rust plugin name, Tauri window label, data dir name, and Vite entry key. **Same string, everywhere.**
 - **Rust commands**: `snake_case`, exposed via `#[tauri::command]`. Invoked from TS as `plugin:<id>|<snake_case>`.
 - **Command params**: camelCase in JS, snake_case in Rust — serde converts automatically.
 - **Errors**: simple modules return `Result<T, String>`. Modules with richer errors define a custom `AppError` enum with `thiserror` + a `Serialize` impl that emits the display string (see `modules/open-sesame/rust/src/error.rs`).
@@ -239,14 +239,16 @@ High-level checklist:
 
 ## Module Origins
 
-- **Port Killer** and **Video Downloader** were migrated from earlier tool projects and rewritten around Rust/Tauri instead of Python sidecars.
+- **Video Downloader** was migrated from an earlier tool project and rewritten around Rust/Tauri instead of Python sidecars.
+- **MySSH** is a new module built on `russh` (embedded SSH) and `xterm.js`, replacing the earlier Port Killer module.
 - **Open Sesame** came from a standalone Tauri documentation workspace app and was converted into a launcher module.
 - **Virtual Comtor** came from `virtual_comtor_desktop` and was converted into a launcher module.
 
 ## Roadmap
 
 - [ ] File Converter module for Markdown-to-PDF conversion with bundled Unicode fonts.
-- [ ] Complete SSH tunneling flow for Port Killer.
+- [ ] MySSH: SSH key generation, nested host folders, and cross-device sync.
+- [ ] Data export & sync — **per-module** (each module exports/syncs its own data) and **launcher-wide** (all modules at once). Everything is local-only today (per-module SQLite + OS keyring, no backend); plan is encrypted export/import first, then optional git-based sync (reusing Open Sesame's git2 + OAuth pattern). Secrets need an encrypted master-password vault, since OS-keyring entries can't leave the machine.
 - [ ] Tighten CSP once the module permission and asset requirements are stable.
 - [ ] Polish the NSIS installer and add auto-update.
 - [ ] Add first-run migration for legacy Comtor data from `%APPDATA%\com.vcomtor.desktop\`.

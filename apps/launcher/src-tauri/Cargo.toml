@@ -1,6 +1,6 @@
 [package]
 name = "desk-launcher"
-version = "0.1.0"
+version = "0.2.0"
 description = "Desk Launcher - unified desktop tool launcher"
 edition.workspace = true
 rust-version.workspace = true
@@ -29,12 +29,17 @@ tauri-plugin-opener = "2"
 
 # Internal shared crates
 launcher-paths = { path = "../../../crates/launcher-paths" }
+launcher-backup = { path = "../../../crates/launcher-backup" }
+
+# Backup: machine-bound auto-key storage + entropy
+keyring = "3"
+getrandom = "0.2"
 
 # Modules — crate names follow Tauri's `tauri-plugin-*` convention so the
 # permission system auto-strips the prefix; capabilities reference them as
-# `comtor:default`, `open-sesame:default`, `port-killer:default`, matching
+# `comtor:default`, `open-sesame:default`, `myssh:default`, matching
 # the runtime plugin name registered by each crate's `Builder::new(...)`.
-tauri-plugin-port-killer       = { path = "../../../modules/port-killer/rust" }
+tauri-plugin-myssh             = { path = "../../../modules/myssh/rust" }
 tauri-plugin-open-sesame       = { path = "../../../modules/open-sesame/rust" }
 tauri-plugin-comtor            = { path = "../../../modules/comtor/rust" }
 tauri-plugin-video-downloader  = { path = "../../../modules/video-downloader/rust" }

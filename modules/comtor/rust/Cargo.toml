@@ -29,3 +29,4 @@ dirs = "5"
 tauri-plugin-dialog = "2"
 
 launcher-paths = { path = "../../../crates/launcher-paths" }
+launcher-backup = { path = "../../../crates/launcher-backup" }

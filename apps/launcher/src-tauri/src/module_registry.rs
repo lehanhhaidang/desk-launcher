@@ -23,13 +23,13 @@ pub struct ModuleWindowSpec {
 
 pub const MODULES: &[ModuleWindowSpec] = &[
     ModuleWindowSpec {
-        id: "port-killer",
-        title: "🔌 Port Killer",
-        initial_url: "modules-pages/port-killer/index.html",
-        width: 1100.0,
-        height: 720.0,
-        min_width: Some(800.0),
-        min_height: Some(500.0),
+        id: "myssh",
+        title: "🖥️ MySSH",
+        initial_url: "modules-pages/myssh/index.html",
+        width: 1280.0,
+        height: 820.0,
+        min_width: Some(1000.0),
+        min_height: Some(640.0),
     },
     ModuleWindowSpec {
         id: "open-sesame",

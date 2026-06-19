@@ -1,0 +1,52 @@
+/* Shared shadcn theme. */
+@import "../../../../packages/ui/src/theme.css";
+/* Syntax highlighting for code blocks in file previews. */
+@import "highlight.js/styles/github-dark.css";
+
+@source ".";
+@source "../../../../packages/ui/src";
+
+:root {
+  font-family: var(--font-sans, "Quicksand", ui-sans-serif, system-ui, sans-serif);
+  color: var(--text);
+  background: var(--bg);
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+}
+
+.myssh-bg {
+  background: var(--app-bg);
+}
+
+.myssh-panel {
+  background:
+    linear-gradient(145deg, color-mix(in oklch, var(--text) 5%, transparent), color-mix(in oklch, var(--text) 1.5%, transparent)),
+    var(--panel);
+  border-color: var(--line);
+  backdrop-filter: blur(16px);
+}
+
+/* The terminal surface (xterm mounts here in the terminal milestone). */
+.myssh-term {
+  background: #0a0c11;
+}
+
+/* Markdown code blocks: the <pre> wrapper owns the box; drop highlight.js's own
+   background/padding so block code isn't double-boxed and token colors show. */
+.hljs.md-code-block {
+  background: transparent;
+  padding: 0;
+}
