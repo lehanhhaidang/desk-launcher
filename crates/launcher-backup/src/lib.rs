@@ -6,3 +6,4 @@ pub mod bundle;
 
 pub use types::*;
 pub use manifest::*;
+pub use bundle::{read_bundle, write_bundle, BundleKey, ReadBundle};
