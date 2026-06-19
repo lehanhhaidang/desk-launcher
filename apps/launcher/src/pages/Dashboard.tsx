@@ -28,6 +28,7 @@ import {
 import { ThemePicker } from '@desk-launcher/theme'
 import { MODULES } from '../modules/registry'
 import { ModuleCard } from '../components/ModuleCard'
+import { BackupPanel } from '../features/backup/BackupPanel'
 
 const sidebarItems = [
   { label: 'Dashboard', icon: LayoutDashboard, active: true },
@@ -241,6 +242,10 @@ function SettingsModal({ onClose }: { onClose: () => void }) {
         </div>
         <ThemePicker />
       </section>
+
+      <div className="mt-6 border-t pt-4">
+        <BackupPanel />
+      </div>
 
       <div className="grid min-h-0 gap-4 lg:grid-cols-[360px_minmax(0,1fr)]">
         <section className="launcher-panel rounded-xl border p-4">
