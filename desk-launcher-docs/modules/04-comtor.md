@@ -13,6 +13,7 @@ Virtual Comtor is a real-time Japanese ⇄ Vietnamese meeting interpreter packag
 - **Transcript export**: client builds an `.xlsx` (via the `xlsx` lib) or `.csv` workbook in JS, then `export_xlsx` shows a native save dialog and writes the bytes to the chosen path.
 - **Secure key storage**: Soniox + OpenAI keys live in the OS keyring (service `virtual_comtor`), never in SQLite; Settings page can set/test/clear each key. App gates first run on a Soniox key being present.
 - **Trilingual UI (vi/en/ja)**: React context i18n with locale persisted to `localStorage` (`vcomtor_locale`) and mirrored into `settings.json` prefs.
+- **Appearance**: themeable via the shared `@desk-launcher/theme` engine — `<ThemePicker>` in the Settings page; per-app `appId` `comtor` (wired in `modules-pages/comtor/main.tsx`). The module's own `components/ThemeProvider.tsx` is now a **passthrough shim** kept for back-compat. See [07-shared-infra](./07-shared-infra.md).
 
 ---
 
@@ -120,7 +121,7 @@ Virtual Comtor is a real-time Japanese ⇄ Vietnamese meeting interpreter packag
 - `modules/comtor/frontend/src/lib/i18n/{index.tsx,en.ts,ja.ts,vi.ts,types.ts}` — React-context i18n; default `vi`, locale persisted to `localStorage['vcomtor_locale']`.
 - `modules/comtor/frontend/src/lib/{version.ts,changelog.ts,utils.ts}` — App version `0.1.0`, changelog seed entries, `cn()` class helper.
 - `modules/comtor/frontend/src/App.tsx` / `main.tsx` — Shell with sidebar nav + first-run Soniox gate; providers (Theme, I18n, ErrorBoundary); bundles Quicksand fonts (Vietnamese subset).
-- `modules/comtor/frontend/src/components/*` — `AppSidebar`, `LanguageSwitcher`, `ThemeProvider`, `ErrorBoundary`, and `ui/*` primitives.
+- `modules/comtor/frontend/src/components/*` — `AppSidebar`, `LanguageSwitcher`, `ThemeProvider` (passthrough shim — theming is owned by the shared `@desk-launcher/theme` engine), `ErrorBoundary`, and `ui/*` primitives.
 
 ---
 
@@ -194,4 +195,4 @@ Virtual Comtor is a real-time Japanese ⇄ Vietnamese meeting interpreter packag
 - [07-shared-infra](./07-shared-infra.md) — launcher-paths, shared UI
 
 ---
-_Last updated: 2026-06-05 · Synced: desk-launcher@acbb5c5 · Format: v1_
+_Last updated: 2026-06-19 · Synced: desk-launcher@8351e8c · Format: v1_

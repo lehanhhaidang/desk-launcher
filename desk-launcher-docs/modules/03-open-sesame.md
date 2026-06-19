@@ -15,6 +15,7 @@ Open Sesame is the largest Desk Launcher module: a project-documentation workspa
 - **Smart file open**: clicking a file routes by type — Markdown/text/code render inline, images open in an inline viewer, and binary/Office/PDF/archive files launch in the OS default app via `plugin-opener`.
 - **Live file watching**: `doc_set_watch_start/stop` registers a `notify` recursive watcher over mirror + mapped local paths; debounced changes are emitted to the frontend as `fs:change`.
 - **Config export/import**: serialize selected workspaces' doc-sets and re-import them by re-cloning from GitHub.
+- **Appearance**: themeable via the shared `@desk-launcher/theme` engine — an `<AppearanceButton>` in the sidebar; per-app `appId` `open-sesame`. See [07-shared-infra](./07-shared-infra.md).
 
 ---
 
@@ -290,4 +291,4 @@ Think of each doc-set as: **local source folder(s) ↔ managed git mirror (`~/.o
 - [07-shared-infra](./07-shared-infra.md) — launcher-paths data dir helper, shared UI
 
 ---
-_Last updated: 2026-06-05 · Synced: desk-launcher@acbb5c5 · Format: v1_
+_Last updated: 2026-06-19 · Synced: desk-launcher@8351e8c · Format: v1_

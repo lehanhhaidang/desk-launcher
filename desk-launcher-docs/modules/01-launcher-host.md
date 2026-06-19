@@ -12,6 +12,7 @@ The Launcher Host is the single Tauri 2 process that boots Desk Launcher: it reg
 - **Dual registry**: a Rust window-spec registry (`module_registry.rs`) and a TS dashboard registry (`registry.ts`) must be kept in sync by hand.
 - **Per-window scoped permissions**: each window label gets its own capability file; the launcher window itself only gets dashboard-level permissions (`apps/launcher/src-tauri/capabilities/*.json`).
 - **Dashboard UX**: searchable module grid, live "open windows" status polling, plus Settings and "New module scaffold" modals (`apps/launcher/src/pages/Dashboard.tsx`).
+- **Theming**: the host themes itself via the shared `@desk-launcher/theme` engine — `applyThemeFromStorage('launcher')` + `<ThemeProvider appId="launcher">` in `main.tsx`, and a live `<ThemePicker>` mounted inside the dashboard's Settings modal. See [07-shared-infra](./07-shared-infra.md).
 
 ---
 
@@ -81,7 +82,7 @@ Registered in `lib.rs::run()` via `tauri::generate_handler![...]`.
 
 ### Pages / Entry
 - `apps/launcher/index.html` — host window HTML; mounts `/src/main.tsx` into `#root`.
-- `apps/launcher/src/main.tsx` — React 19 `createRoot` of `<App/>` under `StrictMode`; imports `main.css`.
+- `apps/launcher/src/main.tsx` — React 19 `createRoot` of `<App/>` under `StrictMode`; imports `main.css`; calls `applyThemeFromStorage('launcher')` before render and wraps `<App/>` in `<ThemeProvider appId="launcher">` (shared `@desk-launcher/theme`).
 - `apps/launcher/src/App.tsx` — renders `<Dashboard/>` (only page).
 - `apps/launcher/src/pages/Dashboard.tsx` — the dashboard: sidebar, search box, module grid, footer; invokes `open_module` and `list_open_modules`; hosts the Settings and Scaffold modals (UI-only mockups, no backend wiring yet).
 - `apps/launcher/src/main.css` — launcher theme (imports shared `packages/ui/src/theme.css`).
@@ -91,7 +92,7 @@ Registered in `lib.rs::run()` via `tauri::generate_handler![...]`.
 - `apps/launcher/src/modules/registry.ts` — the TS module descriptor list (dashboard metadata + window config copy).
 
 ### Per-module HTML shims
-Each is a minimal HTML page with a `#root` div and a `<script type="module" src="./main.tsx">`; the `main.tsx` shim owns the window's React root and mounts the real module component from `modules/<id>/frontend/src/` via an alias. (`apps/launcher/modules-pages/<id>/index.html` + `main.tsx`)
+Each is a minimal HTML page with a `#root` div and a `<script type="module" src="./main.tsx">`; the `main.tsx` shim owns the window's React root and mounts the real module component from `modules/<id>/frontend/src/` via an alias. (`apps/launcher/modules-pages/<id>/index.html` + `main.tsx`). Each shim also pre-applies the saved theme (`applyThemeFromStorage('<id>')`) and wraps the module in `<ThemeProvider appId="<id>">`, so every window themes itself independently (shared `@desk-launcher/theme`).
 
 - `modules-pages/myssh/index.html` + `main.tsx` — mounts `@modules/myssh/frontend/src/MySSH`.
 - `modules-pages/open-sesame/main.tsx` — mounts `@os/App` + sonner `<Toaster/>` + `@os/index.css`.
@@ -122,6 +123,7 @@ Path aliases (Vite `resolve.alias`, mirrored in `tsconfig.json` `paths`):
 | `@modules` | `modules/` |
 | `@desk-launcher/ui` | `packages/ui/src` |
 | `@desk-launcher/tauri-bridge` | `packages/tauri-bridge/src` |
+| `@desk-launcher/theme` | `packages/theme/src` |
 | `@os` | `modules/open-sesame/frontend/src` |
 | `@cmt` | `modules/comtor/frontend/src` |
 | `@vid` | `modules/video-downloader/frontend/src` |
@@ -164,7 +166,7 @@ Dev server: port `5180`, `strictPort`, host `127.0.0.1`, `server.fs.allow` raise
 - **`list_open_modules` filters `"launcher"`** explicitly, so the host window never appears as an "open module".
 - **CSP is `null`** in `tauri.conf.json`; network-egress restrictions for modules like Comtor (Soniox/OpenAI) are described as CSP-enforced in capability comments but are not actually present in config — currently unrestricted at the host level.
 - **Plugin name coupling**: capability strings like `comtor:default` only resolve because each crate calls `Builder::new("<id>")` and is named `tauri-plugin-<id>`; renaming either breaks permission resolution.
-- The Settings and "New module scaffold" modals in `Dashboard.tsx` are **UI mockups** — no `invoke`/backend calls behind their Save/Generate buttons yet.
+- The dashboard **Settings modal** now hosts the shared `<ThemePicker>` (real — applies live + persists to `localStorage["theme:launcher"]`); the **"New module scaffold" modal** is still a **UI mockup** (no backend behind its Generate button).
 - `index.html` files are tagged `lang="vi"` and load `class="dark"` by default.
 
 ---
@@ -173,4 +175,4 @@ Dev server: port `5180`, `strictPort`, host `127.0.0.1`, `server.fs.allow` raise
 - [02-myssh](./02-myssh.md), [03-open-sesame](./03-open-sesame.md), [04-comtor](./04-comtor.md), [05-video-downloader](./05-video-downloader.md), [06-md-converter](./06-md-converter.md), [07-shared-infra](./07-shared-infra.md) — all module windows are spawned by this host
 
 ---
-_Last updated: 2026-06-05 · Synced: desk-launcher@acbb5c5 · Format: v1_
+_Last updated: 2026-06-19 · Synced: desk-launcher@8351e8c · Format: v1_

@@ -12,6 +12,7 @@ The Video Downloader module (internally "Media Toolbox") is a Tauri plugin + Rea
 - **Unified Queue**: A shared zustand `job-store` aggregates Capture/Image/Video jobs into one timeline (Active / History) with per-kind cancel, reveal-in-explorer, and "clear finished".
 - **Platform detection**: URL pattern matching for YouTube, Bilibili, TikTok, X/Twitter, Facebook, Instagram, Twitch (download support is actually whatever yt-dlp can handle).
 - **Per-feature isolation**: Three separate state tables and three event channels keep an in-flight job in one tab alive (via `forceMount`) while the user works in another.
+- **Appearance**: themeable via the shared `@desk-launcher/theme` engine — an `<AppearanceButton>` in the toolbox header; per-app `appId` `video-downloader`. See [07-shared-infra](./07-shared-infra.md).
 
 ---
 
@@ -183,4 +184,4 @@ No SQLite — there is no persistent database. Outputs are written to per-featur
 - [07-shared-infra](./07-shared-infra.md) — ensure-sidecars script, launcher-paths, shared UI
 
 ---
-_Last updated: 2026-06-05 · Synced: desk-launcher@acbb5c5 · Format: v1_
+_Last updated: 2026-06-19 · Synced: desk-launcher@8351e8c · Format: v1_

@@ -6,7 +6,7 @@
 
 ### Main technologies
 - **Backend**: Rust (edition 2021, rust-version 1.77.2), Tauri 2.10, one `tauri-plugin-<id>` crate per module. Key libs per module: `russh`+`xterm.js`+`rusqlite`+`keyring` (MySSH), `rusqlite`+`git2`+`oauth2`+`keyring` (Open Sesame), `rusqlite`+`keyring` (Comtor), `image` crate + `yt-dlp`/`ffmpeg` sidecars (Video Downloader), `calamine`+`zip`+`quick-xml`+`htmd`+`pdf-extract` (Markdown Converter).
-- **Frontend**: React 19, TypeScript, Vite multi-page build (one HTML entry per window), Tailwind CSS v4, shared `@desk-launcher/ui` (shadcn/Radix) + `@desk-launcher/tauri-bridge` packages. Zustand for state in larger modules.
+- **Frontend**: React 19, TypeScript, Vite multi-page build (one HTML entry per window), Tailwind CSS v4, shared `@desk-launcher/ui` (shadcn/Radix) + `@desk-launcher/tauri-bridge` + `@desk-launcher/theme` (per-app theme engine) packages. Zustand for state in larger modules.
 - **Database**: Per-module SQLite via `rusqlite` (Open Sesame, Comtor); other modules are stateless or persist to files / browser `localStorage`. Each module's data lives under `%APPDATA%\io.desklauncher\modules\<id>\` (resolved by the `launcher-paths` crate). Secrets (API keys, OAuth tokens) live in the OS **keyring**, never in the DB.
 - **Deployment**: NSIS installer built via `npm run build` (output under `apps/launcher/src-tauri/target/release/bundle/nsis/`). WebView2 runtime required.
 
@@ -55,9 +55,9 @@ Single git repo (monorepo) rooted at `C:\desk-launcher`. npm workspaces cover `a
 **Description**: A Termius-style SSH client — manage saved hosts (folders, tags, search), open real interactive terminals over `russh` rendered with `xterm.js`, run multiple session tabs, store command snippets, and create local port forwards. Host metadata is in SQLite; passwords/passphrases are in the OS keyring. Replaces the earlier Port Killer module.
 
 **Key Features**:
-- Host CRUD with folders + tags + search; password or SSH-key auth (secrets in keyring)
+- Host CRUD with folders + tags + search; password, key, ssh-agent, or keyboard-interactive (OTP/2FA) auth (secrets in keyring)
 - Embedded interactive PTY shell via `russh` (0.61, `ring` backend) streamed to `xterm.js`
-- Multi-tab sessions (all kept mounted so background tabs keep streaming)
+- Per-host tab bar (all sessions kept mounted so background tabs keep streaming); chunked SFTP transfers with progress
 - TOFU host-key verification (`known_hosts`): first key trusted & stored, changed key rejected
 - Command snippets sent to the active session; local port forwarding (`direct-tcpip`)
 
@@ -192,11 +192,12 @@ Single git repo (monorepo) rooted at `C:\desk-launcher`. npm workspaces cover `a
 
 ### 07. Shared Packages & Infrastructure
 
-**Description**: The cross-cutting foundation (not a business domain) every module builds on: shared React UI primitives (`packages/ui`), a Tauri/HTTP bridge helper (`packages/tauri-bridge`), the `launcher-paths` Rust crate that gives each module its own isolated data dir, and the build/sidecar tooling. This is the concrete realization of the README rule "Modules never talk to each other; shared code lives in `packages/` or `crates/`."
+**Description**: The cross-cutting foundation (not a business domain) every module builds on: shared React UI primitives (`packages/ui`), a Tauri/HTTP bridge helper (`packages/tauri-bridge`), the shared theme engine (`packages/theme`), the `launcher-paths` Rust crate that gives each module its own isolated data dir, and the build/sidecar tooling. This is the concrete realization of the README rule "Modules never talk to each other; shared code lives in `packages/` or `crates/`."
 
 **Key Features**:
 - Shared shadcn/Radix UI primitives + `cn` util + central `theme.css`, consumed via the `@desk-launcher/ui` alias
 - `@desk-launcher/tauri-bridge`: `apiRequest`, `apiDownload`, runtime-detected `API_BASE_URL`
+- `@desk-launcher/theme`: per-app theme engine (dark/light/system, accent, background blend, font/size/radius/motion); each app themes itself via its own `appId` (`localStorage["theme:"+appId]`)
 - `launcher-paths`: per-module `%APPDATA%\io.desklauncher\modules\<id>\` isolation, auto-created
 - `ensure-sidecars.mjs` downloads `yt-dlp.exe` + `ffmpeg.exe` (target-triple suffix), gated by `SKIP_SIDECARS`, run before every dev/build
 - Frontend packages are source-only (no `package.json`); wired purely by Vite path aliases
@@ -204,9 +205,10 @@ Single git repo (monorepo) rooted at `C:\desk-launcher`. npm workspaces cover `a
 **Shared Surface**:
 - `@desk-launcher/ui` → `cn`, `Button`, `Input`, `Card*`, `Badge`, `LoadingSpinner`, `Select*`, `Tabs*`
 - `@desk-launcher/tauri-bridge` → `apiRequest<T>`, `apiDownload`, `API_BASE_URL`
+- `@desk-launcher/theme` → `ThemeProvider`, `useTheme`, `ThemePicker`, `AppearanceButton`, `applyThemeFromStorage`, `DEFAULT_THEME`
 - `launcher-paths` → `launcher_data_dir()`, `module_data_dir(id)`, `module_data_file(id, name)`, `LAUNCHER_IDENTIFIER`, `PathError`
 
-**Consumed by**: `launcher-paths` → host, Comtor, Open Sesame, Video Downloader, MySSH (not MD Converter). UI → all frontends. Sidecars → Video Downloader only.
+**Consumed by**: `launcher-paths` → host, Comtor, Open Sesame, Video Downloader, MySSH (not MD Converter). UI + theme → host + all five module frontends. Sidecars → Video Downloader only.
 
 **Related**: all modules
 
@@ -253,4 +255,4 @@ _Qualitative size, not a live tally._
 Buckets: small ≈ <10 · medium ≈ 10–40 · large ≈ 40+.
 
 ---
-_Last updated: 2026-06-05 · Synced: desk-launcher@acbb5c5 · Format: v1_
+_Last updated: 2026-06-19 · Synced: desk-launcher@8351e8c · Format: v1_
