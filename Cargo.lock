@@ -1412,6 +1412,9 @@ name = "desk-launcher"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "getrandom 0.2.17",
+ "keyring 3.6.3",
+ "launcher-backup",
  "launcher-paths",
  "log",
  "serde",

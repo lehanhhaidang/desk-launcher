@@ -1,3 +1,4 @@
+mod backup;
 mod module_registry;
 mod window_manager;
 
