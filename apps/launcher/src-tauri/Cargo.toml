@@ -1,6 +1,6 @@
 [package]
 name = "desk-launcher"
-version = "0.1.0"
+version = "0.2.0"
 description = "Desk Launcher - unified desktop tool launcher"
 edition.workspace = true
 rust-version.workspace = true
