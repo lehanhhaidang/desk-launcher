@@ -33,6 +33,7 @@ MySSH is a Termius-style SSH client packaged as a Tauri plugin + React bundle. I
 | `src/utils/secret_store.rs` | OS keyring (service `myssh`); DB stores only a `keyring:<host_id>` reference. |
 | `src/commands/` | `hosts`, `groups`, `session`, `snippets`, `forward`, `sftp`. |
 | `build.rs` / `permissions/` | `COMMANDS` array → auto-generated `allow-*` permission files; `default.toml` grants all. |
+| `src/backup.rs` | `export_data(ExportOptions) -> Result<ModuleExport, BackupError>` — takes a `dbsnap` of `myssh.db` and reads keyring secrets per host; when `include_heavy` is set, also bundles SSH key files referenced by host records. `import_data(ModuleImport, ImportMode) -> Result<(), BackupError>` — restores the DB snapshot via `dbsnap::restore_db` and writes secrets back to the keyring. Consumed by the launcher host backup orchestrator. |
 
 ### Capability
 | File | Notable permissions |
@@ -105,4 +106,4 @@ SQLite at `%APPDATA%\io.desklauncher\modules\myssh\myssh.db` (via `launcher-path
 - [07-shared-infra](./07-shared-infra.md) — shared UI primitives & launcher-paths
 
 ---
-_Last updated: 2026-06-19 · Synced: desk-launcher@8351e8c · Format: v1_
+_Last updated: 2026-06-19 · Synced: desk-launcher@43187ec · Format: v1_

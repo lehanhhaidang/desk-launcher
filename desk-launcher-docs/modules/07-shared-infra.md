@@ -75,6 +75,19 @@ A tiny, dependency-light crate (`dirs = "5"`, workspace `thiserror`) whose entir
 
 Data dir convention: the OS app-data root is derived once from `dirs::data_dir()` + `LAUNCHER_IDENTIFIER`. Each module is namespaced under `modules\<id>\`, e.g. `%APPDATA%\io.desklauncher\modules\comtor\` (holds `vcomtor.db`, `audio\`, `settings.json`), `...\modules\open-sesame\` (`data.db`), etc. Launcher-level state (`launcher.toml`, migration markers) sits at the root next to `modules\`. Directories are created lazily on the first resolving call, so there is no separate setup step.
 
+### `launcher-backup` (`crates/launcher-backup/`)
+The backup toolkit consumed by the launcher host and the three stateful modules (MySSH, Open Sesame, Comtor). It provides all primitives needed to produce and consume a `.dlbak` bundle — a passphrase-encrypted tar archive containing per-module data subtrees plus a manifest.
+
+| Module | Public item | Description |
+|---|---|---|
+| `types` | `ModuleExport`, `ModuleImport`, `ExportFile`, `SecretEntry`, `ExportOptions`, `ImportMode`, `BackupManifest` | Shared bundle types: `ExportOptions { include_heavy }` controls whether large artifacts (SSH keys, mirror folders, audio) are included; `ImportMode::Replace` replaces existing data; `BackupManifest` (stored as `manifest.json` inside the bundle) records module ids, format version, and timestamp. |
+| `crypto` | `seal(data, key)`, `open(data, key)`, `BundleKey::{Passphrase, Raw}` | Argon2id KDF (passphrase → 32-byte key) + XChaCha20-Poly1305 AEAD for symmetric encryption/decryption. `BundleKey::Passphrase` derives the key at runtime; `BundleKey::Raw` uses a pre-derived byte array (for machine-bound auto-backup). |
+| `archive` | tar helpers | Builds/reads the unencrypted tar layer that holds per-module subtrees (`<id>/db.sqlite`, `<id>/secrets.json`, optional heavy files) and `launcher/appearance.json`. |
+| `bundle` | `write_bundle(path, key, modules, appearance)`, `read_bundle(path, key) -> ReadBundle` | Top-level API: `write_bundle` seals the tar into a `.dlbak` file; `read_bundle` opens and verifies it. The manifest is stored as `manifest.json` inside the encrypted tar. |
+| `dbsnap` | `snapshot_db(src, dest)`, `restore_db(src, dest)` | Consistent SQLite snapshot via `VACUUM INTO` (zero-lock window); `restore_db` replaces the live DB with the snapshot. |
+
+**Consumed by**: launcher host (`apps/launcher/src-tauri/src/backup/`), MySSH (`modules/myssh/rust/src/backup.rs`), Open Sesame (`modules/open-sesame/rust/src/backup.rs`), Comtor (`modules/comtor/rust/src/backup.rs`).
+
 ---
 
 ## BUILD & TOOLING
@@ -98,6 +111,7 @@ Each binary is skipped if it already exists and is non-empty (`hasFile`). Settin
 | Shared piece | Consumers |
 |---|---|
 | `launcher-paths` crate | **All Rust crates that persist state**: launcher host (`apps/launcher/src-tauri`), Comtor (`audio.rs`, `db.rs`, `settings.rs`), Open Sesame (`utils/paths.rs`), Video Downloader (`paths.rs`), MySSH (`db/mod.rs`). MD Converter does **not** depend on it (no on-disk state). |
+| `launcher-backup` crate | Launcher host (`backup/` orchestrator + commands), MySSH (`backup.rs`), Open Sesame (`backup.rs`), Comtor (`backup.rs`). Video Downloader and MD Converter have no backup integration (no persistent state to export). |
 | `@desk-launcher/ui` | All module frontends + the launcher dashboard. Verified imports: launcher `Dashboard.tsx` / `ModuleCard.tsx`, MD Converter `MdConverter.tsx` / `SingleTab.tsx` / `BatchTab.tsx`. Other module frontends consume it via the same alias. |
 | `@desk-launcher/tauri-bridge` | Module frontends that call a local HTTP backend (wired via the Vite alias). |
 | `@desk-launcher/theme` | The launcher + **all five module frontends** — each wires `applyThemeFromStorage(appId)` + `<ThemeProvider appId>` at its window entry. Picker surface: launcher & **Comtor** mount `<ThemePicker>` in Settings; **MySSH / Open Sesame / Video Downloader / MD Converter** mount `<AppearanceButton>` in the header/sidebar. |
@@ -139,4 +153,4 @@ Each binary is skipped if it already exists and is non-empty (`hasFile`). Settin
 - [02-myssh](./02-myssh.md), [03-open-sesame](./03-open-sesame.md), [04-comtor](./04-comtor.md), [05-video-downloader](./05-video-downloader.md), [06-md-converter](./06-md-converter.md) — all consume this shared layer
 
 ---
-_Last updated: 2026-06-19 · Synced: desk-launcher@8351e8c · Format: v1_
+_Last updated: 2026-06-19 · Synced: desk-launcher@43187ec · Format: v1_

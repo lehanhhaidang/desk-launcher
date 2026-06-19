@@ -47,7 +47,7 @@ Each capability file binds permissions to a window **label** (the same string as
 
 | File | Window | Notable permissions |
 |---|---|---|
-| `capabilities/launcher.json` | `launcher` | `core:default`, `opener:default`, `log:default`, `dialog:default` — dashboard only; no fs/shell. |
+| `capabilities/launcher.json` | `launcher` | `core:default`, `opener:default`, `log:default`, `dialog:default`, `dialog:allow-save`, `dialog:allow-open` — dashboard + backup export/import file dialogs; no fs/shell. |
 | `capabilities/myssh.json` | `myssh` | `core`, `dialog`, `log`, `myssh:default` (host/session/snippet/forward commands live in the plugin). |
 | `capabilities/open-sesame.json` | `open-sesame` | `fs:default` + scoped `fs:allow-read-file`/`allow-write-file` on `$HOME/.open-sesame/**` (read also `$HOME/**`), `shell:allow-open`, `opener:allow-open-url` scoped to `github.com`/`api.github.com`, `open-sesame:default`. |
 | `capabilities/comtor.json` | `comtor` | `dialog:default` + `dialog:allow-save` (xlsx export), `log`, `comtor:default`; Soniox/OpenAI network is gated by CSP, not capabilities. |
@@ -73,6 +73,10 @@ Each capability file binds permissions to a window **label** (the same string as
 | `close_module` | `{ id: String }` | Closes the window with label `id` if present; no-op otherwise. (`window_manager.rs::close_module()`) |
 | `list_open_modules` | none | Returns all live webview window labels **except** `launcher`. (`window_manager.rs::list_open_modules()`) |
 | `list_modules` | none | Returns the static list of registered module ids from the Rust registry. (`module_registry.rs::list_modules()`) |
+| `backup_plan` | none | Returns a `BackupPlan` (list of modules with their data-presence flags) so the frontend export wizard can pre-tick the right items. (`backup/mod.rs`) |
+| `backup_export` | `{ req: ExportReq }` | Runs the full export flow — gathers `ModuleExport` from each selected module (DB snapshot via `dbsnap`, keyring secrets, optional heavy items), bundles them with `launcher-backup::write_bundle`, and saves a timestamped `.dlbak` via a `dialog:allow-save` native file dialog. (`backup/mod.rs`) |
+| `backup_preview` | `{ req: PreviewReq }` | Opens a `.dlbak` via a `dialog:allow-open` native file dialog, decrypts it, and returns the `BackupManifest` so the frontend import wizard can show what is in the bundle before applying. (`backup/mod.rs`) |
+| `backup_import_apply` | `{ req: ApplyReq }` | Applies a previously previewed bundle: auto-backs up the affected modules first (via `auto_backup_module`), then calls each module's `import_data(ModuleImport, ImportMode::Replace)`. (`backup/mod.rs`) |
 
 Registered in `lib.rs::run()` via `tauri::generate_handler![...]`.
 
@@ -166,7 +170,9 @@ Dev server: port `5180`, `strictPort`, host `127.0.0.1`, `server.fs.allow` raise
 - **`list_open_modules` filters `"launcher"`** explicitly, so the host window never appears as an "open module".
 - **CSP is `null`** in `tauri.conf.json`; network-egress restrictions for modules like Comtor (Soniox/OpenAI) are described as CSP-enforced in capability comments but are not actually present in config — currently unrestricted at the host level.
 - **Plugin name coupling**: capability strings like `comtor:default` only resolve because each crate calls `Builder::new("<id>")` and is named `tauri-plugin-<id>`; renaming either breaks permission resolution.
-- The dashboard **Settings modal** now hosts the shared `<ThemePicker>` (real — applies live + persists to `localStorage["theme:launcher"]`); the **"New module scaffold" modal** is still a **UI mockup** (no backend behind its Generate button).
+- The dashboard **Settings modal** now hosts the shared `<ThemePicker>` (real — applies live + persists to `localStorage["theme:launcher"]`) and a **Backup panel** (`apps/launcher/src/features/backup/`) with Export and Import wizards wired to the four `backup_*` host commands. The **"New module scaffold" modal** is still a **UI mockup** (no backend behind its Generate button).
+- **Auto-backup** (`auto_backup_module`): before applying a destructive import, the host writes a timestamped `.dlbak` under `<launcher_data>/backups/` using a machine-bound key stored in the OS keyring (service `desk-launcher`, account `backup-autokey`); only the last 3 auto-backups are kept per module.
+- **Appearance export/import**: the frontend gathers `localStorage["theme:*"]` values into `launcher/appearance.json` inside the bundle and re-applies them on import (no Rust involvement).
 - `index.html` files are tagged `lang="vi"` and load `class="dark"` by default.
 
 ---
@@ -175,4 +181,4 @@ Dev server: port `5180`, `strictPort`, host `127.0.0.1`, `server.fs.allow` raise
 - [02-myssh](./02-myssh.md), [03-open-sesame](./03-open-sesame.md), [04-comtor](./04-comtor.md), [05-video-downloader](./05-video-downloader.md), [06-md-converter](./06-md-converter.md), [07-shared-infra](./07-shared-infra.md) — all module windows are spawned by this host
 
 ---
-_Last updated: 2026-06-19 · Synced: desk-launcher@8351e8c · Format: v1_
+_Last updated: 2026-06-19 · Synced: desk-launcher@43187ec · Format: v1_

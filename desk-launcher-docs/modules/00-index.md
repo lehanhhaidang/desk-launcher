@@ -31,6 +31,7 @@ Single git repo (monorepo) rooted at `C:\desk-launcher`. npm workspaces cover `a
 - Compile-time plugin aggregation + startup registration of all module plugins (`lib.rs`)
 - Open-or-focus: re-opening a live module focuses/unminimizes it instead of duplicating the window
 - Dual hand-synced registry: `module_registry.rs` (Rust window specs) ↔ `registry.ts` (TS dashboard metadata)
+- Backup export/import: Settings modal Backup panel (Export/Import wizards) backed by `backup_plan`/`backup_export`/`backup_preview`/`backup_import_apply` host commands; produces passphrase-encrypted `.dlbak` bundles via `crates/launcher-backup`
 
 **Main Host Commands**:
 | Command | Params | Description |
@@ -192,13 +193,14 @@ Single git repo (monorepo) rooted at `C:\desk-launcher`. npm workspaces cover `a
 
 ### 07. Shared Packages & Infrastructure
 
-**Description**: The cross-cutting foundation (not a business domain) every module builds on: shared React UI primitives (`packages/ui`), a Tauri/HTTP bridge helper (`packages/tauri-bridge`), the shared theme engine (`packages/theme`), the `launcher-paths` Rust crate that gives each module its own isolated data dir, and the build/sidecar tooling. This is the concrete realization of the README rule "Modules never talk to each other; shared code lives in `packages/` or `crates/`."
+**Description**: The cross-cutting foundation (not a business domain) every module builds on: shared React UI primitives (`packages/ui`), a Tauri/HTTP bridge helper (`packages/tauri-bridge`), the shared theme engine (`packages/theme`), the `launcher-paths` Rust crate that gives each module its own isolated data dir, the `launcher-backup` Rust crate (backup bundle types, Argon2id+XChaCha20-Poly1305 crypto, tar archive, and SQLite dbsnap), and the build/sidecar tooling. This is the concrete realization of the README rule "Modules never talk to each other; shared code lives in `packages/` or `crates/`."
 
 **Key Features**:
 - Shared shadcn/Radix UI primitives + `cn` util + central `theme.css`, consumed via the `@desk-launcher/ui` alias
 - `@desk-launcher/tauri-bridge`: `apiRequest`, `apiDownload`, runtime-detected `API_BASE_URL`
 - `@desk-launcher/theme`: per-app theme engine (dark/light/system, accent, background blend, font/size/radius/motion); each app themes itself via its own `appId` (`localStorage["theme:"+appId]`)
 - `launcher-paths`: per-module `%APPDATA%\io.desklauncher\modules\<id>\` isolation, auto-created
+- `launcher-backup`: bundle types (`ModuleExport`/`ModuleImport`/`BackupManifest`/etc.), `seal`/`open` crypto (Argon2id + XChaCha20-Poly1305), `write_bundle`/`read_bundle`, and `snapshot_db`/`restore_db` (SQLite `VACUUM INTO`)
 - `ensure-sidecars.mjs` downloads `yt-dlp.exe` + `ffmpeg.exe` (target-triple suffix), gated by `SKIP_SIDECARS`, run before every dev/build
 - Frontend packages are source-only (no `package.json`); wired purely by Vite path aliases
 
@@ -207,8 +209,9 @@ Single git repo (monorepo) rooted at `C:\desk-launcher`. npm workspaces cover `a
 - `@desk-launcher/tauri-bridge` → `apiRequest<T>`, `apiDownload`, `API_BASE_URL`
 - `@desk-launcher/theme` → `ThemeProvider`, `useTheme`, `ThemePicker`, `AppearanceButton`, `applyThemeFromStorage`, `DEFAULT_THEME`
 - `launcher-paths` → `launcher_data_dir()`, `module_data_dir(id)`, `module_data_file(id, name)`, `LAUNCHER_IDENTIFIER`, `PathError`
+- `launcher-backup` → `write_bundle`, `read_bundle`, `seal`/`open`, `snapshot_db`/`restore_db`, `ModuleExport`/`ModuleImport`/`BackupManifest`/`ExportOptions`/`ImportMode`/`BundleKey`
 
-**Consumed by**: `launcher-paths` → host, Comtor, Open Sesame, Video Downloader, MySSH (not MD Converter). UI + theme → host + all five module frontends. Sidecars → Video Downloader only.
+**Consumed by**: `launcher-paths` → host, Comtor, Open Sesame, Video Downloader, MySSH (not MD Converter). `launcher-backup` → host + MySSH + Open Sesame + Comtor. UI + theme → host + all five module frontends. Sidecars → Video Downloader only.
 
 **Related**: all modules
 
@@ -255,4 +258,4 @@ _Qualitative size, not a live tally._
 Buckets: small ≈ <10 · medium ≈ 10–40 · large ≈ 40+.
 
 ---
-_Last updated: 2026-06-19 · Synced: desk-launcher@8351e8c · Format: v1_
+_Last updated: 2026-06-19 · Synced: desk-launcher@43187ec · Format: v1_

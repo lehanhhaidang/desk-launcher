@@ -29,6 +29,7 @@ Virtual Comtor is a real-time Japanese ⇄ Vietnamese meeting interpreter packag
 | `modules/comtor/rust/src/settings.rs` | Keyring-backed API keys + JSON prefs. Commands `get_settings`, `get/set/clear_soniox_key`, `get/set/clear_openai_key`, `get/set_prefs`. Keyring service = `virtual_comtor`; prefs in `settings.json`. |
 | `modules/comtor/rust/src/export.rs` | Single async command `export_xlsx`: opens a `tauri-plugin-dialog` save dialog (filter `*.xlsx`), writes the provided byte array to the chosen path; returns the path or `None` if cancelled. Used for both XLSX and CSV. |
 | `modules/comtor/rust/src/error.rs` | `AppError` enum (`Db`/`Io`/`Json`/`Keyring`/`NotFound`/`Invalid`/`Internal`) with `Serialize` to a string; `AppResult<T>` alias. |
+| `modules/comtor/rust/src/backup.rs` | `export_data(ExportOptions) -> Result<ModuleExport, BackupError>` — snapshots `vcomtor.db` via `dbsnap` and reads the Soniox/OpenAI API keys from the keyring (service `virtual_comtor`); when `include_heavy` is set, also bundles the `.webm` audio files from the module `audio/` dir. `import_data(ModuleImport, ImportMode) -> Result<(), BackupError>` — restores the DB via `dbsnap::restore_db` and writes API keys back to the keyring. Consumed by the launcher host backup orchestrator. |
 
 ### DB / Storage
 | File | Description |
@@ -195,4 +196,4 @@ Virtual Comtor is a real-time Japanese ⇄ Vietnamese meeting interpreter packag
 - [07-shared-infra](./07-shared-infra.md) — launcher-paths, shared UI
 
 ---
-_Last updated: 2026-06-19 · Synced: desk-launcher@8351e8c · Format: v1_
+_Last updated: 2026-06-19 · Synced: desk-launcher@43187ec · Format: v1_
