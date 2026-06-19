@@ -20,14 +20,25 @@ pub fn unpack(bytes: &[u8]) -> Result<Vec<ExportFile>, BackupError> {
     let mut out = Vec::new();
     for entry in archive.entries().map_err(|e| BackupError::Archive(e.to_string()))? {
         let mut entry = entry.map_err(|e| BackupError::Archive(e.to_string()))?;
-        let path = entry
+        let rel_path = entry
             .path()
             .map_err(|e| BackupError::Archive(e.to_string()))?
             .to_string_lossy()
             .replace('\\', "/");
+
+        // Reject any path that could escape the target directory.
+        if rel_path.starts_with('/') || rel_path.starts_with("\\\\") || rel_path.contains(':') {
+            return Err(BackupError::Archive(format!("unsafe path in archive: {rel_path}")));
+        }
+        for component in rel_path.split('/') {
+            if component == ".." {
+                return Err(BackupError::Archive(format!("unsafe path in archive: {rel_path}")));
+            }
+        }
+
         let mut buf = Vec::new();
         entry.read_to_end(&mut buf).map_err(|e| BackupError::Archive(e.to_string()))?;
-        out.push(ExportFile { rel_path: path, bytes: buf });
+        out.push(ExportFile { rel_path, bytes: buf });
     }
     Ok(out)
 }
@@ -49,5 +60,64 @@ mod tests {
         assert_eq!(out.len(), 2);
         assert_eq!(out[0].rel_path, "manifest.json");
         assert_eq!(out[1].bytes, vec![0, 1, 2, 3]);
+    }
+
+    #[test]
+    fn unpack_rejects_path_traversal() {
+        // The `tar` crate validates paths on `append_data`, so we must build a
+        // raw tar byte stream by hand to smuggle in a `../evil.txt` entry.
+        // A POSIX ustar tar entry is a 512-byte header block followed by
+        // zero or more 512-byte data blocks, then two zero blocks at the end.
+        let filename = b"../evil.txt";
+        let payload = b"evil";
+
+        let mut header = [0u8; 512];
+        // name field: bytes 0-99
+        header[..filename.len()].copy_from_slice(filename);
+        // mode: bytes 100-107
+        header[100..108].copy_from_slice(b"0000644\0");
+        // uid: 108-115
+        header[108..116].copy_from_slice(b"0000000\0");
+        // gid: 116-123
+        header[116..124].copy_from_slice(b"0000000\0");
+        // size: 124-135 (octal, 4 bytes, null-terminated)
+        header[124..135].copy_from_slice(b"00000000004");
+        header[135] = b'\0';
+        // mtime: 136-147
+        header[136..147].copy_from_slice(b"00000000000");
+        header[147] = b'\0';
+        // type flag: 148 is checksum; 156 = '0' (regular file)
+        header[156] = b'0';
+        // magic: 257-262 (ustar)
+        header[257..263].copy_from_slice(b"ustar ");
+        header[263] = b' ';
+        header[264] = b'\0';
+
+        // compute and write checksum (bytes 148-155, fill with spaces first)
+        header[148..156].fill(b' ');
+        let cksum: u32 = header.iter().map(|&b| b as u32).sum();
+        // write checksum as 6-digit octal + null + space
+        let cksum_str = format!("{:06o}\0 ", cksum);
+        header[148..156].copy_from_slice(cksum_str.as_bytes());
+
+        let mut tar_bytes = Vec::new();
+        tar_bytes.extend_from_slice(&header);
+        // data block (padded to 512)
+        let mut data_block = [0u8; 512];
+        data_block[..payload.len()].copy_from_slice(payload);
+        tar_bytes.extend_from_slice(&data_block);
+        // two zero blocks (end-of-archive)
+        tar_bytes.extend_from_slice(&[0u8; 1024]);
+
+        let result = unpack(&tar_bytes);
+        assert!(
+            result.is_err(),
+            "unpack should reject a path-traversal entry but returned Ok"
+        );
+        let err_msg = result.unwrap_err().to_string();
+        assert!(
+            err_msg.contains("unsafe path"),
+            "error message should mention 'unsafe path', got: {err_msg}"
+        );
     }
 }

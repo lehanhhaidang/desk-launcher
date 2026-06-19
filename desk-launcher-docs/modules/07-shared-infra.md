@@ -81,10 +81,10 @@ The backup toolkit consumed by the launcher host and the three stateful modules 
 | Module | Public item | Description |
 |---|---|---|
 | `types` | `ModuleExport`, `ModuleImport`, `ExportFile`, `SecretEntry`, `ExportOptions`, `ImportMode`, `BackupManifest` | Shared bundle types: `ExportOptions { include_heavy }` controls whether large artifacts (SSH keys, mirror folders, audio) are included; `ImportMode::Replace` replaces existing data; `BackupManifest` (stored as `manifest.json` inside the bundle) records module ids, format version, and timestamp. |
-| `crypto` | `seal(data, key)`, `open(data, key)`, `BundleKey::{Passphrase, Raw}` | Argon2id KDF (passphrase → 32-byte key) + XChaCha20-Poly1305 AEAD for symmetric encryption/decryption. `BundleKey::Passphrase` derives the key at runtime; `BundleKey::Raw` uses a pre-derived byte array (for machine-bound auto-backup). |
+| `crypto` | `seal_with_passphrase(data, passphrase)`, `open_with_passphrase(data, passphrase)`, `seal_with_key(data, key)`, `open_with_key(data, key)`, `BundleKey::{Passphrase, Raw}` | Argon2id KDF (passphrase → 32-byte key) + XChaCha20-Poly1305 AEAD for symmetric encryption/decryption. `BundleKey::Passphrase` derives the key at runtime; `BundleKey::Raw` uses a pre-derived byte array (for machine-bound auto-backup). |
 | `archive` | tar helpers | Builds/reads the unencrypted tar layer that holds per-module subtrees (`<id>/db.sqlite`, `<id>/secrets.json`, optional heavy files) and `launcher/appearance.json`. |
-| `bundle` | `write_bundle(path, key, modules, appearance)`, `read_bundle(path, key) -> ReadBundle` | Top-level API: `write_bundle` seals the tar into a `.dlbak` file; `read_bundle` opens and verifies it. The manifest is stored as `manifest.json` inside the encrypted tar. |
-| `dbsnap` | `snapshot_db(src, dest)`, `restore_db(src, dest)` | Consistent SQLite snapshot via `VACUUM INTO` (zero-lock window); `restore_db` replaces the live DB with the snapshot. |
+| `bundle` | `write_bundle(manifest, files, key)`, `read_bundle(bytes, key) -> ReadBundle` | Top-level API: `write_bundle` seals the tar into a `.dlbak` file; `read_bundle` opens and verifies it. The manifest is stored as `manifest.json` inside the encrypted tar. |
+| `dbsnap` | `snapshot(src) -> Vec<u8>`, `restore(dst, bytes)` | Consistent SQLite snapshot via `VACUUM INTO` (zero-lock window); `restore` copies the snapshot into `dst` via the SQLite online backup API, which is safe even when another connection already has the file open. |
 
 **Consumed by**: launcher host (`apps/launcher/src-tauri/src/backup/`), MySSH (`modules/myssh/rust/src/backup.rs`), Open Sesame (`modules/open-sesame/rust/src/backup.rs`), Comtor (`modules/comtor/rust/src/backup.rs`).
 

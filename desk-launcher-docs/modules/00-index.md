@@ -200,7 +200,7 @@ Single git repo (monorepo) rooted at `C:\desk-launcher`. npm workspaces cover `a
 - `@desk-launcher/tauri-bridge`: `apiRequest`, `apiDownload`, runtime-detected `API_BASE_URL`
 - `@desk-launcher/theme`: per-app theme engine (dark/light/system, accent, background blend, font/size/radius/motion); each app themes itself via its own `appId` (`localStorage["theme:"+appId]`)
 - `launcher-paths`: per-module `%APPDATA%\io.desklauncher\modules\<id>\` isolation, auto-created
-- `launcher-backup`: bundle types (`ModuleExport`/`ModuleImport`/`BackupManifest`/etc.), `seal`/`open` crypto (Argon2id + XChaCha20-Poly1305), `write_bundle`/`read_bundle`, and `snapshot_db`/`restore_db` (SQLite `VACUUM INTO`)
+- `launcher-backup`: bundle types (`ModuleExport`/`ModuleImport`/`BackupManifest`/etc.), `seal_with_passphrase`/`open_with_passphrase`/`seal_with_key`/`open_with_key` crypto (Argon2id + XChaCha20-Poly1305), `write_bundle(manifest, files, key)`/`read_bundle(bytes, key)`, and `dbsnap::snapshot`/`dbsnap::restore` (SQLite `VACUUM INTO` + online backup API)
 - `ensure-sidecars.mjs` downloads `yt-dlp.exe` + `ffmpeg.exe` (target-triple suffix), gated by `SKIP_SIDECARS`, run before every dev/build
 - Frontend packages are source-only (no `package.json`); wired purely by Vite path aliases
 
@@ -209,7 +209,7 @@ Single git repo (monorepo) rooted at `C:\desk-launcher`. npm workspaces cover `a
 - `@desk-launcher/tauri-bridge` → `apiRequest<T>`, `apiDownload`, `API_BASE_URL`
 - `@desk-launcher/theme` → `ThemeProvider`, `useTheme`, `ThemePicker`, `AppearanceButton`, `applyThemeFromStorage`, `DEFAULT_THEME`
 - `launcher-paths` → `launcher_data_dir()`, `module_data_dir(id)`, `module_data_file(id, name)`, `LAUNCHER_IDENTIFIER`, `PathError`
-- `launcher-backup` → `write_bundle`, `read_bundle`, `seal`/`open`, `snapshot_db`/`restore_db`, `ModuleExport`/`ModuleImport`/`BackupManifest`/`ExportOptions`/`ImportMode`/`BundleKey`
+- `launcher-backup` → `write_bundle(manifest, files, key)`, `read_bundle(bytes, key)`, `seal_with_passphrase`/`open_with_passphrase`/`seal_with_key`/`open_with_key`, `dbsnap::snapshot`/`dbsnap::restore`, `ModuleExport`/`ModuleImport`/`BackupManifest`/`ExportOptions`/`ImportMode`/`BundleKey`
 
 **Consumed by**: `launcher-paths` → host, Comtor, Open Sesame, Video Downloader, MySSH (not MD Converter). `launcher-backup` → host + MySSH + Open Sesame + Comtor. UI + theme → host + all five module frontends. Sidecars → Video Downloader only.
 

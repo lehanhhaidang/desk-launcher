@@ -324,7 +324,14 @@ pub fn backup_import_apply(
     'modules: for id in &req.selection {
         // Close the module window to release DB locks.
         if let Some(w) = app.get_webview_window(id) {
-            let _ = w.close();
+            if let Err(e) = w.close() {
+                results.push(ModuleResult {
+                    id: id.clone(),
+                    ok: false,
+                    error: Some(format!("could not close module window before import: {e}")),
+                });
+                continue 'modules;
+            }
         }
         // Auto-backup the current data first.
         if let Err(e) = auto_backup_module(id) {
