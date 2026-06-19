@@ -321,7 +321,7 @@ pub fn backup_import_apply(
         .unwrap_or(serde_json::Value::Null);
 
     let mut results = Vec::new();
-    for id in &req.selection {
+    'modules: for id in &req.selection {
         // Close the module window to release DB locks.
         if let Some(w) = app.get_webview_window(id) {
             let _ = w.close();
@@ -339,15 +339,24 @@ pub fn backup_import_apply(
         let prefix = format!("{id}/");
         let mut mi = ModuleImport::default();
         for f in rb.files.iter().filter(|f| f.rel_path.starts_with(&prefix)) {
-            let rel = f.rel_path.trim_start_matches(&prefix);
+            let rel = f.rel_path.strip_prefix(&prefix).unwrap_or(&f.rel_path);
             if rel == "secrets.json" {
-                if let Ok(map) = serde_json::from_slice::<
-                    std::collections::BTreeMap<String, String>,
-                >(&f.bytes)
-                {
-                    for (account, value) in map {
-                        mi.secrets
-                            .push(launcher_backup::SecretEntry { account, value });
+                match serde_json::from_slice::<std::collections::BTreeMap<String, String>>(
+                    &f.bytes,
+                ) {
+                    Ok(map) => {
+                        for (account, value) in map {
+                            mi.secrets
+                                .push(launcher_backup::SecretEntry { account, value });
+                        }
+                    }
+                    Err(e) => {
+                        results.push(ModuleResult {
+                            id: id.clone(),
+                            ok: false,
+                            error: Some(format!("secrets.json parse error: {e}")),
+                        });
+                        continue 'modules;
                     }
                 }
             } else {
