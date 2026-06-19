@@ -49,9 +49,9 @@ pub fn export_data(opts: ExportOptions) -> Result<ModuleExport, BackupError> {
                     value: v,
                 }),
                 Err(keyring::Error::NoEntry) => {}
-                Err(_) => {}
+                Err(e) => return Err(BackupError::Keyring(e.to_string())),
             },
-            Err(_) => {}
+            Err(e) => return Err(BackupError::Keyring(e.to_string())),
         }
     }
 
