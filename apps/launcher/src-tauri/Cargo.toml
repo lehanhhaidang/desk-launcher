@@ -1,6 +1,6 @@
 [package]
 name = "desk-launcher"
-version = "0.2.0"
+version = "0.3.0"
 description = "Desk Launcher - unified desktop tool launcher"
 edition.workspace = true
 rust-version.workspace = true
@@ -44,3 +44,4 @@ tauri-plugin-open-sesame       = { path = "../../../modules/open-sesame/rust" }
 tauri-plugin-comtor            = { path = "../../../modules/comtor/rust" }
 tauri-plugin-video-downloader  = { path = "../../../modules/video-downloader/rust" }
 tauri-plugin-md-converter      = { path = "../../../modules/md-converter/rust" }
+tauri-plugin-ai-session-viewer = { path = "../../../modules/ai-session-viewer/rust" }

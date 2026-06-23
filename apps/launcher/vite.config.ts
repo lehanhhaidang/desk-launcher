@@ -41,6 +41,7 @@ export default defineConfig({
       '@vid': path.resolve(__dirname, '../../modules/video-downloader/frontend/src'),
       '@mdc': path.resolve(__dirname, '../../modules/md-converter/frontend/src'),
       '@myssh': path.resolve(__dirname, '../../modules/myssh/frontend/src'),
+      '@aisv': path.resolve(__dirname, '../../modules/ai-session-viewer/frontend/src'),
     },
   },
   build: {
@@ -54,6 +55,7 @@ export default defineConfig({
         comtor: resolve(__dirname, 'modules-pages/comtor/index.html'),
         'video-downloader': resolve(__dirname, 'modules-pages/video-downloader/index.html'),
         'md-converter': resolve(__dirname, 'modules-pages/md-converter/index.html'),
+        'ai-session-viewer': resolve(__dirname, 'modules-pages/ai-session-viewer/index.html'),
       },
     },
   },

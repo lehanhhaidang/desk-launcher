@@ -1,0 +1,44 @@
+/* Shared shadcn theme + design tokens. */
+@import "../../../../packages/ui/src/theme.css";
+/* Syntax highlighting for fenced code blocks in chat markdown. */
+@import "highlight.js/styles/github-dark.css";
+
+@import 'tailwindcss';
+
+@source ".";
+@source "../../../../packages/ui/src";
+
+:root {
+  font-family: var(--font-sans, "Quicksand", ui-sans-serif, system-ui, sans-serif);
+  color: var(--text);
+  background: var(--bg);
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+}
+
+/* Render plain (user) message text with sensible wrapping for long logs. */
+.aisv-message-content {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+/* The <pre> wrapper owns the code box; drop highlight.js's own background and
+   padding so block code isn't double-boxed and token colors still show. */
+.hljs.aisv-code-block {
+  background: transparent;
+  padding: 0;
+}

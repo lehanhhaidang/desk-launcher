@@ -21,6 +21,7 @@ pub fn run() {
         .plugin(tauri_plugin_comtor::init())
         .plugin(tauri_plugin_video_downloader::init())
         .plugin(tauri_plugin_md_converter::init())
+        .plugin(tauri_plugin_ai_session_viewer::init())
         .invoke_handler(tauri::generate_handler![
             window_manager::open_module,
             window_manager::close_module,

@@ -1,0 +1,21 @@
+[package]
+name = "tauri-plugin-ai-session-viewer"
+version = "0.1.0"
+edition.workspace = true
+description = "AI Session Viewer module — browse and read back Claude Code, Codex and other AI assistant session histories from local JSONL logs."
+authors.workspace = true
+links = "tauri-plugin-ai-session-viewer"
+
+[lib]
+name = "tauri_plugin_ai_session_viewer"
+
+[build-dependencies]
+# tauri-plugin 2.6 moved the build-script helper behind the `build` feature.
+tauri-plugin = { version = "2", features = ["build"] }
+
+[dependencies]
+tauri = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+log = { workspace = true }
+thiserror = { workspace = true }
