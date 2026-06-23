@@ -1,5 +1,5 @@
 import { useRef, useState, type PointerEvent as RPointerEvent, type ReactNode } from 'react'
-import { Palette } from 'lucide-react'
+import { Palette, RefreshCw } from 'lucide-react'
 import { buttonVariants } from '@desk-launcher/ui'
 import { AppearanceButton } from '@desk-launcher/theme'
 import type { useSessionViewer } from '../hooks/useSessionViewer'
@@ -65,7 +65,7 @@ export function Sidebar(state: ViewerState) {
           className="flex flex-col"
           style={{ height: projectsHeight }}
         >
-          <SectionTitle>Projects</SectionTitle>
+          <SectionTitle onRefresh={state.refreshProjects}>Projects</SectionTitle>
           <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-2">
             <ProjectList
               projects={state.projects}
@@ -89,7 +89,7 @@ export function Sidebar(state: ViewerState) {
         </div>
 
         <section className="flex min-h-0 flex-1 flex-col">
-          <SectionTitle>Sessions</SectionTitle>
+          <SectionTitle onRefresh={state.refreshSessions}>Sessions</SectionTitle>
           <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-2">
             <SessionList
               sessions={state.sessions}
@@ -106,10 +106,22 @@ export function Sidebar(state: ViewerState) {
   )
 }
 
-function SectionTitle({ children }: { children: ReactNode }) {
+function SectionTitle({ children, onRefresh }: { children: ReactNode; onRefresh?: () => void }) {
   return (
-    <h2 className="px-4 pt-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
-      {children}
-    </h2>
+    <div className="flex items-center justify-between px-4 pt-3 pb-1.5">
+      <h2 className="text-[11px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+        {children}
+      </h2>
+      {onRefresh && (
+        <button
+          type="button"
+          title="Refresh"
+          onClick={onRefresh}
+          className="rounded p-0.5 text-[var(--text-muted)] transition-colors hover:bg-[var(--panel-2)] hover:text-[var(--text)]"
+        >
+          <RefreshCw className="h-3.5 w-3.5" />
+        </button>
+      )}
+    </div>
   )
 }

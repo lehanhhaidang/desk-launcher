@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { save as saveDialog } from '@tauri-apps/plugin-dialog'
 import { writeTextFile } from '@tauri-apps/plugin-fs'
-import { Bot, Download, User } from 'lucide-react'
+import { Bot, Download, RefreshCw, User } from 'lucide-react'
 import { Button, LoadingSpinner } from '@desk-launcher/ui'
 import type { ChatMessage, SessionEntry } from '../types'
 import { formatIso } from '../format'
@@ -11,6 +11,7 @@ interface Props {
   session: SessionEntry | null
   messages: ChatMessage[]
   loading: boolean
+  onRefresh: () => void
 }
 
 function toMarkdown(session: SessionEntry, messages: ChatMessage[]): string {
@@ -25,7 +26,7 @@ function toMarkdown(session: SessionEntry, messages: ChatMessage[]): string {
   return `${header}\n${body}`
 }
 
-export function ChatView({ session, messages, loading }: Props) {
+export function ChatView({ session, messages, loading, onRefresh }: Props) {
   const [exporting, setExporting] = useState(false)
 
   async function exportAs(kind: 'json' | 'md') {
@@ -69,6 +70,16 @@ export function ChatView({ session, messages, loading }: Props) {
           <p className="truncate text-[11px] text-[var(--text-muted)]">{session.id}</p>
         </div>
         <div className="flex shrink-0 gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={onRefresh}
+            title="Refresh"
+            className="gap-1.5"
+          >
+            <RefreshCw className="h-4 w-4" /> Refresh
+          </Button>
           <Button
             type="button"
             size="sm"

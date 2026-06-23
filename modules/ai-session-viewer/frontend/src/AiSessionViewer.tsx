@@ -20,6 +20,7 @@ export default function AiSessionViewer() {
             session={state.activeSession}
             messages={state.messages}
             loading={state.loading.messages}
+            onRefresh={state.refreshActiveSession}
           />
         </div>
       </main>

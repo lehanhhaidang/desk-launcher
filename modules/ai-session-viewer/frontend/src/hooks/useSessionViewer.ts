@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   listProviders,
   listProjects,
@@ -13,6 +13,19 @@ function errMessage(e: unknown): string {
   if (typeof e === 'string') return e
   if (e instanceof Error) return e.message
   return String(e)
+}
+
+/** Live session re-read cadence and list refresh cadence. */
+const LIVE_POLL_MS = 5000
+const LIST_POLL_MS = 5 * 60 * 1000
+
+/** Cheap equality: same count and same last-message shape. */
+function sameMessages(a: ChatMessage[], b: ChatMessage[]): boolean {
+  if (a.length !== b.length) return false
+  if (a.length === 0) return true
+  const la = a[a.length - 1]
+  const lb = b[b.length - 1]
+  return la.role === lb.role && la.content.length === lb.content.length
 }
 
 export function useSessionViewer() {
@@ -34,6 +47,9 @@ export function useSessionViewer() {
     messages: false,
   })
   const [error, setError] = useState<string | null>(null)
+
+  // True once projects have been loaded at least once — gates background polling.
+  const loadedOnce = useRef(false)
 
   const provider = providers.find((p) => p.id === providerId) ?? null
 
@@ -83,6 +99,7 @@ export function useSessionViewer() {
       setMessages([])
       try {
         setProjects(await listProjects(target))
+        loadedOnce.current = true
       } catch (e) {
         setError(errMessage(e))
       } finally {
@@ -91,6 +108,16 @@ export function useSessionViewer() {
     },
     [basePath],
   )
+
+  // Manual refresh of the project list, preserving the current selection.
+  const refreshProjects = useCallback(async () => {
+    if (!basePath.trim()) return
+    try {
+      setProjects(await listProjects(basePath.trim()))
+    } catch (e) {
+      setError(errMessage(e))
+    }
+  }, [basePath])
 
   const selectProject = useCallback(async (project: ProjectEntry) => {
     setProjectPath(project.path)
@@ -162,6 +189,54 @@ export function useSessionViewer() {
     }
   }, [])
 
+  // Manual re-read of the open session (refresh button).
+  const refreshActiveSession = useCallback(async () => {
+    if (!sessionPath) return
+    try {
+      const next = await readSession(sessionPath)
+      setMessages((prev) => (sameMessages(prev, next) ? prev : next))
+    } catch (e) {
+      setError(errMessage(e))
+    }
+  }, [sessionPath])
+
+  // Live-tail the open session: re-read on an interval, update only on change.
+  useEffect(() => {
+    if (!sessionPath) return
+    const id = setInterval(async () => {
+      try {
+        const next = await readSession(sessionPath)
+        setMessages((prev) => (sameMessages(prev, next) ? prev : next))
+      } catch {
+        // transient read error (file mid-write) — ignore, next tick retries
+      }
+    }, LIVE_POLL_MS)
+    return () => clearInterval(id)
+  }, [sessionPath])
+
+  // Periodically refresh the project (and current session) lists so newly
+  // created sessions show up without a manual reload. Gated on a first load.
+  useEffect(() => {
+    const base = basePath.trim()
+    if (!base) return
+    const id = setInterval(async () => {
+      if (!loadedOnce.current) return
+      try {
+        setProjects(await listProjects(base))
+      } catch {
+        /* ignore */
+      }
+      if (projectPath) {
+        try {
+          setSessions(await listSessions(projectPath))
+        } catch {
+          /* ignore */
+        }
+      }
+    }, LIST_POLL_MS)
+    return () => clearInterval(id)
+  }, [basePath, projectPath])
+
   const activeSession = sessions.find((s) => s.path === sessionPath) ?? null
 
   return {
@@ -174,11 +249,14 @@ export function useSessionViewer() {
     projects,
     projectPath,
     loadProjects,
+    refreshProjects,
     selectProject,
     sessions,
     sessionPath,
     activeSession,
     selectSession,
+    refreshSessions,
+    refreshActiveSession,
     deleteSession,
     renameSession,
     messages,
