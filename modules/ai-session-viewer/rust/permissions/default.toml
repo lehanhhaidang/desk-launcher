@@ -7,4 +7,6 @@ permissions = [
     "allow-list-projects",
     "allow-list-sessions",
     "allow-read-session",
+    "allow-delete-session",
+    "allow-rename-session",
 ]

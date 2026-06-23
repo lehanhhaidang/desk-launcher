@@ -13,3 +13,10 @@ export const listSessions = (projectPath: string) =>
 
 export const readSession = (sessionPath: string) =>
   invoke<ChatMessage[]>(ns('read_session'), { sessionPath })
+
+export const deleteSession = (sessionPath: string) =>
+  invoke<void>(ns('delete_session'), { sessionPath })
+
+/** Renames the session file on disk; returns the new absolute path. */
+export const renameSession = (sessionPath: string, newName: string) =>
+  invoke<string>(ns('rename_session'), { sessionPath, newName })

@@ -13,6 +13,8 @@ pub enum ViewerError {
     NotFound(String),
     #[error("not a directory: {0}")]
     NotDir(String),
+    #[error("{0}")]
+    Invalid(String),
 }
 
 pub type Result<T> = std::result::Result<T, ViewerError>;

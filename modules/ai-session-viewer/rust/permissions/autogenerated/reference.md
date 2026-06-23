@@ -8,6 +8,8 @@ Allows all AI Session Viewer commands.
 - `allow-list-projects`
 - `allow-list-sessions`
 - `allow-read-session`
+- `allow-delete-session`
+- `allow-rename-session`
 
 ## Permission Table
 
@@ -17,6 +19,32 @@ Allows all AI Session Viewer commands.
 <th>Description</th>
 </tr>
 
+
+<tr>
+<td>
+
+`ai-session-viewer:allow-delete-session`
+
+</td>
+<td>
+
+Enables the delete_session command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`ai-session-viewer:deny-delete-session`
+
+</td>
+<td>
+
+Denies the delete_session command without any pre-configured scope.
+
+</td>
+</tr>
 
 <tr>
 <td>
@@ -118,6 +146,32 @@ Enables the read_session command without any pre-configured scope.
 <td>
 
 Denies the read_session command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`ai-session-viewer:allow-rename-session`
+
+</td>
+<td>
+
+Enables the rename_session command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`ai-session-viewer:deny-rename-session`
+
+</td>
+<td>
+
+Denies the rename_session command without any pre-configured scope.
 
 </td>
 </tr>

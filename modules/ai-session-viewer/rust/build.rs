@@ -3,6 +3,8 @@ const COMMANDS: &[&str] = &[
     "list_projects",
     "list_sessions",
     "read_session",
+    "delete_session",
+    "rename_session",
 ];
 
 fn main() {

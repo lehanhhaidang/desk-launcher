@@ -300,6 +300,76 @@ fn read_session_inner(session_path: &str) -> Result<Vec<ChatMessage>> {
     Ok(messages)
 }
 
+#[tauri::command]
+pub fn delete_session(session_path: String) -> std::result::Result<(), String> {
+    delete_session_inner(&session_path).map_err(|e| e.to_string())
+}
+
+fn delete_session_inner(session_path: &str) -> Result<()> {
+    let path = PathBuf::from(session_path);
+    if !path.exists() {
+        return Err(ViewerError::NotFound(session_path.to_string()));
+    }
+    if !path.is_file() {
+        return Err(ViewerError::Invalid(format!("not a file: {session_path}")));
+    }
+    fs::remove_file(&path)?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn rename_session(
+    session_path: String,
+    new_name: String,
+) -> std::result::Result<String, String> {
+    rename_session_inner(&session_path, &new_name).map_err(|e| e.to_string())
+}
+
+fn rename_session_inner(session_path: &str, new_name: &str) -> Result<String> {
+    let path = PathBuf::from(session_path);
+    if !path.is_file() {
+        return Err(ViewerError::NotFound(session_path.to_string()));
+    }
+    let parent = path
+        .parent()
+        .ok_or_else(|| ViewerError::Invalid("session has no parent folder".into()))?;
+
+    let stem = sanitize_stem(new_name);
+    if stem.is_empty() {
+        return Err(ViewerError::Invalid("name is empty after sanitizing".into()));
+    }
+
+    let target = parent.join(format!("{stem}.jsonl"));
+    if target == path {
+        return Ok(path.to_string_lossy().into_owned());
+    }
+    if target.exists() {
+        return Err(ViewerError::Invalid(format!(
+            "a session named \"{stem}\" already exists"
+        )));
+    }
+    fs::rename(&path, &target)?;
+    Ok(target.to_string_lossy().into_owned())
+}
+
+/// Turn a user-typed name into a safe single-segment filename stem (no
+/// extension). Strips path separators and characters illegal on Windows.
+fn sanitize_stem(name: &str) -> String {
+    let trimmed = name.trim();
+    // Drop a trailing ".jsonl" the user may have typed.
+    let base = if trimmed.to_ascii_lowercase().ends_with(".jsonl") {
+        &trimmed[..trimmed.len() - ".jsonl".len()]
+    } else {
+        trimmed
+    };
+    base.chars()
+        .filter(|c| !matches!(c, '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|') && !c.is_control())
+        .collect::<String>()
+        .trim()
+        .trim_matches('.')
+        .to_string()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -367,6 +437,27 @@ mod tests {
         assert_eq!(msgs[0].timestamp.as_deref(), Some("2026-06-23T01:00:00Z"));
         assert_eq!(msgs[1].role, "assistant");
         assert_eq!(msgs[1].content, "hello back");
+    }
+
+    #[test]
+    fn sanitize_stem_strips_illegal_and_extension() {
+        assert_eq!(sanitize_stem("  my/bug:fix?.jsonl "), "mybugfix");
+        assert_eq!(sanitize_stem("Fix login.JSONL"), "Fix login");
+        assert_eq!(sanitize_stem("..."), "");
+    }
+
+    #[test]
+    fn rename_session_moves_file_in_place() {
+        let dir = std::env::temp_dir();
+        let src = dir.join("aisv_rename_src.jsonl");
+        fs::write(&src, "{}").unwrap();
+
+        let new_path = rename_session_inner(src.to_str().unwrap(), "renamed-session").unwrap();
+        assert!(new_path.ends_with("renamed-session.jsonl"));
+        assert!(!src.exists());
+        assert!(PathBuf::from(&new_path).exists());
+
+        let _ = fs::remove_file(&new_path);
     }
 }
 

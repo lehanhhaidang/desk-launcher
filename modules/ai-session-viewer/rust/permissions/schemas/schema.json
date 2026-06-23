@@ -295,6 +295,18 @@
       "type": "string",
       "oneOf": [
         {
+          "description": "Enables the delete_session command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-delete-session",
+          "markdownDescription": "Enables the delete_session command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the delete_session command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-delete-session",
+          "markdownDescription": "Denies the delete_session command without any pre-configured scope."
+        },
+        {
           "description": "Enables the list_projects command without any pre-configured scope.",
           "type": "string",
           "const": "allow-list-projects",
@@ -343,10 +355,22 @@
           "markdownDescription": "Denies the read_session command without any pre-configured scope."
         },
         {
-          "description": "Allows all AI Session Viewer commands.\n#### This default permission set includes:\n\n- `allow-list-providers`\n- `allow-list-projects`\n- `allow-list-sessions`\n- `allow-read-session`",
+          "description": "Enables the rename_session command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-rename-session",
+          "markdownDescription": "Enables the rename_session command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the rename_session command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-rename-session",
+          "markdownDescription": "Denies the rename_session command without any pre-configured scope."
+        },
+        {
+          "description": "Allows all AI Session Viewer commands.\n#### This default permission set includes:\n\n- `allow-list-providers`\n- `allow-list-projects`\n- `allow-list-sessions`\n- `allow-read-session`\n- `allow-delete-session`\n- `allow-rename-session`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Allows all AI Session Viewer commands.\n#### This default permission set includes:\n\n- `allow-list-providers`\n- `allow-list-projects`\n- `allow-list-sessions`\n- `allow-read-session`"
+          "markdownDescription": "Allows all AI Session Viewer commands.\n#### This default permission set includes:\n\n- `allow-list-providers`\n- `allow-list-projects`\n- `allow-list-sessions`\n- `allow-read-session`\n- `allow-delete-session`\n- `allow-rename-session`"
         }
       ]
     }

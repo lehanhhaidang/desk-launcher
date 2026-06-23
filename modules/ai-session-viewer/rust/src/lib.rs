@@ -12,7 +12,9 @@ use tauri::plugin::{Builder, TauriPlugin};
 use tauri::Wry;
 
 use commands::providers::list_providers;
-use commands::sessions::{list_projects, list_sessions, read_session};
+use commands::sessions::{
+    delete_session, list_projects, list_sessions, read_session, rename_session,
+};
 
 pub fn init() -> TauriPlugin<Wry> {
     Builder::new("ai-session-viewer")
@@ -21,6 +23,8 @@ pub fn init() -> TauriPlugin<Wry> {
             list_projects,
             list_sessions,
             read_session,
+            delete_session,
+            rename_session,
         ])
         .setup(|_app, _api| {
             log::info!("ai-session-viewer plugin initialized (Rust)");

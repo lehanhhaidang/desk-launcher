@@ -4,6 +4,8 @@ import {
   listProjects,
   listSessions,
   readSession,
+  deleteSession as apiDeleteSession,
+  renameSession as apiRenameSession,
 } from '../api/ai-session-viewer-api'
 import type { ProviderInfo, ProjectEntry, SessionEntry, ChatMessage } from '../types'
 
@@ -101,6 +103,46 @@ export function useSessionViewer() {
     }
   }, [])
 
+  const refreshSessions = useCallback(async () => {
+    if (!projectPath) return
+    try {
+      setSessions(await listSessions(projectPath))
+    } catch (e) {
+      setError(errMessage(e))
+    }
+  }, [projectPath])
+
+  const deleteSession = useCallback(
+    async (session: SessionEntry) => {
+      setError(null)
+      try {
+        await apiDeleteSession(session.path)
+        if (sessionPath === session.path) {
+          setSessionPath(null)
+          setMessages([])
+        }
+        await refreshSessions()
+      } catch (e) {
+        setError(errMessage(e))
+      }
+    },
+    [sessionPath, refreshSessions],
+  )
+
+  const renameSession = useCallback(
+    async (session: SessionEntry, newName: string) => {
+      setError(null)
+      try {
+        const newPath = await apiRenameSession(session.path, newName)
+        if (sessionPath === session.path) setSessionPath(newPath)
+        await refreshSessions()
+      } catch (e) {
+        setError(errMessage(e))
+      }
+    },
+    [sessionPath, refreshSessions],
+  )
+
   const selectSession = useCallback(async (session: SessionEntry) => {
     setSessionPath(session.path)
     setMessages([])
@@ -132,6 +174,8 @@ export function useSessionViewer() {
     sessionPath,
     activeSession,
     selectSession,
+    deleteSession,
+    renameSession,
     messages,
     loading,
     error,
