@@ -5,6 +5,7 @@ import { Bot, Download, User } from 'lucide-react'
 import { Button, LoadingSpinner } from '@desk-launcher/ui'
 import type { ChatMessage, SessionEntry } from '../types'
 import { formatIso } from '../format'
+import { MarkdownMessage } from './MarkdownMessage'
 
 interface Props {
   session: SessionEntry | null
@@ -139,13 +140,13 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         </div>
         <div
           className={[
-            'aisv-message-content rounded-lg border px-3 py-2 text-sm',
+            'rounded-lg border px-3 py-2 text-sm',
             isUser
-              ? 'border-[var(--brand)]/30 bg-[var(--brand)]/10 text-[var(--text)]'
+              ? 'aisv-message-content border-[var(--brand)]/30 bg-[var(--brand)]/10 text-[var(--text)]'
               : 'border-[var(--line)] bg-[var(--panel)] text-[var(--text)]',
           ].join(' ')}
         >
-          {message.content}
+          {isUser ? message.content : <MarkdownMessage content={message.content} />}
         </div>
       </div>
     </div>
