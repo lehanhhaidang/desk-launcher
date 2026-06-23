@@ -29,7 +29,8 @@
       "@cmt/*": ["../../modules/comtor/frontend/src/*"],
       "@vid/*": ["../../modules/video-downloader/frontend/src/*"],
       "@mdc/*": ["../../modules/md-converter/frontend/src/*"],
-      "@myssh/*": ["../../modules/myssh/frontend/src/*"]
+      "@myssh/*": ["../../modules/myssh/frontend/src/*"],
+      "@aisv/*": ["../../modules/ai-session-viewer/frontend/src/*"]
     }
   },
   "include": [
@@ -40,6 +41,7 @@
     "../../modules/comtor/frontend/src",
     "../../modules/video-downloader/frontend/src",
     "../../modules/md-converter/frontend/src",
+    "../../modules/ai-session-viewer/frontend/src",
     "../../packages/*/src"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]

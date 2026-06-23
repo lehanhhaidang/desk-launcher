@@ -67,6 +67,15 @@ pub const MODULES: &[ModuleWindowSpec] = &[
         min_width: Some(900.0),
         min_height: Some(600.0),
     },
+    ModuleWindowSpec {
+        id: "ai-session-viewer",
+        title: "🧠 AI Session Viewer",
+        initial_url: "modules-pages/ai-session-viewer/index.html",
+        width: 1300.0,
+        height: 860.0,
+        min_width: Some(1000.0),
+        min_height: Some(640.0),
+    },
 ];
 
 pub fn find(id: &str) -> Option<&'static ModuleWindowSpec> {

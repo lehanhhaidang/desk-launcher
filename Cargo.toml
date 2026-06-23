@@ -9,6 +9,7 @@ members = [
   "modules/comtor/rust",
   "modules/video-downloader/rust",
   "modules/md-converter/rust",
+  "modules/ai-session-viewer/rust",
   # Add new modules' rust crates here as they come online.
 ]
 

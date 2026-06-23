@@ -1,0 +1,35 @@
+/* Shared shadcn theme + design tokens. */
+@import "../../../../packages/ui/src/theme.css";
+
+@import 'tailwindcss';
+
+@source ".";
+@source "../../../../packages/ui/src";
+
+:root {
+  font-family: var(--font-sans, "Quicksand", ui-sans-serif, system-ui, sans-serif);
+  color: var(--text);
+  background: var(--bg);
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+}
+
+/* Render assistant/user message text with sensible wrapping for long logs. */
+.aisv-message-content {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
