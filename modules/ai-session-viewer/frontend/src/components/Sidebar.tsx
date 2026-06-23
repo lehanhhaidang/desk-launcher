@@ -1,4 +1,7 @@
 import type { ReactNode } from 'react'
+import { Palette } from 'lucide-react'
+import { buttonVariants } from '@desk-launcher/ui'
+import { AppearanceButton } from '@desk-launcher/theme'
 import type { useSessionViewer } from '../hooks/useSessionViewer'
 import { ProviderPicker } from './ProviderPicker'
 import { ProjectList } from './ProjectList'
@@ -10,7 +13,15 @@ export function Sidebar(state: ViewerState) {
   return (
     <aside className="flex h-full w-[320px] shrink-0 flex-col border-r border-[var(--line)] bg-[var(--panel)]">
       <div className="border-b border-[var(--line)] px-4 py-4">
-        <h1 className="mb-3 text-sm font-semibold text-[var(--text)]">AI Session Viewer</h1>
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <h1 className="text-sm font-semibold text-[var(--text)]">AI Session Viewer</h1>
+          <AppearanceButton
+            className={buttonVariants({ variant: 'ghost', size: 'icon-sm' })}
+            title="Appearance"
+          >
+            <Palette className="size-4" />
+          </AppearanceButton>
+        </div>
         <ProviderPicker
           providers={state.providers}
           providerId={state.providerId}

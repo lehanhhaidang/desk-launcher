@@ -101,7 +101,7 @@ export function ChatView({ session, messages, loading }: Props) {
             No readable messages in this session.
           </p>
         ) : (
-          <div className="mx-auto flex max-w-3xl flex-col gap-4">
+          <div className="mx-auto flex max-w-4xl flex-col gap-4">
             {messages.map((m, i) => (
               <MessageBubble key={i} message={m} />
             ))}
@@ -115,7 +115,7 @@ export function ChatView({ session, messages, loading }: Props) {
 function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === 'user'
   return (
-    <div className="flex gap-3">
+    <div className={['flex gap-3', isUser ? 'flex-row-reverse' : 'flex-row'].join(' ')}>
       <div
         className={[
           'flex h-7 w-7 shrink-0 items-center justify-center rounded-full',
@@ -126,7 +126,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
       >
         {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
       </div>
-      <div className="min-w-0 flex-1">
+      <div className={['flex min-w-0 max-w-[78%] flex-col', isUser ? 'items-end' : 'items-start'].join(' ')}>
         <div className="mb-1 flex items-center gap-2">
           <span className="text-xs font-semibold text-[var(--text)]">
             {isUser ? 'User' : 'Assistant'}
@@ -137,7 +137,14 @@ function MessageBubble({ message }: { message: ChatMessage }) {
             </span>
           )}
         </div>
-        <div className="aisv-message-content rounded-lg border border-[var(--line)] bg-[var(--panel)] px-3 py-2 text-sm text-[var(--text)]">
+        <div
+          className={[
+            'aisv-message-content rounded-lg border px-3 py-2 text-sm',
+            isUser
+              ? 'border-[var(--brand)]/30 bg-[var(--brand)]/10 text-[var(--text)]'
+              : 'border-[var(--line)] bg-[var(--panel)] text-[var(--text)]',
+          ].join(' ')}
+        >
           {message.content}
         </div>
       </div>
