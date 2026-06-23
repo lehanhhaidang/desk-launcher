@@ -24,7 +24,7 @@ Single git repo (monorepo) rooted at `C:\desk-launcher`. npm workspaces cover `a
 
 ### 01. Launcher Host & Shell
 
-**Description**: The single Tauri 2 host process. It links all five module Rust plugins at compile time, registers them at startup, renders the React dashboard in the main `launcher` window, and spawns each tool into its own isolated `WebviewWindow` on demand. Per-window isolation is enforced via Tauri capabilities (bound by window label) and a Vite multi-page build.
+**Description**: The single Tauri 2 host process. It links all six module Rust plugins at compile time, registers them at startup, renders the React dashboard in the main `launcher` window, and spawns each tool into its own isolated `WebviewWindow` on demand. Per-window isolation is enforced via Tauri capabilities (bound by window label) and a Vite multi-page build.
 
 **Key Features**:
 - Single host process hosting the dashboard + N module WebView windows, each with its own JS bundle and scoped capabilities
@@ -47,7 +47,7 @@ Single git repo (monorepo) rooted at `C:\desk-launcher`. npm workspaces cover `a
 
 **Database**: none (host owns no storage; modules own their own)
 
-**Related**: [02-myssh](./02-myssh.md), [03-open-sesame](./03-open-sesame.md), [04-comtor](./04-comtor.md), [05-video-downloader](./05-video-downloader.md), [06-md-converter](./06-md-converter.md), [07-shared-infra](./07-shared-infra.md)
+**Related**: [02-myssh](./02-myssh.md), [03-open-sesame](./03-open-sesame.md), [04-comtor](./04-comtor.md), [05-video-downloader](./05-video-downloader.md), [06-md-converter](./06-md-converter.md), [08-ai-session-viewer](./08-ai-session-viewer.md), [07-shared-infra](./07-shared-infra.md)
 
 ---
 
@@ -211,9 +211,37 @@ Single git repo (monorepo) rooted at `C:\desk-launcher`. npm workspaces cover `a
 - `launcher-paths` → `launcher_data_dir()`, `module_data_dir(id)`, `module_data_file(id, name)`, `LAUNCHER_IDENTIFIER`, `PathError`
 - `launcher-backup` → `write_bundle(manifest, files, key)`, `read_bundle(bytes, key)`, `seal_with_passphrase`/`open_with_passphrase`/`seal_with_key`/`open_with_key`, `dbsnap::snapshot`/`dbsnap::restore`, `ModuleExport`/`ModuleImport`/`BackupManifest`/`ExportOptions`/`ImportMode`/`BundleKey`
 
-**Consumed by**: `launcher-paths` → host, Comtor, Open Sesame, Video Downloader, MySSH (not MD Converter). `launcher-backup` → host + MySSH + Open Sesame + Comtor. UI + theme → host + all five module frontends. Sidecars → Video Downloader only.
+**Consumed by**: `launcher-paths` → host, Comtor, Open Sesame, Video Downloader, MySSH (not MD Converter or AI Session Viewer). `launcher-backup` → host + MySSH + Open Sesame + Comtor. UI + theme → host + all six module frontends. Sidecars → Video Downloader only.
 
 **Related**: all modules
+
+---
+
+### 08. AI Session Viewer
+
+**Description**: A read-first viewer for the local chat logs written by AI coding assistants (Claude Code, Codex, …). It resolves a provider's sessions root on disk, lists project folders and their `.jsonl` session files, and renders each session as a cleaned-up two-sided conversation (user prompts right, Markdown-rendered assistant replies left) with tool calls, tool results, thinking blocks and bookkeeping entries stripped out. Pure-Rust plugin, no DB; all reads happen in Rust against the user's home directory.
+
+**Key Features**:
+- Navigation: Provider → sessions folder (default per-machine, or browse/type) → project → session → chat view
+- JSONL conversation filter: keeps only `user`/`assistant` text, drops `tool_use`/`tool_result`/`thinking`/`isMeta`/bookkeeping entries
+- Best-effort titles probed from `custom-title`/`ai-title`/`summary`/first user line
+- Manage logs: delete (removes the file) and rename (renames the file in place) a session; export the open session to Markdown/JSON
+- Resizable Projects/Sessions split, manual refresh buttons, 5s live-tail of the open session, 5-min list polling
+
+**Main API Endpoints** (`plugin:ai-session-viewer|<command>`):
+| Command | Description |
+|---|---|
+| `list_providers` | Static provider catalog with OS-resolved default paths |
+| `list_projects` / `list_sessions` | List project folders / `.jsonl` sessions (newest first) |
+| `read_session` | Parse one session into filtered `ChatMessage`s |
+| `delete_session` / `rename_session` | Remove / rename the session file on disk |
+
+**Frontend Pages**:
+- `AiSessionViewer.tsx` — sidebar (provider picker + resizable project/session lists) + Markdown chat view
+
+**Database**: stateless — no SQLite/keyring; reads user-home `.jsonl` logs, only writes are delete/rename of those files + Markdown/JSON export
+
+**Related**: [01-launcher-host](./01-launcher-host.md), [06-md-converter](./06-md-converter.md), [07-shared-infra](./07-shared-infra.md)
 
 ---
 
@@ -239,6 +267,7 @@ All on-disk module data is namespaced under `%APPDATA%\io.desklauncher\modules\<
 | `comtor` | `modules-pages/comtor/index.html` | Virtual Comtor |
 | `video-downloader` | `modules-pages/video-downloader/index.html` | Video Downloader |
 | `md-converter` | `modules-pages/md-converter/index.html` | Markdown Converter |
+| `ai-session-viewer` | `modules-pages/ai-session-viewer/index.html` | AI Session Viewer |
 
 Each window is created on demand by `open_module` and gets only its `<id>:default` capability set plus `core`/`dialog`/`log` defaults.
 
@@ -250,12 +279,12 @@ _Qualitative size, not a live tally._
 
 | Dimension | Scale |
 |---|---|
-| Backend surface (Tauri commands / services) | **large** — ~80+ commands across 6 plugins; Open Sesame alone has ~20 services |
+| Backend surface (Tauri commands / services) | **large** — ~90+ commands across 7 plugins; Open Sesame alone has ~20 services |
 | Data model (tables / models) | **medium** — ~12 SQLite tables across 2 modules; others stateless/file-based |
-| Frontend (screens / components) | **large** — 6 independent React bundles, 100+ components |
-| Module docs | 8 files (00-index + 7 modules) |
+| Frontend (screens / components) | **large** — 7 independent React bundles, 100+ components |
+| Module docs | 9 files (00-index + 8 modules) |
 
 Buckets: small ≈ <10 · medium ≈ 10–40 · large ≈ 40+.
 
 ---
-_Last updated: 2026-06-19 · Synced: desk-launcher@43187ec · Format: v1_
+_Last updated: 2026-06-23 · Synced: desk-launcher@5d88d1a · Format: v1_
