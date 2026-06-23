@@ -66,26 +66,31 @@ export function useSessionViewer() {
     [providers],
   )
 
-  const loadProjects = useCallback(async () => {
-    if (!basePath.trim()) {
-      setError('Enter a sessions folder path first.')
-      return
-    }
-    setError(null)
-    setLoading((s) => ({ ...s, projects: true }))
-    setProjects([])
-    setProjectPath(null)
-    setSessions([])
-    setSessionPath(null)
-    setMessages([])
-    try {
-      setProjects(await listProjects(basePath.trim()))
-    } catch (e) {
-      setError(errMessage(e))
-    } finally {
-      setLoading((s) => ({ ...s, projects: false }))
-    }
-  }, [basePath])
+  const loadProjects = useCallback(
+    async (override?: string) => {
+      const target = (override ?? basePath).trim()
+      if (!target) {
+        setError('Enter or browse to a sessions folder first.')
+        return
+      }
+      if (override !== undefined) setBasePath(override)
+      setError(null)
+      setLoading((s) => ({ ...s, projects: true }))
+      setProjects([])
+      setProjectPath(null)
+      setSessions([])
+      setSessionPath(null)
+      setMessages([])
+      try {
+        setProjects(await listProjects(target))
+      } catch (e) {
+        setError(errMessage(e))
+      } finally {
+        setLoading((s) => ({ ...s, projects: false }))
+      }
+    },
+    [basePath],
+  )
 
   const selectProject = useCallback(async (project: ProjectEntry) => {
     setProjectPath(project.path)
