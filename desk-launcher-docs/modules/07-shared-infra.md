@@ -110,11 +110,11 @@ Each binary is skipped if it already exists and is non-empty (`hasFile`). Settin
 
 | Shared piece | Consumers |
 |---|---|
-| `launcher-paths` crate | **All Rust crates that persist state**: launcher host (`apps/launcher/src-tauri`), Comtor (`audio.rs`, `db.rs`, `settings.rs`), Open Sesame (`utils/paths.rs`), Video Downloader (`paths.rs`), MySSH (`db/mod.rs`). MD Converter does **not** depend on it (no on-disk state). |
+| `launcher-paths` crate | **All Rust crates that persist state**: launcher host (`apps/launcher/src-tauri`), Comtor (`audio.rs`, `db.rs`, `settings.rs`), Open Sesame (`utils/paths.rs`), Video Downloader (`paths.rs`), MySSH (`db/mod.rs`). MD Converter and AI Session Viewer do **not** depend on it (no on-disk state). |
 | `launcher-backup` crate | Launcher host (`backup/` orchestrator + commands), MySSH (`backup.rs`), Open Sesame (`backup.rs`), Comtor (`backup.rs`). Video Downloader and MD Converter have no backup integration (no persistent state to export). |
 | `@desk-launcher/ui` | All module frontends + the launcher dashboard. Verified imports: launcher `Dashboard.tsx` / `ModuleCard.tsx`, MD Converter `MdConverter.tsx` / `SingleTab.tsx` / `BatchTab.tsx`. Other module frontends consume it via the same alias. |
 | `@desk-launcher/tauri-bridge` | Module frontends that call a local HTTP backend (wired via the Vite alias). |
-| `@desk-launcher/theme` | The launcher + **all five module frontends** — each wires `applyThemeFromStorage(appId)` + `<ThemeProvider appId>` at its window entry. Picker surface: launcher & **Comtor** mount `<ThemePicker>` in Settings; **MySSH / Open Sesame / Video Downloader / MD Converter** mount `<AppearanceButton>` in the header/sidebar. |
+| `@desk-launcher/theme` | The launcher + **all six module frontends** — each wires `applyThemeFromStorage(appId)` + `<ThemeProvider appId>` at its window entry. Picker surface: launcher & **Comtor** mount `<ThemePicker>` in Settings; **MySSH / Open Sesame / Video Downloader / MD Converter / AI Session Viewer** mount `<AppearanceButton>` in the header/sidebar. |
 | Sidecars (`yt-dlp`, `ffmpeg`) | **Video Downloader** only — it is the only module that shells out to these CLI binaries. |
 | `theme.css` | The launcher (`apps/launcher/src/main.css`) → applies to every module window. |
 
@@ -153,4 +153,4 @@ Each binary is skipped if it already exists and is non-empty (`hasFile`). Settin
 - [02-myssh](./02-myssh.md), [03-open-sesame](./03-open-sesame.md), [04-comtor](./04-comtor.md), [05-video-downloader](./05-video-downloader.md), [06-md-converter](./06-md-converter.md) — all consume this shared layer
 
 ---
-_Last updated: 2026-06-19 · Synced: desk-launcher@43187ec · Format: v1_
+_Last updated: 2026-06-23 · Synced: desk-launcher@5d88d1a · Format: v1_

@@ -120,4 +120,22 @@ export const MODULES: readonly ModuleDescriptor[] = [
       initialUrl: 'modules-pages/md-converter/index.html',
     },
   },
+  {
+    id: 'ai-session-viewer',
+    displayName: 'AI Session Viewer',
+    shortName: 'AI Sessions',
+    description: 'Browse and read back Claude Code, Codex and other AI assistant session histories.',
+    icon: 'file-text',
+    category: 'dev',
+    accentClass: 'from-violet-500/20 to-purple-400/10 text-violet-300 border-violet-400/20',
+    health: 'beta',
+    windowConfig: {
+      title: 'AI Session Viewer',
+      width: 1300,
+      height: 860,
+      minWidth: 1000,
+      minHeight: 640,
+      initialUrl: 'modules-pages/ai-session-viewer/index.html',
+    },
+  },
 ] as const
